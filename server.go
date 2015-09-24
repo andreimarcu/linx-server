@@ -9,7 +9,6 @@ import (
 	"regexp"
 
 	"github.com/zenazn/goji"
-	// "github.com/zenazn/goji/web"
 )
 
 var Config struct {

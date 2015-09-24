@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/flosch/pongo2"
 	"net/http"
 
+	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji/web"
 )
 
