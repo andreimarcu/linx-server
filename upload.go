@@ -77,16 +77,14 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-	dst, ferr := os.Create(path.Join("files/", upload.Filename))
-	defer dst.Close()
-	if ferr != nil {
-		err = ferr
+	dst, err := os.Create(path.Join("files/", upload.Filename))
+	if err != nil {
 		return
 	}
+	defer dst.Close()
 
-	bytes, cerr := io.Copy(dst, upReq.src)
-	if cerr != nil {
-		err = cerr
+	bytes, err := io.Copy(dst, upReq.src)
+	if err != nil {
 		return
 	} else if bytes == 0 {
 		err = errors.New("Empty file")
