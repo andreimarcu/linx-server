@@ -1,6 +1,7 @@
-{% extends "../base.html" %}
+{% extends "base.html" %}
 
-{% block content %}
-<p>Viewing file {{ filename }} of mime: {{ mime }}</p>
-<p><a href="/selif/{{ filename }}">Click to download</a></p>
+{% block main %}
+<div class="normal">
+	<p class="center">You are requesting <a href="/selif/{{ filename }}">{{ filename }}</a>, <a href="/selif/{{ filename }}">>click here</a> to download.</p>
+</div>
 {% endblock %}

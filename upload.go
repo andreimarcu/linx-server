@@ -46,7 +46,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "File %s uploaded successfully.", upload.Filename)
+	http.Redirect(w, r, "/"+upload.Filename, 301)
 }
 
 func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {

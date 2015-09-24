@@ -1,6 +1,5 @@
-{% extends "../base.html" %}
+{% extends "base.html" %}
 
-{% block content %}
-<p>Viewing file {{ filename }}</p>
-<img src="/selif/{{ filename }}" />
+{% block main %}
+<img style="margin-bottom: -6px; max-width: 800px;" src="/selif/{{ filename }}" />
 {% endblock %}

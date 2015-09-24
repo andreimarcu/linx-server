@@ -1,0 +1,25 @@
+{% extends "../base.html" %}
+
+{% block title %}{{ filename }}{% endblock %}
+
+{% block bodymore %}{% endblock %}
+
+{% block content %}
+
+    <div id="info" class="dinfo">
+        <div class="float-left" id="filename">
+            {{ filename }}
+        </div>
+        {% block infoleft %}{% endblock %}
+
+        <div class="clear"></div>
+    </div>
+
+    <div id="main">
+
+      <div id='inner_content'>
+      {% block main %}{% endblock %}
+      </div>
+
+    </div>
+{% endblock %}

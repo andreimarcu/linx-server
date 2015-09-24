@@ -1,8 +1,45 @@
 {% extends "base.html" %}
 
-{% block content %}
-<form enctype="multipart/form-data" action="/upload" method="post">
-    <input type="file" name="file" />
-    <input type="submit" value="upload" />
-</form>
+{% block content %} 
+
+<div id="fileupload">
+
+    <div id="html5">
+        <div class="clear"></div>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+
+            <div id="file-uploader" style="min-width: 400px;">
+                    <br />
+                    <input type="file" name="file" id="file_upload" name="file"><br/ ><br/ >
+                    <input id ="upload_btn" type="submit" value="Upload">
+                    <br /><br />
+            </div>
+
+            <div id="choices">
+                <div id="expiry">
+                    <label>File expiry: 
+                    <select name="expires" id="expires">
+                    </label>
+                        <option value="never">never</option>
+                        <option value="a minute">a minute</option>
+                        <option value="5 minutes">5 minutes</option>
+                        <option value="an hour">an hour</option>
+                        <option value="a day">a day</option>
+                        <option value="a week">a week</option>
+                        <option value="a month">a month</option>
+                        <option value="a year">a year</option>
+                    </select>
+                </div>
+
+                <label><input name="randomize" id="randomize" type="checkbox" checked /> Randomize filename</label>
+
+            </div>
+
+        </form>
+
+        <div style="clear:both;"></div>
+
+    </div>
+</div>
 {% endblock %}

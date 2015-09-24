@@ -1,13 +1,30 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}{{ sitename }}{% endblock %}</title>
+	<title>{% block title %}{{ sitename }}{% endblock %}</title>
+	<meta charset='utf-8' content='text/html' http-equiv='content-type'>
+	<link href='/static/linx.css' media='screen, projection' rel='stylesheet' type='text/css'>
+	<link href='/static/favicon.gif' rel='icon' type='image/gif'>
+	{% block head %}{% endblock %}
 </head>
+
 <body>
+	<div id="container_container">
+		<div id="container">
+			<div id="header">
+				<div id="navigation" class="right">
+					<a href="/">Upload</a>
+				</div>
+				<h2><a href="/"  title="{{ sitename }}">{{ sitename }}</a></h2>
+			</div>
 
-<div>
-    {% block content %}{% endblock %}
-</div>
+			{% block content %}{% endblock %}
 
+			<div id="footer">
+				<a href="https://github.com/andreimarcu/linx-server">linx</a>
+			</div>
 
+		</div>
+	</div>
 </body>
 </html>
