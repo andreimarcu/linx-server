@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji"
 )
 
@@ -25,6 +26,13 @@ func main() {
 		"name of the site")
 	flag.Parse()
 
+	// Disable template caching -- keep until out of pre-alpha
+	pongo2.DefaultSet.Debug = true // will keep this until out of pre-alpha
+
+	// Template Globals
+	pongo2.DefaultSet.Globals["sitename"] = Config.siteName
+
+	// Routing setup
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
 	selifRe := regexp.MustCompile(`^/selif/(?P<name>[a-z0-9-\.]+)$`)
 

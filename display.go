@@ -37,7 +37,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasPrefix(mimetype, "image/") {
 		tpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
-	} else if  strings.HasPrefix(mimetype, "video/") {
+	} else if strings.HasPrefix(mimetype, "video/") {
 		tpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
 	} else {
 		tpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
@@ -45,7 +45,6 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	err = tpl.ExecuteWriter(pongo2.Context{
 		"mime":     mimetype,
-		"sitename": Config.siteName,
 		"filename": fileName,
 		"size":     fileInfo.Size(),
 	}, w)
