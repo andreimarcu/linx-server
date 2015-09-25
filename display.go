@@ -12,9 +12,9 @@ import (
 )
 
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	filename := c.URLParams["name"]
-	absPath := path.Join(Config.filesDir, filename)
-	fileInfo, err := os.Stat(absPath)
+	fileName := c.URLParams["name"]
+	filePath := path.Join(Config.filesDir, fileName)
+	fileInfo, err := os.Stat(filePath)
 
 	if os.IsNotExist(err) {
 		http.Error(w, http.StatusText(404), 404)
@@ -28,7 +28,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 	defer magicmime.Close()
 
-	mimetype, err := magicmime.TypeByFile(absPath)
+	mimetype, err := magicmime.TypeByFile(filePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -37,6 +37,8 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasPrefix(mimetype, "image/") {
 		tpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
+	} else if  strings.HasPrefix(mimetype, "video/") {
+		tpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
 	} else {
 		tpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
 	}
@@ -44,7 +46,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err = tpl.ExecuteWriter(pongo2.Context{
 		"mime":     mimetype,
 		"sitename": Config.siteName,
-		"filename": filename,
+		"filename": fileName,
 		"size":     fileInfo.Size(),
 	}, w)
 
