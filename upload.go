@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"code.google.com/p/go-uuid/uuid"
@@ -97,7 +98,23 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-	dst, err := os.Create(path.Join("files/", upload.Filename))
+	_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
+
+	fileexists := err == nil
+	for fileexists {
+		counter, err := strconv.Atoi(string(barename[len(barename)-1]))
+		if err != nil {
+			barename = barename + "1"
+		} else {
+			barename = barename[:len(barename)-1] + strconv.Itoa(counter+1)
+		}
+		upload.Filename = strings.Join([]string{barename, extension}, ".")
+
+		_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
+		fileexists = err == nil
+	}
+
+	dst, err := os.Create(path.Join(Config.filesDir, upload.Filename))
 	if err != nil {
 		return
 	}

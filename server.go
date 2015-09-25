@@ -24,7 +24,7 @@ func main() {
 	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
 		"host to bind to (default: 127.0.0.1:8080)")
 	flag.StringVar(&Config.filesDir, "filespath", "files/",
-		"path to files directory (default: files/)")
+		"path to files directory (including trailing slash)")
 	flag.BoolVar(&Config.noLogs, "nologs", false,
 		"remove stdout output for each request")
 	flag.StringVar(&Config.siteName, "sitename", "linx",
@@ -36,6 +36,8 @@ func main() {
 	if Config.noLogs {
 		goji.Abandon(middleware.Logger)
 	}
+
+	// check trailing slashes
 
 	// Template Globals
 	pongo2.DefaultSet.Globals["sitename"] = Config.siteName
