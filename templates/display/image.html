@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
 {% block main %}
-<img style="margin-bottom: -6px; max-width: 800px;" src="/selif/{{ filename }}" />
+<a href="/selif/{{ filename }}">
+	<img style="margin-bottom: -6px; max-width: 800px;" src="/selif/{{ filename }}" />
+</a>
 {% endblock %}
