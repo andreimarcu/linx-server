@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -30,15 +31,21 @@ type Upload struct {
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq := UploadRequest{}
 
-	file, headers, err := r.FormFile("file")
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-	defer file.Close()
+	if r.Header.Get("Content-Type") == "application/octet-stream" {
+		defer r.Body.Close()
+		upReq.src = r.Body
+		upReq.filename = r.URL.Query().Get("qqfile")
 
-	upReq.src = file
-	upReq.filename = headers.Filename
+	} else {
+		file, headers, err := r.FormFile("file")
+		if err != nil {
+			return
+		}
+		defer file.Close()
+
+		upReq.src = file
+		upReq.filename = headers.Filename
+	}
 
 	upload, err := processUpload(upReq)
 	if err != nil {
@@ -46,7 +53,19 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/"+upload.Filename, 301)
+	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		js, _ := json.Marshal(map[string]string{
+			"filename": upload.Filename,
+			"url":      Config.siteURL + upload.Filename,
+		})
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Write(js)
+
+	} else {
+		http.Redirect(w, r, "/"+upload.Filename, 301)
+	}
+
 }
 
 func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {

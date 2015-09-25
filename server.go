@@ -15,15 +15,18 @@ var Config struct {
 	bind     string
 	filesDir string
 	siteName string
+	siteURL  string
 }
 
 func main() {
 	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
 		"host to bind to (default: 127.0.0.1:8080)")
-	flag.StringVar(&Config.filesDir, "d", "files/",
+	flag.StringVar(&Config.filesDir, "filespath", "files/",
 		"path to files directory (default: files/)")
-	flag.StringVar(&Config.siteName, "n", "linx",
+	flag.StringVar(&Config.siteName, "sitename", "linx",
 		"name of the site")
+	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
+		"site base url (including trailing slash)")
 	flag.Parse()
 
 	// Disable template caching -- keep until out of pre-alpha

@@ -8,12 +8,11 @@
         <div class="clear"></div>
 
         <form action="/upload" method="POST" enctype="multipart/form-data">
-
             <div id="file-uploader" style="min-width: 400px;">
-                    <br />
-                    <input type="file" name="file" id="file_upload" name="file"><br/ ><br/ >
-                    <input id ="upload_btn" type="submit" value="Upload">
-                    <br /><br />
+                <br />
+                <input type="file" name="file" id="file_upload" name="file"><br/ ><br/ >
+                <input id ="upload_btn" type="submit" value="Upload">
+                <br /><br />
             </div>
 
             <div id="choices">
@@ -42,4 +41,18 @@
 
     </div>
 </div>
+
+<script type="text/javascript">
+    function downloadJSAtOnload() {
+        var element = document.createElement("script");
+        element.src = "/static/js/cat.js";
+        document.body.appendChild(element);
+    }
+    if (window.addEventListener)
+        window.addEventListener("load", downloadJSAtOnload, false);
+        else if (window.attachEvent)
+        window.attachEvent("onload", downloadJSAtOnload);
+        else window.onload = downloadJSAtOnload;
+</script>
+
 {% endblock %}
