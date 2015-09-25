@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -39,6 +38,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	} else {
 		file, headers, err := r.FormFile("file")
 		if err != nil {
+			oopsHandler(c, w, r)
 			return
 		}
 		defer file.Close()
@@ -49,7 +49,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	upload, err := processUpload(upReq)
 	if err != nil {
-		fmt.Fprintf(w, "Failed to upload: %v", err)
+		oopsHandler(c, w, r)
 		return
 	}
 
@@ -72,15 +72,16 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq := UploadRequest{}
 
 	defer r.Body.Close()
+	upReq.filename = c.URLParams["name"]
 	upReq.src = r.Body
 
 	upload, err := processUpload(upReq)
 	if err != nil {
-		fmt.Fprintf(w, "Failed to upload")
+		oopsHandler(c, w, r)
 		return
 	}
 
-	fmt.Fprintf(w, "File %s uploaded successfully.", upload.Filename)
+	fmt.Fprintf(w, Config.siteURL+upload.Filename)
 }
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
@@ -106,12 +107,10 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	if err != nil {
 		return
 	} else if bytes == 0 {
-		err = errors.New("Empty file")
 		return
 	}
 
 	upload.Size = bytes
-
 	return
 }
 

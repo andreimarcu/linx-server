@@ -14,7 +14,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(filePath)
 
 	if os.IsNotExist(err) {
-		http.Error(w, http.StatusText(404), 404)
+		notFoundHandler(c, w, r)
 		return
 	}
 

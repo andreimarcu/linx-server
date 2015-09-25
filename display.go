@@ -11,36 +11,40 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
+var imageTpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
+var videoTpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
+var fileTpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
+
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
 	fileInfo, err := os.Stat(filePath)
 
 	if os.IsNotExist(err) {
-		http.Error(w, http.StatusText(404), 404)
+		notFoundHandler(c, w, r)
 		return
 	}
 
 	if err := magicmime.Open(magicmime.MAGIC_MIME_TYPE |
 		magicmime.MAGIC_SYMLINK |
 		magicmime.MAGIC_ERROR); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		oopsHandler(c, w, r)
 	}
 	defer magicmime.Close()
 
 	mimetype, err := magicmime.TypeByFile(filePath)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		oopsHandler(c, w, r)
 	}
 
 	var tpl *pongo2.Template
 
 	if strings.HasPrefix(mimetype, "image/") {
-		tpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
+		tpl = imageTpl
 	} else if strings.HasPrefix(mimetype, "video/") {
-		tpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
+		tpl = videoTpl
 	} else {
-		tpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
+		tpl = fileTpl
 	}
 
 	err = tpl.ExecuteWriter(pongo2.Context{
@@ -50,6 +54,6 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}, w)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		oopsHandler(c, w, r)
 	}
 }
