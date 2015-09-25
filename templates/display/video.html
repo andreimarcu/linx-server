@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div id='video'>
+    <video controls autoplay width="800">
+        <source src="/selif/{{ filename }}"/>
+    </video>
+</div>
+
+{% endblock %}

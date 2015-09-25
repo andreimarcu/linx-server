@@ -9,9 +9,9 @@ import (
 )
 
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	filename := c.URLParams["name"]
-	absPath := path.Join(Config.filesDir, filename)
-	_, err := os.Stat(absPath)
+	fileName := c.URLParams["name"]
+	filePath := path.Join(Config.filesDir, fileName)
+	_, err := os.Stat(filePath)
 
 	if os.IsNotExist(err) {
 		http.Error(w, http.StatusText(404), 404)
@@ -20,5 +20,5 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	// plug file expiry checking here
 
-	http.ServeFile(w, r, absPath)
+	http.ServeFile(w, r, filePath)
 }
