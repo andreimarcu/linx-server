@@ -61,6 +61,14 @@ body {
   margin-bottom: 5px;
 }
 
+.dinfo {
+  -moz-box-shadow: 1px 1px 1px 1px #ccc;
+  -webkit-box-shadow: 1px 1px 1px 1px #ccc;
+  box-shadow: 1px 1px 1px 1px #ccc;
+  margin-bottom: 15px;
+
+}
+
 #info {
 	text-align: left;
 
