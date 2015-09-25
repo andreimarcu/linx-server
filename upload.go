@@ -119,8 +119,9 @@ func generateBarename() string {
 	return uuid.New()[:8]
 }
 
+var barePlusRe = regexp.MustCompile(`[^A-Za-z0-9\-]`)
+
 func barePlusExt(filename string) (barename, extension string) {
-	re := regexp.MustCompile(`[^A-Za-z0-9\-]`)
 
 	filename = strings.TrimSpace(filename)
 	filename = strings.ToLower(filename)
@@ -128,8 +129,8 @@ func barePlusExt(filename string) (barename, extension string) {
 	extension = path.Ext(filename)
 	barename = filename[:len(filename)-len(extension)]
 
-	extension = re.ReplaceAllString(extension, "")
-	barename = re.ReplaceAllString(barename, "")
+	extension = barePlusRe.ReplaceAllString(extension, "")
+	barename = barePlusRe.ReplaceAllString(barename, "")
 
 	return
 }
