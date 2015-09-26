@@ -15,8 +15,15 @@ By default linx will bind to ```http://127.0.0.1:8080/```, use the "files/" file
 Configurable flags can be found in ```server.go```.
 
 
+
+Development
+-----------
+Any help is welcome, PRs will be reviewed and merged accordingly.  
+The official IRC channel is #linx on irc.oftc.net  
+
+
 TODO
---------
+----
 Please refer to the [main TODO issue](https://github.com/andreimarcu/linx-server/issues/1) 
 
 Author
