@@ -43,7 +43,7 @@ func main() {
 	err := os.MkdirAll(Config.filesDir, 0755)
 	if err != nil {
 		fmt.Printf("Error: could not create files directory")
-		os.exit(1)
+		os.Exit(1)
 	}
 
 	// Template Globals
