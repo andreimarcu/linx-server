@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/pborman/uuid"
 	"github.com/zenazn/goji/web"
 )
 
