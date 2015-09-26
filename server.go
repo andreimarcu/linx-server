@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"regexp"
+	"os"
+	"fmt"
 
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji"
@@ -37,7 +39,12 @@ func main() {
 		goji.Abandon(middleware.Logger)
 	}
 
-	// check trailing slashes
+	// make directory if needed
+	err := os.MkdirAll(Config.filesDir, 0755)
+	if err != nil {
+		fmt.Printf("Error: could not create files directory")
+		os.exit(1)
+	}
 
 	// Template Globals
 	pongo2.DefaultSet.Globals["sitename"] = Config.siteName
