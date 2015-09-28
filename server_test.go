@@ -16,7 +16,6 @@ import (
 func TestSetup(t *testing.T) {
 	Config.siteURL = "http://linx.example.org/"
 	Config.filesDir = path.Join(os.TempDir(), randomString(10))
-	t.Log(os.TempDir())
 	Config.metaDir = Config.filesDir + "_meta"
 	Config.noLogs = true
 	Config.siteName = "linx"
@@ -183,13 +182,6 @@ func TestPutUpload(t *testing.T) {
 	if w.Body.String() != Config.siteURL+filename {
 		t.Fatal("Response was not expected URL")
 	}
-
-	// if w.Code != 301 {
-	// 	t.Fatalf("Status code is not 301, but %d", w.Code)
-	// }
-	// if w.Header().Get("Location") != "/"+filename {
-	// 	t.Fatalf("Was redirected to %s instead of /%s", w.Header().Get("Location"), filename)
-	// }
 }
 
 func TestPutRandomizedUpload(t *testing.T) {

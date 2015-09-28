@@ -119,9 +119,6 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 }
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
-
-	// if UploadRequest.src
-
 	// Determine the appropriate filename, then write to disk
 	barename, extension := barePlusExt(upReq.filename)
 
