@@ -23,21 +23,7 @@ var Config struct {
 	siteURL  string
 }
 
-func main() {
-	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
-		"host to bind to (default: 127.0.0.1:8080)")
-	flag.StringVar(&Config.filesDir, "filespath", "files/",
-		"path to files directory")
-	flag.StringVar(&Config.metaDir, "metapath", "meta/",
-		"path to metadata directory")
-	flag.BoolVar(&Config.noLogs, "nologs", false,
-		"remove stdout output for each request")
-	flag.StringVar(&Config.siteName, "sitename", "linx",
-		"name of the site")
-	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
-		"site base url (including trailing slash)")
-	flag.Parse()
-
+func setup() {
 	if Config.noLogs {
 		goji.Abandon(middleware.Logger)
 	}
@@ -81,6 +67,25 @@ func main() {
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.NotFound(notFoundHandler)
+
+}
+
+func main() {
+	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
+		"host to bind to (default: 127.0.0.1:8080)")
+	flag.StringVar(&Config.filesDir, "filespath", "files/",
+		"path to files directory")
+	flag.StringVar(&Config.metaDir, "metapath", "meta/",
+		"path to metadata directory")
+	flag.BoolVar(&Config.noLogs, "nologs", false,
+		"remove stdout output for each request")
+	flag.StringVar(&Config.siteName, "sitename", "linx",
+		"name of the site")
+	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
+		"site base url (including trailing slash)")
+	flag.Parse()
+
+	setup()
 
 	listener, err := net.Listen("tcp", Config.bind)
 	if err != nil {
