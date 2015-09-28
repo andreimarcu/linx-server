@@ -1,5 +1,8 @@
 Linx Server
 ======
+[![Build Status](https://travis-ci.org/andreimarcu/linx-server.svg?branch=master)](https://travis-ci.org/andreimarcu/linx-server)  
+
+
 Soon-to-be opensource replacement of Linx  
 
 **Please do not use yet! Consider it in pre-alpha development stages.**
