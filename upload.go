@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -118,6 +119,9 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 }
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
+
+	// if UploadRequest.src
+
 	// Determine the appropriate filename, then write to disk
 	barename, extension := barePlusExt(upReq.filename)
 
@@ -169,7 +173,9 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	if err != nil {
 		return
 	} else if bytes == 0 {
-		return
+		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		return upload, errors.New("Empty file")
 	}
 
 	upload.Size = bytes

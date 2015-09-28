@@ -58,7 +58,7 @@ func setup() {
 	goji.Get("/", indexHandler)
 
 	goji.Post("/upload", uploadPostHandler)
-	goji.Post("/upload/", http.RedirectHandler("/upload", 301))
+	goji.Post("/upload/", uploadPostHandler)
 	goji.Put("/upload", uploadPutHandler)
 	goji.Put("/upload/:name", uploadPutHandler)
 
