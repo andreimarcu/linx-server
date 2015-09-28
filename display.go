@@ -12,8 +12,10 @@ import (
 )
 
 var imageTpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
+var audioTpl = pongo2.Must(pongo2.FromCache("templates/display/audio.html"))
 var videoTpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
 var fileTpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
+var pdfTpl = pongo2.Must(pongo2.FromCache("templates/display/pdf.html"))
 
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
@@ -24,6 +26,8 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		notFoundHandler(c, w, r)
 		return
 	}
+
+	// file expiry checking
 
 	if err := magicmime.Open(magicmime.MAGIC_MIME_TYPE |
 		magicmime.MAGIC_SYMLINK |
@@ -43,6 +47,10 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = imageTpl
 	} else if strings.HasPrefix(mimetype, "video/") {
 		tpl = videoTpl
+	} else if strings.HasPrefix(mimetype, "audio/") {
+		tpl = audioTpl
+	} else if mimetype == "application/pdf" {
+		tpl = pdfTpl
 	} else {
 		tpl = fileTpl
 	}

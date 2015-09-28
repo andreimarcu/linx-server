@@ -35,7 +35,7 @@ func main() {
 	flag.StringVar(&Config.siteName, "sitename", "linx",
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
-		"site base url")
+		"site base url (including trailing slash)")
 	flag.Parse()
 
 	if Config.noLogs {
