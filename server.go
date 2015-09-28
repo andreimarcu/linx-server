@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"regexp"
 	"os"
-	"fmt"
+	"regexp"
 
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji"
@@ -17,6 +17,7 @@ import (
 var Config struct {
 	bind     string
 	filesDir string
+	metaDir  string
 	noLogs   bool
 	siteName string
 	siteURL  string
@@ -26,24 +27,39 @@ func main() {
 	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
 		"host to bind to (default: 127.0.0.1:8080)")
 	flag.StringVar(&Config.filesDir, "filespath", "files/",
-		"path to files directory (including trailing slash)")
+		"path to files directory")
+	flag.StringVar(&Config.metaDir, "metapath", "meta/",
+		"path to metadata directory")
 	flag.BoolVar(&Config.noLogs, "nologs", false,
 		"remove stdout output for each request")
 	flag.StringVar(&Config.siteName, "sitename", "linx",
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
-		"site base url (including trailing slash)")
+		"site base url")
 	flag.Parse()
 
 	if Config.noLogs {
 		goji.Abandon(middleware.Logger)
 	}
 
-	// make directory if needed
-	err := os.MkdirAll(Config.filesDir, 0755)
+	// make directories if needed
+	var err error
+
+	err = os.MkdirAll(Config.filesDir, 0755)
 	if err != nil {
-		fmt.Printf("Error: could not create files directory")
+		fmt.Printf("Error: could not create files directory\n")
 		os.Exit(1)
+	}
+
+	err = os.MkdirAll(Config.metaDir, 0700)
+	if err != nil {
+		fmt.Printf("Error: could not create metadata directory\n")
+		os.Exit(1)
+	}
+
+	// ensure siteURL ends wth '/'
+	if lastChar := Config.siteURL[len(Config.siteURL)-1:]; lastChar != "/" {
+		Config.siteURL = Config.siteURL + "/"
 	}
 
 	// Template Globals
