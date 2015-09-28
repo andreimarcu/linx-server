@@ -4,17 +4,16 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"strings"
 	"testing"
 
 	"github.com/zenazn/goji"
 )
 
-var a = 0
-
 func TestSetup(t *testing.T) {
 	Config.siteURL = "http://linx.example.org/"
-	Config.filesDir = "/tmp/" + randomString(10)
+	Config.filesDir = path.Join(os.TempDir(), randomString(10))
 	Config.metaDir = Config.filesDir + "_meta"
 	Config.noLogs = true
 	Config.siteName = "linx"
