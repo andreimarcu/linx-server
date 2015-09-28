@@ -30,35 +30,6 @@ type Upload struct {
 	Size      int64
 	Expiry    int32  // Unix timestamp of expiry, 0=never
 	DeleteKey string // Deletion key, one generated if not provided
-	DebugInfo string // Optional field to store whatever
-}
-
-func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
-	// For legacy reasons
-	upReq.randomBarename = false
-	if r.Header.Get("X-Randomized-Filename") == "yes" {
-		upReq.randomBarename = true
-	}
-
-	if r.Header.Get("X-Randomized-Barename") == "yes" {
-		upReq.randomBarename = true
-	}
-
-	upReq.deletionKey = r.Header.Get("X-Delete-Key")
-
-	// Get seconds until expiry. Non-integer responses never expire.
-	expStr := r.Header.Get("X-File-Expiry")
-	if expStr == "" {
-		upReq.expiry = 0
-	} else {
-		expiry, err := strconv.ParseInt(expStr, 10, 32)
-		if err != nil {
-			upReq.expiry = 0
-		} else {
-			upReq.expiry = int32(expiry)
-		}
-	}
-
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -66,6 +37,11 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	uploadHeaderProcess(r, &upReq)
 
 	if r.Header.Get("Content-Type") == "application/octet-stream" {
+		if r.URL.Query().Get("randomize") == "true" {
+			upReq.randomBarename = true
+		}
+		upReq.expiry = parseExpiry(r.URL.Query().Get("expires"))
+
 		defer r.Body.Close()
 		upReq.src = r.Body
 		upReq.filename = r.URL.Query().Get("qqfile")
@@ -78,6 +54,11 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
+		r.ParseForm()
+		if r.Form.Get("randomize") == "true" {
+			upReq.randomBarename = true
+		}
+		upReq.expiry = parseExpiry(r.Form.Get("expires"))
 		upReq.src = file
 		upReq.filename = headers.Filename
 	}
@@ -89,14 +70,9 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		js, _ := json.Marshal(map[string]string{
-			"filename": upload.Filename,
-			"url":      Config.siteURL + upload.Filename,
-		})
-
+		js := generateJSONresponse(upload)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
-
 	} else {
 		http.Redirect(w, r, "/"+upload.Filename, 301)
 	}
@@ -117,7 +93,29 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, Config.siteURL+upload.Filename)
+	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		js := generateJSONresponse(upload)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Write(js)
+	} else {
+		fmt.Fprintf(w, Config.siteURL+upload.Filename)
+	}
+}
+
+func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
+	// For legacy reasons
+	if r.Header.Get("X-Randomized-Filename") == "yes" {
+		upReq.randomBarename = true
+	} else if r.Header.Get("X-Randomized-Barename") == "yes" {
+		upReq.randomBarename = true
+	}
+
+	upReq.deletionKey = r.Header.Get("X-Delete-Key")
+
+	// Get seconds until expiry. Non-integer responses never expire.
+	expStr := r.Header.Get("X-File-Expiry")
+	upReq.expiry = parseExpiry(expStr)
+
 }
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
@@ -183,6 +181,18 @@ func generateBarename() string {
 	return uuid.New()[:8]
 }
 
+func generateJSONresponse(upload Upload) []byte {
+	js, _ := json.Marshal(map[string]string{
+		"url":        Config.siteURL + upload.Filename,
+		"filename":   upload.Filename,
+		"delete_key": upload.DeleteKey,
+		"expiry":     strconv.FormatInt(int64(upload.Expiry), 10),
+		"size":       strconv.FormatInt(upload.Size, 10),
+	})
+
+	return js
+}
+
 var barePlusRe = regexp.MustCompile(`[^A-Za-z0-9\-]`)
 
 func barePlusExt(filename string) (barename, extension string) {
@@ -197,4 +207,17 @@ func barePlusExt(filename string) (barename, extension string) {
 	barename = barePlusRe.ReplaceAllString(barename, "")
 
 	return
+}
+
+func parseExpiry(expStr string) int32 {
+	if expStr == "" {
+		return 0
+	} else {
+		expiry, err := strconv.ParseInt(expStr, 10, 32)
+		if err != nil {
+			return 0
+		} else {
+			return int32(expiry)
+		}
+	}
 }

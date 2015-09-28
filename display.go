@@ -22,12 +22,10 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	filePath := path.Join(Config.filesDir, fileName)
 	fileInfo, err := os.Stat(filePath)
 
-	if os.IsNotExist(err) {
+	if !fileExistsAndNotExpired(fileName) {
 		notFoundHandler(c, w, r)
 		return
 	}
-
-	// file expiry checking
 
 	if err := magicmime.Open(magicmime.MAGIC_MIME_TYPE |
 		magicmime.MAGIC_SYMLINK |

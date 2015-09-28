@@ -33,12 +33,8 @@ func isTsExpired(ts int32) (expired bool) {
 }
 
 // Determine if the given filename is expired
-func isFileExpired(filename string) (bool, error) {
-	exp, err := metadataGetExpiry(filename)
+func isFileExpired(filename string) bool {
+	exp, _ := metadataGetExpiry(filename)
 
-	if err != nil {
-		return true, err
-	} else {
-		return isTsExpired(exp), err
-	}
+	return isTsExpired(exp)
 }

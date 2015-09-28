@@ -18,20 +18,20 @@
             <div id="choices">
                 <div id="expiry">
                     <label>File expiry: 
-                    <select name="expires" id="expires">
+                    <select name="expires" id="expires" onchange="uploader.setParams({expires: $('#expires').val(), randomize: $('#randomize').is(':checked')})">
                     </label>
-                        <option value="never">never</option>
-                        <option value="a minute">a minute</option>
-                        <option value="5 minutes">5 minutes</option>
-                        <option value="an hour">an hour</option>
-                        <option value="a day">a day</option>
-                        <option value="a week">a week</option>
-                        <option value="a month">a month</option>
-                        <option value="a year">a year</option>
+                        <option value="0">never</option>
+                        <option value="60">a minute</option>
+                        <option value="300">5 minutes</option>
+                        <option value="3600">an hour</option>
+                        <option value="86400">a day</option>
+                        <option value="604800">a week</option>
+                        <option value="2419200">a month</option>
+                        <option value="29030400">a year</option>
                     </select>
                 </div>
 
-                <label><input name="randomize" id="randomize" type="checkbox" checked /> Randomize filename</label>
+                <label><input name="randomize" id="randomize" type="checkbox" checked onclick="uploader.setParams({expires: $('#expires').val(), randomize: $('#randomize').is(':checked')})" /> Randomize filename</label>
 
             </div>
 

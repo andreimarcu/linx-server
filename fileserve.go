@@ -11,24 +11,28 @@ import (
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
-	_, err := os.Stat(filePath)
 
-	if os.IsNotExist(err) {
+	if isFileExpired(fileName) {
 		notFoundHandler(c, w, r)
 		return
-	}
-
-	expired, expErr := isFileExpired(fileName)
-
-	if expErr != nil {
-		// Error reading metadata, pretend it's expired
-		notFoundHandler(c, w, r)
-		// TODO log error internally
-		return
-	} else if expired {
-		notFoundHandler(c, w, r)
-		// TODO delete the file
 	}
 
 	http.ServeFile(w, r, filePath)
+}
+
+func fileExistsAndNotExpired(filename string) bool {
+	filePath := path.Join(Config.filesDir, filename)
+
+	_, err := os.Stat(filePath)
+	if err != nil {
+		return false
+	}
+
+	if isFileExpired(filename) {
+		os.Remove(path.Join(Config.filesDir, filename))
+		os.Remove(path.Join(Config.metaDir, filename))
+		return false
+	}
+
+	return true
 }

@@ -47,13 +47,13 @@ func main() {
 
 	err = os.MkdirAll(Config.filesDir, 0755)
 	if err != nil {
-		fmt.Printf("Error: could not create files directory\n")
+		fmt.Println("Error: could not create files directory")
 		os.Exit(1)
 	}
 
 	err = os.MkdirAll(Config.metaDir, 0700)
 	if err != nil {
-		fmt.Printf("Error: could not create metadata directory\n")
+		fmt.Println("Error: could not create metadata directory")
 		os.Exit(1)
 	}
 

@@ -24,7 +24,6 @@ func metadataWrite(filename string, upload *Upload) error {
 
 	fmt.Fprintln(w, upload.Expiry)
 	fmt.Fprintln(w, upload.DeleteKey)
-	fmt.Fprintln(w, upload.DebugInfo)
 
 	return w.Flush()
 }
