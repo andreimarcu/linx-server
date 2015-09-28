@@ -3,6 +3,12 @@ language: go
 go:
   - tip
 
+sudo: required
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libmagic-dev
+
 before_script:
   - go vet ./...
 
