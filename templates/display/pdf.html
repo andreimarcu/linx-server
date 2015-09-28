@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block main %}
+<object data="/selif/{{ filename }}"
+        type="application/pdf"
+        width=910 
+        height=800>
+
+<p>It appears your Web browser is not configured to display PDF files. 
+No worries, just <a href="/selif/{{ filename }}">click here to download the PDF file.</a></p>
+
+</object>
+{% endblock %}
