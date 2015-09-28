@@ -18,7 +18,17 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// plug file expiry checking here
+	expired, expErr := isFileExpired(fileName)
+
+	if expErr != nil {
+		// Error reading metadata, pretend it's expired
+		notFoundHandler(c, w, r)
+		// TODO log error internally
+		return
+	} else if expired {
+		notFoundHandler(c, w, r)
+		// TODO delete the file
+	}
 
 	http.ServeFile(w, r, filePath)
 }
