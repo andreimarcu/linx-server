@@ -232,11 +232,11 @@ func TestPutEmptyUpload(t *testing.T) {
 
 func TestPutJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string `json: filename`
-		Url       string `json: url`
-		DeleteKey string `json: delete_key`
-		Expiry    string `json: expiry`
-		Size      string `json: size`
+		Filename  string
+		Url       string
+		DeleteKey string
+		Expiry    string
+		Size      string
 	}
 	var myjson RespJSON
 
@@ -265,11 +265,11 @@ func TestPutJSONUpload(t *testing.T) {
 
 func TestPutRandomizedJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string `json: filename`
-		Url       string `json: url`
-		DeleteKey string `json: delete_key`
-		Expiry    string `json: expiry`
-		Size      string `json: size`
+		Filename  string
+		Url       string
+		DeleteKey string
+		Expiry    string
+		Size      string
 	}
 	var myjson RespJSON
 
@@ -299,11 +299,11 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 
 func TestPutExpireJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string `json: filename`
-		Url       string `json: url`
-		DeleteKey string `json: delete_key`
-		Expiry    string `json: expiry`
-		Size      string `json: size`
+		Filename  string
+		Url       string
+		DeleteKey string
+		Expiry    string
+		Size      string
 	}
 	var myjson RespJSON
 
