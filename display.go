@@ -5,8 +5,10 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"bitbucket.org/taruti/mimemagic"
+	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji/web"
 )
@@ -20,6 +22,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		notFoundHandler(c, w, r)
 		return
 	}
+
+	expiry, _ := metadataGetExpiry(fileName)
+	var expiryHuman string
+	if expiry != 0 {
+		expiryHuman = humanize.RelTime(time.Now(), time.Unix(expiry, 0), "", "")
+	}
+	sizeHuman := humanize.Bytes(uint64(fileInfo.Size()))
 
 	file, _ := os.Open(filePath)
 	header := make([]byte, 512)
@@ -45,7 +54,8 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err = tpl.ExecuteWriter(pongo2.Context{
 		"mime":     mimetype,
 		"filename": fileName,
-		"size":     fileInfo.Size(),
+		"size":     sizeHuman,
+		"expiry":   expiryHuman,
 	}, w)
 
 	if err != nil {

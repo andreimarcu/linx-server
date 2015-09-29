@@ -19,7 +19,7 @@ import (
 type UploadRequest struct {
 	src            io.Reader
 	filename       string
-	expiry         int32 // Seconds until expiry, 0 = never
+	expiry         int64 // Seconds until expiry, 0 = never
 	randomBarename bool
 	deletionKey    string // Empty string if not defined
 }
@@ -28,7 +28,7 @@ type UploadRequest struct {
 type Upload struct {
 	Filename  string // Final filename on disk
 	Size      int64
-	Expiry    int32  // Unix timestamp of expiry, 0=never
+	Expiry    int64  // Unix timestamp of expiry, 0=never
 	DeleteKey string // Deletion key, one generated if not provided
 }
 
@@ -211,15 +211,15 @@ func barePlusExt(filename string) (barename, extension string) {
 	return
 }
 
-func parseExpiry(expStr string) int32 {
+func parseExpiry(expStr string) int64 {
 	if expStr == "" {
 		return 0
 	} else {
-		expiry, err := strconv.ParseInt(expStr, 10, 32)
+		expiry, err := strconv.ParseInt(expStr, 10, 64)
 		if err != nil {
 			return 0
 		} else {
-			return int32(expiry)
+			return int64(expiry)
 		}
 	}
 }

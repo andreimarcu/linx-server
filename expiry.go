@@ -5,8 +5,8 @@ import (
 )
 
 // Get what the unix timestamp will be in "seconds".
-func getFutureTimestamp(seconds int32) (ts int32) {
-	now := int32(time.Now().Unix())
+func getFutureTimestamp(seconds int64) (ts int64) {
+	now := int64(time.Now().Unix())
 
 	if seconds == 0 {
 		ts = 0
@@ -18,8 +18,8 @@ func getFutureTimestamp(seconds int32) (ts int32) {
 }
 
 // Determine if a file with expiry set to "ts" has expired yet
-func isTsExpired(ts int32) (expired bool) {
-	now := int32(time.Now().Unix())
+func isTsExpired(ts int64) (expired bool) {
+	now := int64(time.Now().Unix())
 
 	if ts == 0 {
 		expired = false

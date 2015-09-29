@@ -47,7 +47,7 @@ func metadataRead(filename string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func metadataGetExpiry(filename string) (int32, error) {
+func metadataGetExpiry(filename string) (int64, error) {
 	metadata, err := metadataRead(filename)
 
 	if len(metadata) < 1 {
@@ -68,7 +68,7 @@ func metadataGetExpiry(filename string) (int32, error) {
 	if err != nil {
 		return 0, err
 	} else {
-		return int32(expiry), err
+		return int64(expiry), err
 	}
 }
 
