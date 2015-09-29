@@ -45,6 +45,7 @@ func populateTemplatesMap(tSet *pongo2.TemplateSet, tMap map[string]*pongo2.Temp
 	templates := [...]string{
 		"index.html",
 		"404.html",
+		"401.html",
 		"oops.html",
 
 		"display/audio.html",

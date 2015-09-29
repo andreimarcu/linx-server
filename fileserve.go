@@ -12,7 +12,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
 
-	if isFileExpired(fileName) {
+	if !fileExistsAndNotExpired(fileName) {
 		notFoundHandler(c, w, r)
 		return
 	}
