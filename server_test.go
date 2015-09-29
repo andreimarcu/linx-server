@@ -224,11 +224,11 @@ func TestPutEmptyUpload(t *testing.T) {
 
 func TestPutJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string
-		Url       string
-		DeleteKey string
-		Expiry    string
-		Size      string
+		Filename   string
+		Url        string
+		Delete_Key string
+		Expiry     string
+		Size       string
 	}
 	var myjson RespJSON
 
@@ -257,11 +257,11 @@ func TestPutJSONUpload(t *testing.T) {
 
 func TestPutRandomizedJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string
-		Url       string
-		DeleteKey string
-		Expiry    string
-		Size      string
+		Filename   string
+		Url        string
+		Delete_Key string
+		Expiry     string
+		Size       string
 	}
 	var myjson RespJSON
 
@@ -291,11 +291,11 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 
 func TestPutExpireJSONUpload(t *testing.T) {
 	type RespJSON struct {
-		Filename  string
-		Url       string
-		DeleteKey string
-		Expiry    string
-		Size      string
+		Filename   string
+		Url        string
+		Delete_Key string
+		Expiry     string
+		Size       string
 	}
 	var myjson RespJSON
 
@@ -324,6 +324,99 @@ func TestPutExpireJSONUpload(t *testing.T) {
 	}
 	if expiry < 1 {
 		t.Fatal("Expiry was not set")
+	}
+}
+
+func TestPutAndDelete(t *testing.T) {
+	type RespJSON struct {
+		Filename   string
+		Url        string
+		Delete_Key string
+		Expiry     string
+		Size       string
+	}
+	var myjson RespJSON
+
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Delete it
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
+	req.Header.Set("X-Delete-Key", myjson.Delete_Key)
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 404 {
+		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
+	}
+
+	// Make sure it's actually gone
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/"+myjson.Filename, nil)
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 404 {
+		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
+	}
+}
+
+func TestPutAndSpecificDelete(t *testing.T) {
+	type RespJSON struct {
+		Filename   string
+		Url        string
+		Delete_Key string
+		Expiry     string
+		Size       string
+	}
+	var myjson RespJSON
+
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Delete-Key", "supersecret")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Delete it
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
+	req.Header.Set("X-Delete-Key", "supersecret")
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 404 {
+		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
+	}
+
+	// Make sure it's actually gone
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/"+myjson.Filename, nil)
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 404 {
+		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
 	}
 }
 
