@@ -81,7 +81,6 @@ func setup() {
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.NotFound(notFoundHandler)
-
 }
 
 func main() {
