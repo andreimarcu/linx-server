@@ -9,8 +9,12 @@ import (
 
 func TestCreateTorrent(t *testing.T) {
 	fileName := "server.go"
-	encoded := CreateTorrent(fileName, fileName)
 	var decoded Torrent
+
+	encoded, err := CreateTorrent(fileName, fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	bencode.DecodeBytes(encoded, &decoded)
 

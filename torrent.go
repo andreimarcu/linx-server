@@ -18,12 +18,6 @@ const (
 	TORRENT_PIECE_LENGTH = 262144
 )
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 type TorrentInfo struct {
 	PieceLength int    `bencode:"piece length"`
 	Pieces      []byte `bencode:"pieces"`
@@ -37,20 +31,23 @@ type Torrent struct {
 	UrlList  []string    `bencode:"url-list"`
 }
 
-func CreateTorrent(fileName string, filePath string) []byte {
+func CreateTorrent(fileName string, filePath string) ([]byte, error) {
 	chunk := make([]byte, TORRENT_PIECE_LENGTH)
 	var pieces []byte
 	length := 0
 
 	f, err := os.Open(filePath)
-	check(err)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	for {
 		n, err := f.Read(chunk)
 		if err == io.EOF {
 			break
+		} else if err != nil {
+			return []byte{}, err
 		}
-		check(err)
 
 		length += n
 
@@ -73,9 +70,11 @@ func CreateTorrent(fileName string, filePath string) []byte {
 	}
 
 	data, err := bencode.EncodeBytes(torrent)
-	check(err)
+	if err != nil {
+		return []byte{}, err
+	}
 
-	return data
+	return data, nil
 }
 
 func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -87,7 +86,11 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encoded := CreateTorrent(fileName, filePath)
+	encoded, err := CreateTorrent(fileName, filePath)
+	if err != nil {
+		oopsHandler(c, w, r) // 500 - creating torrent failed
+		return
+	}
 
 	w.Header().Set(`Content-Disposition`, fmt.Sprintf(`attachment; filename="%s.torrent"`, fileName))
 	http.ServeContent(w, r, "", time.Now(), bytes.NewReader(encoded))
