@@ -14,10 +14,10 @@ type Pongo2Loader struct {
 	box *rice.Box
 }
 
-func NewPongo2Loader(boxName string) (*Pongo2Loader, error) {
+func NewPongo2TemplatesLoader() (*Pongo2Loader, error) {
 	fs := &Pongo2Loader{}
 
-	p2l, err := rice.FindBox(boxName)
+	p2l, err := rice.FindBox("templates")
 	if err != nil {
 		return nil, err
 	}

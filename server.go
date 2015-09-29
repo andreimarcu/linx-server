@@ -51,7 +51,7 @@ func setup() {
 	}
 
 	// Template setup
-	p2l, err := NewPongo2Loader("templates")
+	p2l, err := NewPongo2TemplatesLoader()
 	if err != nil {
 		fmt.Println("Error: could not load templates")
 		os.Exit(1)
