@@ -68,6 +68,7 @@ func setup() {
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
 	selifRe := regexp.MustCompile(`^/selif/(?P<name>[a-z0-9-\.]+)$`)
 	selifIndexRe := regexp.MustCompile(`^/selif/$`)
+	torrentRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)/torrent$`)
 
 	goji.Get("/", indexHandler)
 
@@ -83,6 +84,7 @@ func setup() {
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.Get(selifIndexRe, unauthorizedHandler)
+	goji.Get(torrentRe, fileTorrentHandler)
 	goji.NotFound(notFoundHandler)
 }
 
