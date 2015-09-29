@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web/middleware"
@@ -23,15 +24,16 @@ var Config struct {
 	siteURL  string
 }
 
+var Templates = make(map[string]*pongo2.Template)
+var TemplateSet *pongo2.TemplateSet
+
 func setup() {
 	if Config.noLogs {
 		goji.Abandon(middleware.Logger)
 	}
 
 	// make directories if needed
-	var err error
-
-	err = os.MkdirAll(Config.filesDir, 0755)
+	err := os.MkdirAll(Config.filesDir, 0755)
 	if err != nil {
 		fmt.Println("Error: could not create files directory")
 		os.Exit(1)
@@ -48,8 +50,19 @@ func setup() {
 		Config.siteURL = Config.siteURL + "/"
 	}
 
-	// Template Globals
-	pongo2.DefaultSet.Globals["sitename"] = Config.siteName
+	// Template setup
+	p2l, err := NewPongo2Loader("templates")
+	if err != nil {
+		fmt.Println("Error: could not load templates")
+		os.Exit(1)
+	}
+	TemplateSet := pongo2.NewSet("templates", p2l)
+	TemplateSet.Globals["sitename"] = Config.siteName
+	err = populateTemplatesMap(TemplateSet, Templates)
+	if err != nil {
+		fmt.Println("Error: could not load templates")
+		os.Exit(1)
+	}
 
 	// Routing setup
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
@@ -62,8 +75,9 @@ func setup() {
 	goji.Put("/upload", uploadPutHandler)
 	goji.Put("/upload/:name", uploadPutHandler)
 
+	staticBox := rice.MustFindBox("static")
 	goji.Get("/static/*", http.StripPrefix("/static/",
-		http.FileServer(http.Dir("static/"))))
+		http.FileServer(staticBox.HTTPBox())))
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.NotFound(notFoundHandler)

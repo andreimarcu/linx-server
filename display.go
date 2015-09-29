@@ -11,12 +11,6 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
-var imageTpl = pongo2.Must(pongo2.FromCache("templates/display/image.html"))
-var audioTpl = pongo2.Must(pongo2.FromCache("templates/display/audio.html"))
-var videoTpl = pongo2.Must(pongo2.FromCache("templates/display/video.html"))
-var fileTpl = pongo2.Must(pongo2.FromCache("templates/display/file.html"))
-var pdfTpl = pongo2.Must(pongo2.FromCache("templates/display/pdf.html"))
-
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
@@ -42,15 +36,15 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var tpl *pongo2.Template
 
 	if strings.HasPrefix(mimetype, "image/") {
-		tpl = imageTpl
+		tpl = Templates["display/image.html"]
 	} else if strings.HasPrefix(mimetype, "video/") {
-		tpl = videoTpl
+		tpl = Templates["display/video.html"]
 	} else if strings.HasPrefix(mimetype, "audio/") {
-		tpl = audioTpl
+		tpl = Templates["display/audio.html"]
 	} else if mimetype == "application/pdf" {
-		tpl = pdfTpl
+		tpl = Templates["display/pdf.html"]
 	} else {
-		tpl = fileTpl
+		tpl = Templates["display/file.html"]
 	}
 
 	err = tpl.ExecuteWriter(pongo2.Context{
