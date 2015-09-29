@@ -16,12 +16,13 @@ import (
 )
 
 var Config struct {
-	bind     string
-	filesDir string
-	metaDir  string
-	noLogs   bool
-	siteName string
-	siteURL  string
+	bind         string
+	filesDir     string
+	metaDir      string
+	noLogs       bool
+	allowHotlink bool
+	siteName     string
+	siteURL      string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -95,6 +96,8 @@ func main() {
 		"path to metadata directory")
 	flag.BoolVar(&Config.noLogs, "nologs", false,
 		"remove stdout output for each request")
+	flag.BoolVar(&Config.allowHotlink, "allowhotlink", false,
+		"Allow hotlinking of files")
 	flag.StringVar(&Config.siteName, "sitename", "linx",
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/zenazn/goji/web"
 )
@@ -15,6 +16,14 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	if !fileExistsAndNotExpired(fileName) {
 		notFoundHandler(c, w, r)
 		return
+	}
+
+	if !Config.allowHotlink {
+		referer := r.Header.Get("Referer")
+		if referer != "" && !strings.HasPrefix(referer, Config.siteURL) {
+			w.WriteHeader(403)
+			return
+		}
 	}
 
 	http.ServeFile(w, r, filePath)
