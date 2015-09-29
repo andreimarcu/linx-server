@@ -30,7 +30,7 @@ func metadataWrite(filename string, upload *Upload) error {
 
 // Return list of strings from a filename's metadata source
 func metadataRead(filename string) ([]string, error) {
-	file, err := os.Create(path.Join(Config.metaDir, filename))
+	file, err := os.Open(path.Join(Config.metaDir, filename))
 
 	if err != nil {
 		return nil, err

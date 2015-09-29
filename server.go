@@ -67,6 +67,7 @@ func setup() {
 	// Routing setup
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
 	selifRe := regexp.MustCompile(`^/selif/(?P<name>[a-z0-9-\.]+)$`)
+	selifIndexRe := regexp.MustCompile(`^/selif/$`)
 
 	goji.Get("/", indexHandler)
 
@@ -74,12 +75,14 @@ func setup() {
 	goji.Post("/upload/", uploadPostHandler)
 	goji.Put("/upload", uploadPutHandler)
 	goji.Put("/upload/:name", uploadPutHandler)
+	goji.Delete("/:name", deleteHandler)
 
 	staticBox := rice.MustFindBox("static")
 	goji.Get("/static/*", http.StripPrefix("/static/",
 		http.FileServer(staticBox.HTTPBox())))
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
+	goji.Get(selifIndexRe, unauthorizedHandler)
 	goji.NotFound(notFoundHandler)
 }
 
