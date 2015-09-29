@@ -36,7 +36,7 @@ func TestCreateTorrent(t *testing.T) {
 
 	tracker := fmt.Sprintf("%sselif/%s", Config.siteURL, fileName)
 	if decoded.UrlList[0] != tracker {
-		t.Fatal("First entry in URL list was %s, expected %s", decoded.UrlList[0], tracker)
+		t.Fatalf("First entry in URL list was %s, expected %s", decoded.UrlList[0], tracker)
 	}
 }
 
