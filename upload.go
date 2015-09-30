@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"bitbucket.org/taruti/mimemagic"
 	"github.com/zenazn/goji/web"
 )
 
@@ -122,12 +124,28 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	// Determine the appropriate filename, then write to disk
 	barename, extension := barePlusExt(upReq.filename)
 
+	// Pull the first 512 bytes off for use in MIME detection if needed
+	header := make([]byte, 512)
+	_, err = upReq.src.Read(header)
+	if err != nil {
+		return
+	}
+
 	if upReq.randomBarename || len(barename) == 0 {
 		barename = generateBarename()
 	}
 
 	if len(extension) == 0 {
-		extension = "ext"
+		// Determine the type of file from header
+		mimetype := mimemagic.Match("", header)
+
+		// If the mime type is in our map, use that
+		// otherwise just use "ext"
+		if val, exists := mimeToExtension[mimetype]; exists {
+			extension = val
+		} else {
+			extension = "ext"
+		}
 	}
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
@@ -166,7 +184,10 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	metadataWrite(upload.Filename, &upload)
 
-	bytes, err := io.Copy(dst, upReq.src)
+	// Make a multi-reader from the header and the remainder of bytes
+	// in the upReq.src io.Reader
+	src := io.MultiReader(bytes.NewReader(header), upReq.src)
+	bytes, err := io.Copy(dst, src)
 	if err != nil {
 		return
 	} else if bytes == 0 {
