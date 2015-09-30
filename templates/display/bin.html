@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {% if extra.extension == "story" %}
+    <link href="/static/css/highlight/story.css" rel="stylesheet" type="text/css" />
+    {% else %}
+    <link href="/static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css" />
+    {% endif %}
+    {% endblock %}
+
+{% block innercontentmore %} style="overflow: auto;" {% endblock %}
+{% block mainmore %} {% if extra.extension == "story" %} style="background-color: #f0e0d6;"{% endif %} {% endblock %}
+
+{% block infoleft %}
+    <div id="foarm" style="display: none;">
+        <form id="reply" action='/upload' method='post' >
+            <div class="right">
+	            <select id="expiry" name="expires">
+                    <option disabled=disabled>Expires:</option>
+                    <option value="0">never</option>
+                    <option value="60">a minute</option>
+                    <option value="300">5 minutes</option>
+                    <option value="3600">an hour</option>
+                    <option value="86400">a day</option>
+                    <option value="604800">a week</option>
+                    <option value="2419200">a month</option>
+                    <option value="29030400">a year</option>
+	            </select>
+
+	            <button id="save" onclick="paste()">save</button>
+	        </div>
+
+            <input style ="width:232px;" class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<input id="extension" class="codebox" style="width:30px;" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt" />
+
+
+            <textarea name='content' id="newcontent" class="editor" style="display: none;"></textarea>
+    </div>
+
+
+</form>
+{% endblock %}
+
+{%block infomore %}
+<label>wrap <input id="wordwrap" type="checkbox" onclick="wrap()" checked /></label> | 
+{% endblock %}
+
+{% block main %}
+<div id="normal-content" class="normal {% if extra.lang_hl != "story" %}fixed{% endif %}">
+    <pre id="normal-code"><code id="codeb" style="white-space: pre-wrap;" class="{{ extra.lang_hl }}">{{ extra.contents }}</pre></code>
+    <div id="editor" style="display: none; height: 800px; font-size: 11px;">{{ extra.contents }}</div>
+</div>
+
+
+{% if extra.lang_hl != "text" %}
+<script src="/static/js/highlight/highlight.pack.js"></script>
+<script>
+    hljs.tabReplace = '    ';
+    hljs.initHighlightingOnLoad();
+</script>
+{% endif %}
+
+<script type="text/javascript" src="/static/js/bin.js"></script>
+<script src="/static/js/ace/ace.js"></script>
+<script type="text/javascript">
+        var editor = ace.edit("editor");
+        editor.getSession().setMode("ace/mode/{{ extra.lang_ace }}");
+        editor.setTheme("ace/theme/tomorrow");
+</script>
+
+{% endblock %}

@@ -53,6 +53,7 @@ func populateTemplatesMap(tSet *pongo2.TemplateSet, tMap map[string]*pongo2.Temp
 		"display/image.html",
 		"display/video.html",
 		"display/pdf.html",
+		"display/bin.html",
 		"display/file.html",
 	}
 

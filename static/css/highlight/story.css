@@ -1,0 +1,13 @@
+.hljs {
+  display: block;
+  background: #f0e0d6;
+  color: #800000;
+  padding: 0.5em;
+
+  font-family: arial,helvetica,sans-serif;
+  font-size: 13px;
+}
+
+.hljs-comment {
+    color: #789922;
+}

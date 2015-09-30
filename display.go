@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -31,6 +33,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		expiryHuman = humanize.RelTime(time.Now(), time.Unix(expiry, 0), "", "")
 	}
 	sizeHuman := humanize.Bytes(uint64(fileInfo.Size()))
+	extra := make(map[string]string)
 
 	file, _ := os.Open(filePath)
 	header := make([]byte, 512)
@@ -38,6 +41,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	file.Close()
 
 	mimetype := mimemagic.Match("", header)
+	extension := strings.TrimPrefix(filepath.Ext(fileName), ".")
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
@@ -60,6 +64,20 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/audio.html"]
 	} else if mimetype == "application/pdf" {
 		tpl = Templates["display/pdf.html"]
+	} else if supportedBinExtension(extension) {
+		if fileInfo.Size() < 500000 {
+			bytes, err := ioutil.ReadFile(filePath)
+			if err != nil {
+				tpl = Templates["display/file.html"]
+			} else {
+				extra["extension"] = extension
+				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
+				extra["contents"] = string(bytes)
+				tpl = Templates["display/bin.html"]
+			}
+		} else {
+			tpl = Templates["display/file.html"]
+		}
 	} else {
 		tpl = Templates["display/file.html"]
 	}
@@ -69,6 +87,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		"filename": fileName,
 		"size":     sizeHuman,
 		"expiry":   expiryHuman,
+		"extra":    extra,
 	}, w)
 
 	if err != nil {

@@ -10,22 +10,24 @@
         <div class="float-left" id="filename">
             {{ filename }}
         </div>
-        {% block infoleft %}{% endblock %}
 
         <div class="right">
             {% if expiry %}
             <span>file expires in {{ expiry }}</span> | 
             {% endif %}
+            {% block infomore %}{% endblock %}
             <span>{{ size }}</span> |
             <a href="{{ filename }}/torrent" download>torrent</a> |
             <a href="/selif/{{ filename }}" download>get</a>
         </div>
+
+        {% block infoleft %}{% endblock %}
         <div class="clear"></div>
     </div>
 
-    <div id="main">
+    <div id="main" {% block mainmore %}{% endblock %}>
 
-      <div id='inner_content'>
+      <div id='inner_content' {% block innercontentmore %}{% endblock %} >
       {% block main %}{% endblock %}
       </div>
 
