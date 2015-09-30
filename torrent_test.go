@@ -44,4 +44,19 @@ func TestCreateTorrent(t *testing.T) {
 	}
 }
 
+func TestCreateTorrentWithImage(t *testing.T) {
+	var decoded Torrent
+
+	encoded, err := CreateTorrent("test.jpg", "static/images/404.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bencode.DecodeBytes(encoded, &decoded)
+
+	if decoded.Info.Pieces != "r\x01\x80j\x99\x84\n\xd3dZ;1NX\xec;\x9d$+f" {
+		t.Fatal("Torrent pieces did not match expected pieces for image")
+	}
+}
+
 // vim:set ts=8 sw=8 noet:
