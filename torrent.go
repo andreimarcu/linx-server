@@ -20,7 +20,7 @@ const (
 
 type TorrentInfo struct {
 	PieceLength int    `bencode:"piece length"`
-	Pieces      []byte `bencode:"pieces"`
+	Pieces      string `bencode:"pieces"`
 	Name        string `bencode:"name"`
 	Length      int    `bencode:"length"`
 }
@@ -31,10 +31,23 @@ type Torrent struct {
 	UrlList  []string    `bencode:"url-list"`
 }
 
+func hashPiece(piece []byte) []byte {
+	h := sha1.New()
+	h.Write(piece)
+	return h.Sum(nil)
+}
+
 func CreateTorrent(fileName string, filePath string) ([]byte, error) {
 	chunk := make([]byte, TORRENT_PIECE_LENGTH)
-	var pieces []byte
-	length := 0
+
+	torrent := Torrent{
+		Encoding: "UTF-8",
+		Info: TorrentInfo{
+			PieceLength: TORRENT_PIECE_LENGTH,
+			Name:        fileName,
+		},
+		UrlList: []string{fmt.Sprintf("%sselif/%s", Config.siteURL, fileName)},
+	}
 
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -49,27 +62,13 @@ func CreateTorrent(fileName string, filePath string) ([]byte, error) {
 			return []byte{}, err
 		}
 
-		length += n
-
-		h := sha1.New()
-		h.Write(chunk)
-		pieces = append(pieces, h.Sum(nil)...)
+		torrent.Info.Length += n
+		torrent.Info.Pieces += string(hashPiece(chunk[:n]))
 	}
 
 	f.Close()
 
-	torrent := &Torrent{
-		Encoding: "UTF-8",
-		Info: TorrentInfo{
-			PieceLength: TORRENT_PIECE_LENGTH,
-			Pieces:      pieces,
-			Name:        fileName,
-			Length:      length,
-		},
-		UrlList: []string{fmt.Sprintf("%sselif/%s", Config.siteURL, fileName)},
-	}
-
-	data, err := bencode.EncodeBytes(torrent)
+	data, err := bencode.EncodeBytes(&torrent)
 	if err != nil {
 		return []byte{}, err
 	}
