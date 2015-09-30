@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -36,6 +38,17 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	file.Close()
 
 	mimetype := mimemagic.Match("", header)
+
+	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		js, _ := json.Marshal(map[string]string{
+			"filename": fileName,
+			"mimetype": mimetype,
+			"expiry":   strconv.FormatInt(expiry, 10),
+			"size":     strconv.FormatInt(fileInfo.Size(), 10),
+		})
+		w.Write(js)
+		return
+	}
 
 	var tpl *pongo2.Template
 
