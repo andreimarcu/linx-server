@@ -72,6 +72,8 @@ func setup() {
 	torrentRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)/torrent$`)
 
 	goji.Get("/", indexHandler)
+	goji.Get("/paste/", pasteHandler)
+	goji.Get("/paste", http.RedirectHandler("/paste/", 301))
 
 	goji.Post("/upload", uploadPostHandler)
 	goji.Post("/upload/", uploadPostHandler)

@@ -14,6 +14,13 @@ func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	err := Templates["paste.html"].ExecuteWriter(pongo2.Context{}, w)
+	if err != nil {
+		oopsHandler(c, w, r)
+	}
+}
+
 func notFoundHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	err := Templates["404.html"].ExecuteWriter(pongo2.Context{}, w)

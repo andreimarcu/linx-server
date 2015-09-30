@@ -38,7 +38,9 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq := UploadRequest{}
 	uploadHeaderProcess(r, &upReq)
 
-	if r.Header.Get("Content-Type") == "application/octet-stream" {
+	contentType := r.Header.Get("Content-Type")
+
+	if contentType == "application/octet-stream" {
 		if r.URL.Query().Get("randomize") == "true" {
 			upReq.randomBarename = true
 		}
@@ -48,7 +50,9 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.src = r.Body
 		upReq.filename = r.URL.Query().Get("qqfile")
 
-	} else {
+	} else if strings.HasPrefix(contentType, "multipart/form-data") {
+		return
+
 		file, headers, err := r.FormFile("file")
 		if err != nil {
 			oopsHandler(c, w, r)
@@ -63,6 +67,19 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.expiry = parseExpiry(r.Form.Get("expires"))
 		upReq.src = file
 		upReq.filename = headers.Filename
+	} else {
+		if r.FormValue("content") == "" {
+			oopsHandler(c, w, r)
+			return
+		}
+		extension := r.FormValue("extension")
+		if extension == "" {
+			extension = "txt"
+		}
+
+		upReq.src = strings.NewReader(r.FormValue("content"))
+		upReq.expiry = parseExpiry(r.FormValue("expires"))
+		upReq.filename = r.FormValue("filename") + "." + extension
 	}
 
 	upload, err := processUpload(upReq)
@@ -126,8 +143,8 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	// Pull the first 512 bytes off for use in MIME detection if needed
 	header := make([]byte, 512)
-	_, err = upReq.src.Read(header)
-	if err != nil {
+	n, err := upReq.src.Read(header)
+	if n == 0 || err != nil {
 		return
 	}
 
