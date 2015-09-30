@@ -51,8 +51,6 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.filename = r.URL.Query().Get("qqfile")
 
 	} else if strings.HasPrefix(contentType, "multipart/form-data") {
-		return
-
 		file, headers, err := r.FormFile("file")
 		if err != nil {
 			oopsHandler(c, w, r)
