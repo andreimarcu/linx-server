@@ -665,7 +665,7 @@ var mimeToExtension = map[string]string{
 	"image/g3fax":                                                               "g3",
 	"image/gif":                                                                 "gif",
 	"image/ief":                                                                 "ief",
-	"image/jpeg":                                                                "jpeg",
+	"image/jpeg":                                                                "jpg",
 	"image/ktx":                                                                 "ktx",
 	"image/png":                                                                 "png",
 	"image/prs.btif":                                                            "btif",
