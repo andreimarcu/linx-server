@@ -29,6 +29,24 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 }
 
+func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	if path[len(path)-1:] == "/" {
+		notFoundHandler(c, w, r)
+		return
+	} else {
+		filePath := strings.TrimPrefix(path, "/static/")
+		file, err := staticBox.Open(filePath)
+		if err != nil {
+			oopsHandler(c, w, r)
+			return
+		}
+
+		http.ServeContent(w, r, filePath, timeStarted, file)
+		return
+	}
+}
+
 func fileExistsAndNotExpired(filename string) bool {
 	filePath := path.Join(Config.filesDir, filename)
 

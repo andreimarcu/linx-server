@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
@@ -27,6 +28,8 @@ var Config struct {
 
 var Templates = make(map[string]*pongo2.Template)
 var TemplateSet *pongo2.TemplateSet
+var staticBox *rice.Box
+var timeStarted time.Time
 
 func setup() {
 	if Config.noLogs {
@@ -65,6 +68,9 @@ func setup() {
 		os.Exit(1)
 	}
 
+	staticBox = rice.MustFindBox("static")
+	timeStarted = time.Now()
+
 	// Routing setup
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
 	selifRe := regexp.MustCompile(`^/selif/(?P<name>[a-z0-9-\.]+)$`)
@@ -81,9 +87,7 @@ func setup() {
 	goji.Put("/upload/:name", uploadPutHandler)
 	goji.Delete("/:name", deleteHandler)
 
-	staticBox := rice.MustFindBox("static")
-	goji.Get("/static/*", http.StripPrefix("/static/",
-		http.FileServer(staticBox.HTTPBox())))
+	goji.Get("/static/*", staticHandler)
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.Get(selifIndexRe, unauthorizedHandler)
