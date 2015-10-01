@@ -130,27 +130,20 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	// Determine the appropriate filename, then write to disk
 	barename, extension := barePlusExt(upReq.filename)
 
-	// Pull the first 512 bytes off for use in MIME detection if needed
-	// If the file uploaded fit in 512 or less bytes, then the Read will have returned EOF
-	// In this situation we don't want to create a MultiReader as this will cause no EOF to be emitted
-	// by the resulting io.Reader. Instead we just create a new reader from the bytes we already read,
-	// and only create a multiReader if we have yet to get EOF from the first read.
-	var fileSrc io.Reader
-	header := make([]byte, 512)
-	n, err := upReq.src.Read(header)
-	if n == 0 {
-		return
-	} else if err == io.EOF {
-		fileSrc = bytes.NewReader(header[:n])
-	} else {
-		fileSrc = io.MultiReader(bytes.NewReader(header), upReq.src)
-	}
-
 	if upReq.randomBarename || len(barename) == 0 {
 		barename = generateBarename()
 	}
 
+	var header []byte
 	if len(extension) == 0 {
+		// Pull the first 512 bytes off for use in MIME detection
+		header = make([]byte, 512)
+		n, err := upReq.src.Read(header)
+		if n == 0 {
+			return upload, err
+		}
+		header = header[:n]
+
 		// Determine the type of file from header
 		mimetype := mimemagic.Match("", header)
 
@@ -199,7 +192,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	metadataWrite(upload.Filename, &upload)
 
-	bytes, err := io.Copy(dst, fileSrc)
+	bytes, err := io.Copy(dst, io.MultiReader(bytes.NewReader(header), upReq.src))
 	if err != nil {
 		return
 	} else if bytes == 0 {
