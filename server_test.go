@@ -32,8 +32,8 @@ func TestIndex(t *testing.T) {
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
-	if !strings.Contains(w.Body.String(), "file-uploader") {
-		t.Fatal("String 'file-uploader' not found in index response")
+	if !strings.Contains(w.Body.String(), "Click or Drop file") {
+		t.Fatal("String 'Click or Drop file' not found in index response")
 	}
 }
 
@@ -84,87 +84,6 @@ func TestDisplayNotFound(t *testing.T) {
 	if w.Code != 404 {
 		t.Fatalf("Expected 404, got %d", w.Code)
 	}
-}
-
-func TestPostBodyUpload(t *testing.T) {
-	w := httptest.NewRecorder()
-
-	filename := randomString(10) + ".ext"
-
-	req, err := http.NewRequest("POST", "/upload", strings.NewReader("File content"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/octet-stream")
-	params := req.URL.Query()
-	params.Add("qqfile", filename)
-	req.URL.RawQuery = params.Encode()
-
-	goji.DefaultMux.ServeHTTP(w, req)
-
-	if w.Code != 301 {
-		t.Fatalf("Status code is not 301, but %d", w.Code)
-	}
-	if w.Header().Get("Location") != "/"+filename {
-		t.Fatalf("Was redirected to %s instead of /%s", w.Header().Get("Location"), filename)
-	}
-}
-
-func TestPostEmptyBodyUpload(t *testing.T) {
-	w := httptest.NewRecorder()
-
-	filename := randomString(10) + ".ext"
-
-	req, err := http.NewRequest("POST", "/upload", strings.NewReader(""))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/octet-stream")
-	params := req.URL.Query()
-	params.Add("qqfile", filename)
-	req.URL.RawQuery = params.Encode()
-
-	goji.DefaultMux.ServeHTTP(w, req)
-
-	if w.Code == 301 {
-		t.Fatal("Status code is 301")
-	}
-
-	if !strings.Contains(w.Body.String(), "Oops! Something went wrong.") {
-		t.Fatal("Response doesn't contain'Oops! Something went wrong.'")
-	}
-}
-
-func TestPostBodyRandomizeUpload(t *testing.T) {
-	w := httptest.NewRecorder()
-
-	filename := randomString(10) + ".ext"
-
-	req, err := http.NewRequest("POST", "/upload", strings.NewReader("File content"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/octet-stream")
-	params := req.URL.Query()
-	params.Add("qqfile", filename)
-	params.Add("randomize", "true")
-	req.URL.RawQuery = params.Encode()
-
-	goji.DefaultMux.ServeHTTP(w, req)
-
-	if w.Code != 301 {
-		t.Fatalf("Status code is not 301, but %d", w.Code)
-	}
-	if w.Header().Get("Location") == "/"+filename {
-		t.Fatalf("Was redirected to %s instead of something random", filename)
-	}
-}
-
-func TestPostBodyExpireUpload(t *testing.T) {
-	// Dependant on json info on display url to check expiry
 }
 
 func TestPutUpload(t *testing.T) {

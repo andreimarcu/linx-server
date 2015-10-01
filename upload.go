@@ -40,17 +40,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	contentType := r.Header.Get("Content-Type")
 
-	if contentType == "application/octet-stream" {
-		if r.URL.Query().Get("randomize") == "true" {
-			upReq.randomBarename = true
-		}
-		upReq.expiry = parseExpiry(r.URL.Query().Get("expires"))
-
-		defer r.Body.Close()
-		upReq.src = r.Body
-		upReq.filename = r.URL.Query().Get("qqfile")
-
-	} else if strings.HasPrefix(contentType, "multipart/form-data") {
+	if strings.HasPrefix(contentType, "multipart/form-data") {
 		file, headers, err := r.FormFile("file")
 		if err != nil {
 			oopsHandler(c, w, r)
@@ -66,6 +56,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.src = file
 		upReq.filename = headers.Filename
 	} else {
+		fmt.Println(r.Header.Get("Content-Type"))
 		if r.FormValue("content") == "" {
 			oopsHandler(c, w, r)
 			return

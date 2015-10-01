@@ -1,0 +1,58 @@
+#dropzone {
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#choices {
+	padding-bottom: 20px;
+}
+
+div.dz-default {
+    border: 2px dashed #C9C9C9;
+    color: #C9C9C9;
+    font: 14px "helvetica neue",helvetica,arial,sans-serif;
+    background-color: #FAFBFC;
+	padding-top: 60px;
+	padding-bottom: 60px;
+	text-align: center;
+}
+
+div.dz-default:hover {
+	background-color: #eff4f8;
+}
+
+div.upload {
+	background-color: #E2E2E2;
+	border: 1px solid #C9C9C9;
+	margin-bottom: 5px;
+	padding: 5px;
+}
+
+.upload {
+	font-size: 12px;
+}
+
+.upload a {
+	font-size: 12px;
+    text-decoration: none;
+    border-bottom: 1px dotted #556A7F;
+    font-weight: 600;
+    color: #556A7F;
+}
+
+.upload a:hover {
+    border-bottom: 1px dotted #556A7F;
+    color: #556A7F;
+}
+
+.upload .right {
+	float: right;
+	padding-left: 5px;
+}
+
+.cancel {
+	margin-right: 5px;
+	font-size: 10px;
+    border-bottom: 1px dotted #556A7F;	
+}
