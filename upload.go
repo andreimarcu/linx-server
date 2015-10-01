@@ -56,7 +56,6 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.src = file
 		upReq.filename = headers.Filename
 	} else {
-		fmt.Println(r.Header.Get("Content-Type"))
 		if r.FormValue("content") == "" {
 			oopsHandler(c, w, r)
 			return
