@@ -27,7 +27,7 @@ Command-line options
 
 Deployment
 ----------
-A suggetsed deployment is running nginx in front of linx-server serving through fastcgi.  
+A suggested deployment is running nginx in front of linx-server serving through fastcgi.  
 An example configuration:
 ```
 server {
