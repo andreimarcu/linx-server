@@ -1,4 +1,25 @@
 Dropzone.options.dropzone = {
+	init: function() {
+		this.dzone = document.getElementById("dzone");
+		this.on("drop", function(ev) {
+			this.dzone.style.backgroundColor = "#FAFBFC";
+		});
+		this.on("dragstart", function(ev) {
+			this.dzone.style.backgroundColor = "#2c89f0";
+		});
+		this.on("dragend", function(ev) {
+			this.dzone.style.backgroundColor = "#FAFBFC";
+		});
+		this.on("dragenter", function(ev) {
+			this.dzone.style.backgroundColor = "#2c89f0";
+		});
+		this.on("dragover", function(ev) {
+			this.dzone.style.backgroundColor = "#2c89f0";
+		});
+		this.on("dragleave", function(ev) {
+			this.dzone.style.backgroundColor = "#FAFBFC";
+		});
+	},
 	addedfile: function(file) {
 		var upload = document.createElement("div");
 		upload.className = "upload";
@@ -69,6 +90,7 @@ Dropzone.options.dropzone = {
 		}
 		file.leftElement.style.color = "#E68181";
 	},
+
     maxFilesize: 4096,
 	previewsContainer: "#uploads",
 	parallelUploads: 5,
