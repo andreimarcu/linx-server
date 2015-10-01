@@ -32,6 +32,10 @@ Dropzone.options.dropzone = {
 		file.rightRightElement.innerHTML = p + "%";
 		file.uploadElement.setAttribute("style", 'background-image: -webkit-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -moz-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -ms-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -o-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%)');
 	},
+	sending: function(file, xhr, formData) {
+		formData.append("randomize", document.getElementById("randomize").checked);
+		formData.append("expires", document.getElementById("expires").selectedOptions[0].value);
+	},
 	success: function(file, resp) {
 		file.rightLeftElement.innerHTML = "";
 		file.leftElement.innerHTML = '<a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
