@@ -11,19 +11,37 @@ Soon-to-be opensource replacement of Linx (media-sharing website)
 Get release and run
 -------------------
 1. Grab the latest binary from the [releases](https://github.com/andreimarcu/linx-server/releases)
-2. Run ```./linx-server-v...```
+2. Run ```./linx-server...```
   
   
 Command-line options
 --------------------
 
-- Specify what to bind to ```-b 0.0.0.0:8080```
-- Specify the sitename ```-sitename myLinx```
-- Specify the siteurl (for generating link) ```-siteurl "http://mylinx.example.org/"```
-- Specify the filespath (where files are uploaded to) ```-filespath files/"```
-- Specify the metapath (where metadata for files are stored) ```-metapath meta/```
-- Optionally: Specify to disable request logs in stdout ```-nologs```
+- ```-b 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
+- ```-sitename myLinx``` -- the site name displayed on top (default is linx)
+- ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
+- ```-filespath files/"``` -- Path to store uploads (default is files/)
+- ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-fastcgi``` -- (optionally) serve through fastcgi 
+- ```-nologs``` -- (optionally) disable request logs in stdout
 
+Deployment
+----------
+A suggetsed deployment is running nginx in front of linx-server serving through fastcgi.  
+An example configuration:
+```
+server {
+    ...
+    server_name yourlinx.example.org;
+    ...
+    
+    client_max_body_size 4096M;
+    location / {
+        fastcgi_pass 127.0.0.1:8080;
+        include fastcgi_params;
+    }
+}
+```
 
 Development
 -----------

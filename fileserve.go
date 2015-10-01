@@ -42,6 +42,8 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Set("Etag", timeStartedStr)
+		w.Header().Set("Cache-Control", "max-age=86400")
 		http.ServeContent(w, r, filePath, timeStarted, file)
 		return
 	}

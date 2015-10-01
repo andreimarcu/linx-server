@@ -6,8 +6,10 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/fcgi"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/GeertJohan/go.rice"
@@ -24,12 +26,14 @@ var Config struct {
 	allowHotlink bool
 	siteName     string
 	siteURL      string
+	fastcgi      bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
 var TemplateSet *pongo2.TemplateSet
 var staticBox *rice.Box
 var timeStarted time.Time
+var timeStartedStr string
 
 func setup() {
 	if Config.noLogs {
@@ -70,6 +74,7 @@ func setup() {
 
 	staticBox = rice.MustFindBox("static")
 	timeStarted = time.Now()
+	timeStartedStr = strconv.FormatInt(timeStarted.Unix(), 10)
 
 	// Routing setup
 	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
@@ -110,6 +115,8 @@ func main() {
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
 		"site base url (including trailing slash)")
+	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
+		"serve through fastcgi")
 	flag.Parse()
 
 	setup()
@@ -119,5 +126,9 @@ func main() {
 		log.Fatal("Could not bind: ", err)
 	}
 
-	goji.ServeListener(listener)
+	if Config.fastcgi {
+		fcgi.Serve(listener, goji.DefaultMux)
+	} else {
+		goji.ServeListener(listener)
+	}
 }
