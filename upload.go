@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"bitbucket.org/taruti/mimemagic"
+	"github.com/dchest/uniuri"
 	"github.com/zenazn/goji/web"
 )
 
@@ -219,7 +220,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	// If no delete key specified, pick a random one.
 	if upReq.deletionKey == "" {
-		upload.DeleteKey = randomString(30)
+		upload.DeleteKey = uniuri.NewLen(30)
 	} else {
 		upload.DeleteKey = upReq.deletionKey
 	}
@@ -240,7 +241,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 }
 
 func generateBarename() string {
-	return randomString(8)
+	return uniuri.NewLenChars(8, []byte("abcdefghijklmnopqrstuvwxyz0123456789"))
 }
 
 func generateJSONresponse(upload Upload) []byte {
