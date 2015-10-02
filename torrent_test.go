@@ -11,7 +11,7 @@ func TestCreateTorrent(t *testing.T) {
 	fileName := "server.go"
 	var decoded Torrent
 
-	encoded, err := CreateTorrent(fileName, fileName)
+	encoded, err := createTorrent(fileName, fileName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestCreateTorrent(t *testing.T) {
 func TestCreateTorrentWithImage(t *testing.T) {
 	var decoded Torrent
 
-	encoded, err := CreateTorrent("test.jpg", "static/images/404.jpg")
+	encoded, err := createTorrent("test.jpg", "static/images/404.jpg")
 	if err != nil {
 		t.Fatal(err)
 	}

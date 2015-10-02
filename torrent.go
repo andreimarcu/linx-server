@@ -37,7 +37,7 @@ func hashPiece(piece []byte) []byte {
 	return h.Sum(nil)
 }
 
-func CreateTorrent(fileName string, filePath string) ([]byte, error) {
+func createTorrent(fileName string, filePath string) ([]byte, error) {
 	chunk := make([]byte, TORRENT_PIECE_LENGTH)
 
 	torrent := Torrent{
@@ -85,7 +85,7 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encoded, err := CreateTorrent(fileName, filePath)
+	encoded, err := createTorrent(fileName, filePath)
 	if err != nil {
 		oopsHandler(c, w, r) // 500 - creating torrent failed
 		return
