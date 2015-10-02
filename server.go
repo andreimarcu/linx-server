@@ -19,14 +19,15 @@ import (
 )
 
 var Config struct {
-	bind         string
-	filesDir     string
-	metaDir      string
-	noLogs       bool
-	allowHotlink bool
-	siteName     string
-	siteURL      string
-	fastcgi      bool
+	bind          string
+	filesDir      string
+	metaDir       string
+	noLogs        bool
+	allowHotlink  bool
+	siteName      string
+	siteURL       string
+	fastcgi       bool
+	remoteUploads bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -86,6 +87,11 @@ func setup() {
 	goji.Get("/paste/", pasteHandler)
 	goji.Get("/paste", http.RedirectHandler("/paste/", 301))
 
+	if Config.remoteUploads {
+		goji.Get("/upload", uploadRemote)
+		goji.Get("/upload/", uploadRemote)
+	}
+
 	goji.Post("/upload", uploadPostHandler)
 	goji.Post("/upload/", uploadPostHandler)
 	goji.Put("/upload", uploadPutHandler)
@@ -117,6 +123,8 @@ func main() {
 		"site base url (including trailing slash)")
 	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
 		"serve through fastcgi")
+	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
+		"enable remote uploads")
 	flag.Parse()
 
 	setup()

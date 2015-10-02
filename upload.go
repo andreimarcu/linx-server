@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -106,6 +108,39 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Write(js)
 	} else {
 		fmt.Fprintf(w, Config.siteURL+upload.Filename)
+	}
+}
+
+func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("url") == "" {
+		http.Redirect(w, r, "/", 301)
+		return
+	}
+
+	upReq := UploadRequest{}
+	grabUrl, _ := url.Parse(r.FormValue("url"))
+
+	resp, err := http.Get(grabUrl.String())
+	if err != nil {
+		oopsHandler(c, w, r)
+		return
+	}
+
+	upReq.filename = filepath.Base(grabUrl.Path)
+	upReq.src = resp.Body
+
+	upload, err := processUpload(upReq)
+	if err != nil {
+		oopsHandler(c, w, r)
+		return
+	}
+
+	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		js := generateJSONresponse(upload)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Write(js)
+	} else {
+		http.Redirect(w, r, "/"+upload.Filename, 301)
 	}
 }
 

@@ -22,6 +22,7 @@ Command-line options
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-fastcgi``` -- (optionally) serve through fastcgi 
 - ```-nologs``` -- (optionally) disable request logs in stdout
 
