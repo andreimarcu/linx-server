@@ -1,24 +1,5 @@
 Dropzone.options.dropzone = {
 	init: function() {
-		this.dzone = document.getElementById("dzone");
-		this.on("drop", function(ev) {
-			this.dzone.style.backgroundColor = "#FAFBFC";
-		});
-		this.on("dragstart", function(ev) {
-			this.dzone.style.backgroundColor = "#2c89f0";
-		});
-		this.on("dragend", function(ev) {
-			this.dzone.style.backgroundColor = "#FAFBFC";
-		});
-		this.on("dragenter", function(ev) {
-			this.dzone.style.backgroundColor = "#2c89f0";
-		});
-		this.on("dragover", function(ev) {
-			this.dzone.style.backgroundColor = "#2c89f0";
-		});
-		this.on("dragleave", function(ev) {
-			this.dzone.style.backgroundColor = "#FAFBFC";
-		});
 	},
 	addedfile: function(file) {
 		var upload = document.createElement("div");
@@ -62,7 +43,6 @@ Dropzone.options.dropzone = {
 		file.leftElement.innerHTML = '<a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
 		file.rightRightElement.innerHTML = "Delete";
 		file.rightRightElement.className = "cancel";
-		file.rightRightElement.style.color = "#E68181";
 		file.rightRightElement.onclick = function(ev) {
 		    xhr = new XMLHttpRequest();
 			xhr.open("DELETE", resp.url, true);
@@ -70,7 +50,7 @@ Dropzone.options.dropzone = {
 			xhr.onreadystatechange = function(file) {
 				if (xhr.status === 404) {
 					file.leftElement.innerHTML = 'Deleted <a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
-					file.leftElement.style.color = "#E68181";
+					file.leftElement.className = "deleted";
 					file.rightRightElement.onclick = null;
 					file.rightRightElement.innerHTML = "";					
 				}
@@ -88,7 +68,7 @@ Dropzone.options.dropzone = {
 		else {
 			file.leftElement.innerHTML = "Could not upload " + file.name;
 		}
-		file.leftElement.style.color = "#E68181";
+		file.leftElement.className = "error";
 	},
 
     maxFilesize: 4096,
