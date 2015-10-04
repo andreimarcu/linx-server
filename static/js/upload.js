@@ -73,7 +73,7 @@ Dropzone.options.dropzone = {
 		file.cancelActionElement = deleteAction;
 		file.fileActions.appendChild(deleteAction);
 	},
-	error: function(file, errMsg, xhrO) {
+	error: function(file, resp, xhrO) {
         file.fileActions.removeChild(file.cancelActionElement);
         file.fileActions.removeChild(file.progressElement);
 
