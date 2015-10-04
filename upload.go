@@ -46,7 +46,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(contentType, "multipart/form-data") {
 		file, headers, err := r.FormFile("file")
 		if err != nil {
-			oopsHandler(c, w, r)
+			oopsHandler(c, w, r, RespHTML, "Could not upload file.")
 			return
 		}
 		defer file.Close()
@@ -60,7 +60,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.filename = headers.Filename
 	} else {
 		if r.FormValue("content") == "" {
-			oopsHandler(c, w, r)
+			oopsHandler(c, w, r, RespHTML, "Could not upload file.")
 			return
 		}
 		extension := r.FormValue("extension")
@@ -74,16 +74,22 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upload, err := processUpload(upReq)
-	if err != nil {
-		oopsHandler(c, w, r)
-		return
-	}
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		if err != nil {
+			oopsHandler(c, w, r, RespJSON, "Could not upload file: "+err.Error())
+			return
+		}
+
 		js := generateJSONresponse(upload)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, "Could not upload file: "+err.Error())
+			return
+		}
+
 		http.Redirect(w, r, "/"+upload.Filename, 301)
 	}
 
@@ -98,16 +104,22 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq.src = r.Body
 
 	upload, err := processUpload(upReq)
-	if err != nil {
-		oopsHandler(c, w, r)
-		return
-	}
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		if err != nil {
+			oopsHandler(c, w, r, RespJSON, "Could not upload file: "+err.Error())
+			return
+		}
+
 		js := generateJSONresponse(upload)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
+		if err != nil {
+			oopsHandler(c, w, r, RespPLAIN, "Could not upload file: "+err.Error())
+			return
+		}
+
 		fmt.Fprintf(w, Config.siteURL+upload.Filename)
 	}
 }
@@ -123,7 +135,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get(grabUrl.String())
 	if err != nil {
-		oopsHandler(c, w, r)
+		oopsHandler(c, w, r, RespAUTO, "Could not retrieve URL")
 		return
 	}
 
@@ -131,16 +143,22 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq.src = resp.Body
 
 	upload, err := processUpload(upReq)
-	if err != nil {
-		oopsHandler(c, w, r)
-		return
-	}
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		if err != nil {
+			oopsHandler(c, w, r, RespJSON, "Could not upload file: "+err.Error())
+			return
+		}
+
 		js := generateJSONresponse(upload)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, "Could not upload file: "+err.Error())
+			return
+		}
+
 		http.Redirect(w, r, "/"+upload.Filename, 301)
 	}
 }
@@ -174,8 +192,8 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		// Pull the first 512 bytes off for use in MIME detection
 		header = make([]byte, 512)
 		n, err := upReq.src.Read(header)
-		if n == 0 {
-			return upload, err
+		if n == 0 || err != nil {
+			return upload, errors.New("Empty file")
 		}
 		header = header[:n]
 
@@ -228,12 +246,15 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	metadataWrite(upload.Filename, &upload)
 
 	bytes, err := io.Copy(dst, io.MultiReader(bytes.NewReader(header), upReq.src))
-	if err != nil {
-		return
-	} else if bytes == 0 {
+	if bytes == 0 {
 		os.Remove(path.Join(Config.filesDir, upload.Filename))
 		os.Remove(path.Join(Config.metaDir, upload.Filename))
 		return upload, errors.New("Empty file")
+
+	} else if err != nil {
+		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		return
 	}
 
 	upload.Size = bytes

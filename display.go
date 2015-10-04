@@ -91,6 +91,6 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}, w)
 
 	if err != nil {
-		oopsHandler(c, w, r)
+		oopsHandler(c, w, r, RespHTML, "")
 	}
 }

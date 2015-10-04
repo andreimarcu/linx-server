@@ -136,8 +136,8 @@ func TestPutEmptyUpload(t *testing.T) {
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
-	if !strings.Contains(w.Body.String(), "Oops! Something went wrong.") {
-		t.Fatal("Response doesn't contain'Oops! Something went wrong.'")
+	if !strings.Contains(w.Body.String(), "Empty file") {
+		t.Fatal("Response doesn't contain'Empty file'")
 	}
 }
 

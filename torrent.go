@@ -87,7 +87,7 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	encoded, err := createTorrent(fileName, filePath)
 	if err != nil {
-		oopsHandler(c, w, r) // 500 - creating torrent failed
+		oopsHandler(c, w, r, RespHTML, "Could not create torrent.")
 		return
 	}
 

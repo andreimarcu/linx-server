@@ -38,7 +38,7 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		filePath := strings.TrimPrefix(path, "/static/")
 		file, err := staticBox.Open(filePath)
 		if err != nil {
-			oopsHandler(c, w, r)
+			notFoundHandler(c, w, r)
 			return
 		}
 

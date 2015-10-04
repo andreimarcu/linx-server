@@ -58,15 +58,15 @@ Dropzone.options.dropzone = {
 			xhr.send();
 		}.bind(this);
 	},
-	error: function(file, errMsg, xhrO) {
+	error: function(file, resp, xhrO) {
 		file.rightLeftElement.onclick = null;
 		file.rightLeftElement.innerHTML = "";
 		file.rightRightElement.innerHTML = "";
 		if (file.status === "canceled") {
-			file.leftElement.innerHTML = "Canceled " + file.name;			
+			file.leftElement.innerHTML = file.name + ": Canceled ";			
 		}
 		else {
-			file.leftElement.innerHTML = "Could not upload " + file.name;
+			file.leftElement.innerHTML = file.name + ": " + resp.error;
 		}
 		file.leftElement.className = "error";
 	},
