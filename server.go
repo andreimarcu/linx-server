@@ -135,7 +135,7 @@ func main() {
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
 		"enable remote uploads")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentSecurityPolicy",
-		"default-src 'self'; img-src 'self' data:; referrer none;",
+		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
 		"value of default Content-Security-Policy header")
 	flag.StringVar(&Config.fileContentSecurityPolicy, "fileContentSecurityPolicy",
 		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;",
