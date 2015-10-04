@@ -7,7 +7,10 @@ function init() {
     var editA = document.createElement('a');
 
     editA.setAttribute("href", "#");
-    editA.setAttribute("onclick", "edit();return false;");
+    editA.addEventListener('click', function(ev) {
+        edit();
+        return false;
+    });
     editA.innerHTML = "edit";
 
     var separator = document.createTextNode(" | ");
