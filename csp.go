@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	cspHeader          = "Content-Security-Policy"
-	frameOptionsHeader = "X-Frame-Options"
+	cspHeader                = "Content-Security-Policy"
+	frameOptionsHeader       = "X-Frame-Options"
+	contentTypeOptionsHeader = "X-Content-Type-Options"
 )
 
 type csp struct {
@@ -26,6 +27,7 @@ func (c csp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set(frameOptionsHeader, c.opts.frame)
+	w.Header().Set(contentTypeOptionsHeader, "nosniff")
 
 	c.h.ServeHTTP(w, r)
 }

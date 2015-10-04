@@ -11,6 +11,7 @@ import (
 var testCSPHeaders = map[string]string{
 	"Content-Security-Policy": "default-src 'none'; style-src 'self';",
 	"X-Frame-Options":         "SAMEORIGIN",
+	"X-Content-Type-Options":  "nosniff",
 }
 
 func TestContentSecurityPolicy(t *testing.T) {
