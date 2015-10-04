@@ -78,10 +78,10 @@ Dropzone.options.dropzone = {
         file.fileActions.removeChild(file.progressElement);
 
 		if (file.status === "canceled") {
-			file.fileLabel.innerHTML = "Canceled " + file.name;			
+			file.fileLabel.innerHTML = file.name + ": Canceled ";			
 		}
 		else {
-			file.fileLabel.innerHTML = "Could not upload " + file.name;
+			file.fileLabel.innerHTML = file.name + ": " + resp.error;
 		}
 		file.fileLabel.className = "error";
 	},

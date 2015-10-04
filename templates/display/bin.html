@@ -31,8 +31,6 @@
             </div>
 
             <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)">.<input id="extension" class="codebox" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt">
-
-
             <textarea name='content' id="newcontent" class="editor"></textarea>
         </form>
     </div>
@@ -45,7 +43,7 @@
 {% block main %}
 <div id="normal-content" class="normal {% if extra.lang_hl != "story" %}fixed{% endif %}">
     <pre id="normal-code"><code id="codeb" class="{{ extra.lang_hl }}">{{ extra.contents }}</code></pre>
-    <div id="editor" data-lang="{{ extra.lang_ace }}">{{ extra.contents }}</div>
+    <textarea id="editor">{{ extra.contents }}</textarea>
 </div>
 
 
@@ -54,6 +52,5 @@
 <script src="/static/js/bin_hljs.js"></script>
 {% endif %}
 
-<script src="/static/js/ace/ace.js"></script>
 <script src="/static/js/bin.js"></script>
 {% endblock %}

@@ -35,7 +35,7 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		metaDelErr := os.Remove(metaPath)
 
 		if (fileDelErr != nil) || (metaDelErr != nil) {
-			oopsHandler(c, w, r) // 500 - can't delete something
+			oopsHandler(c, w, r, RespPLAIN, "Could not delete")
 			return
 		}
 

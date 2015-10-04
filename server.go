@@ -99,6 +99,7 @@ func setup() {
 	goji.Delete("/:name", deleteHandler)
 
 	goji.Get("/static/*", staticHandler)
+	goji.Get("/favicon.ico", staticHandler)
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.Get(selifIndexRe, unauthorizedHandler)

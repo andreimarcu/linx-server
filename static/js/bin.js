@@ -17,11 +17,6 @@ function init() {
     navlist.insertBefore(editA, navlist.firstChild);
     navlist.insertBefore(separator, navlist.children[1]);
 
-    var lang = document.getElementById('editor').getAttribute('data-lang');
-    var editor = ace.edit("editor");
-    editor.getSession().setMode("ace/mode/" + lang);
-    editor.setTheme("ace/theme/tomorrow");
-
     document.getElementById('save').addEventListener('click', paste);
     document.getElementById('wordwrap').addEventListener('click', wrap);
 }
@@ -38,16 +33,12 @@ function edit(ev) {
 
     var editordiv = document.getElementById("editor");
     editordiv.style.display = "block";
-
-    var editor = ace.edit("editor");
-    editor.commands.bindKeys({"ctrl-l":null, 'Command-L': null, 'ctrl-R': null, 'Command-R': null, 'Ctrl-Shift-R': null, 'Command-Shift-R': null});
-    editor.commands.addCommand({name: ' ', bindKey: {win: 'Ctrl-S',  mac: 'Command-S'}, exec: function() { paste(); } });
-
 }
 
 
 function paste(ev) {
-    document.getElementById("newcontent").value = editor.getSession().getValue();
+    var editordiv = document.getElementById("editor");
+    document.getElementById("newcontent").value = editordiv.value;
     document.forms["reply"].submit();
 }
 

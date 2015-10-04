@@ -1,10 +1,22 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji/web"
+)
+
+type RespType int
+
+const (
+	RespPLAIN RespType = iota
+	RespJSON
+	RespHTML
+	RespAUTO
 )
 
 func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -17,7 +29,7 @@ func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err := Templates["paste.html"].ExecuteWriter(pongo2.Context{}, w)
 	if err != nil {
-		oopsHandler(c, w, r)
+		oopsHandler(c, w, r, RespHTML, "")
 	}
 }
 
@@ -25,15 +37,41 @@ func notFoundHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	err := Templates["404.html"].ExecuteWriter(pongo2.Context{}, w)
 	if err != nil {
-		oopsHandler(c, w, r)
+		oopsHandler(c, w, r, RespHTML, "")
 	}
 }
 
-func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
-	err := Templates["oops.html"].ExecuteWriter(pongo2.Context{}, w)
-	if err != nil {
-		oopsHandler(c, w, r)
+func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, msg string) {
+	if msg == "" {
+		msg = "Oops! Something went wrong..."
+	}
+
+	if rt == RespHTML {
+		Templates["oops.html"].ExecuteWriter(pongo2.Context{"msg": msg}, w)
+		w.WriteHeader(500)
+		return
+
+	} else if rt == RespPLAIN {
+		fmt.Fprintf(w, "%s", msg)
+		w.WriteHeader(500)
+		return
+
+	} else if rt == RespJSON {
+		js, _ := json.Marshal(map[string]string{
+			"error": msg,
+		})
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(500)
+		w.Write(js)
+		return
+
+	} else if rt == RespAUTO {
+		if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+			oopsHandler(c, w, r, RespJSON, msg)
+		} else {
+			oopsHandler(c, w, r, RespHTML, msg)
+		}
 	}
 }
 
