@@ -48,7 +48,7 @@ Dropzone.options.dropzone = {
 			xhr.open("DELETE", resp.url, true);
 			xhr.setRequestHeader("X-Delete-Key", resp.delete_key);
 			xhr.onreadystatechange = function(file) {
-				if (xhr.status === 404) {
+				if (xhr.status === 200) {
 					file.leftElement.innerHTML = 'Deleted <a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
 					file.leftElement.className = "deleted";
 					file.rightRightElement.onclick = null;
