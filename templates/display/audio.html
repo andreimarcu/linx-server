@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block main %}
-<audio controls style='width: 500px;' preload='auto'>
-	<source src='/selif/{{ filename }}'>
-  <a href='/selif/{{ filename }}'>Download it instead</a>
+<audio class="display-audio" controls preload='auto'>
+    <source src='/selif/{{ filename }}'>
+    <a href='/selif/{{ filename }}'>Download it instead</a>
 </audio>
 {% endblock %}
 

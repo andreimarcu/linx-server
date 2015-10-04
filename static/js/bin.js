@@ -8,7 +8,7 @@ function init() {
 
     editA.setAttribute("href", "#");
     editA.addEventListener('click', function(ev) {
-        edit();
+        edit(ev);
         return false;
     });
     editA.innerHTML = "edit";
@@ -22,14 +22,16 @@ function init() {
     editor.getSession().setMode("ace/mode/" + lang);
     editor.setTheme("ace/theme/tomorrow");
 
+    document.getElementById('save').addEventListener('click', paste);
+    document.getElementById('wordwrap').addEventListener('click', wrap);
 }
 
 
-function edit() {
+function edit(ev) {
 
     navlist.remove();
     document.getElementById("filename").remove();
-    document.getElementById("foarm").style.display = "block";
+    document.getElementById("editform").style.display = "block";
 
     var normalcontent = document.getElementById("normal-content");
     normalcontent.removeChild(document.getElementById("normal-code"));
@@ -44,14 +46,12 @@ function edit() {
 }
 
 
-function paste() {
-
+function paste(ev) {
     document.getElementById("newcontent").value = editor.getSession().getValue();
     document.forms["reply"].submit();
-
 }
 
-function wrap() {
+function wrap(ev) {
     if (document.getElementById("wordwrap").checked) {
         document.getElementById("codeb").style.wordWrap = "break-word";
         document.getElementById("codeb").style.whiteSpace = "pre-wrap";
