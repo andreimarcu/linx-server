@@ -58,5 +58,3 @@ func TestCreateTorrentWithImage(t *testing.T) {
 		t.Fatal("Torrent pieces did not match expected pieces for image")
 	}
 }
-
-// vim:set ts=8 sw=8 noet:

@@ -36,5 +36,3 @@ func ContentSecurityPolicy(o CSPOptions) func(http.Handler) http.Handler {
 	}
 	return fn
 }
-
-// vim:set ts=8 sw=8 noet:

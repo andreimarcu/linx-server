@@ -94,5 +94,3 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(`Content-Disposition`, fmt.Sprintf(`attachment; filename="%s.torrent"`, fileName))
 	http.ServeContent(w, r, "", time.Now(), bytes.NewReader(encoded))
 }
-
-// vim:set ts=8 sw=8 noet:

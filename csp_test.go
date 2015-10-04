@@ -34,5 +34,3 @@ func TestContentSecurityPolicy(t *testing.T) {
 		}
 	}
 }
-
-// vim:set ts=8 sw=8 noet:
