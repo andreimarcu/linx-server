@@ -1,0 +1,2 @@
+hljs.tabReplace = '    ';
+hljs.initHighlightingOnLoad();

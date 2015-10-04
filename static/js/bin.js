@@ -14,6 +14,11 @@ function init() {
     navlist.insertBefore(editA, navlist.firstChild);
     navlist.insertBefore(separator, navlist.children[1]);
 
+    var lang = document.getElementById('editor').getAttribute('data-lang');
+    var editor = ace.edit("editor");
+    editor.getSession().setMode("ace/mode/" + lang);
+    editor.setTheme("ace/theme/tomorrow");
+
 }
 
 
@@ -25,7 +30,7 @@ function edit() {
 
     var normalcontent = document.getElementById("normal-content");
     normalcontent.removeChild(document.getElementById("normal-code"));
-    
+
     var editordiv = document.getElementById("editor");
     editordiv.style.display = "block";
 

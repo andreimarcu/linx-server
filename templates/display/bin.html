@@ -46,25 +46,16 @@
 
 {% block main %}
 <div id="normal-content" class="normal {% if extra.lang_hl != "story" %}fixed{% endif %}">
-    <pre id="normal-code"><code id="codeb" style="white-space: pre-wrap;" class="{{ extra.lang_hl }}">{{ extra.contents }}</pre></code>
-    <div id="editor" style="display: none; height: 800px; font-size: 11px;">{{ extra.contents }}</div>
+    <pre id="normal-code"><code id="codeb" style="white-space: pre-wrap;" class="{{ extra.lang_hl }}">{{ extra.contents }}</code></pre>
+    <div id="editor" style="display: none; height: 800px; font-size: 11px;" data-lang="{{ extra.lang_ace }}">{{ extra.contents }}</div>
 </div>
 
 
 {% if extra.lang_hl != "text" %}
 <script src="/static/js/highlight/highlight.pack.js"></script>
-<script>
-    hljs.tabReplace = '    ';
-    hljs.initHighlightingOnLoad();
-</script>
+<script src="/static/js/bin_hljs.js"></script>
 {% endif %}
 
-<script type="text/javascript" src="/static/js/bin.js"></script>
 <script src="/static/js/ace/ace.js"></script>
-<script type="text/javascript">
-        var editor = ace.edit("editor");
-        editor.getSession().setMode("ace/mode/{{ extra.lang_ace }}");
-        editor.setTheme("ace/theme/tomorrow");
-</script>
-
+<script src="/static/js/bin.js"></script>
 {% endblock %}
