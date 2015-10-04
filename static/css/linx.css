@@ -80,6 +80,16 @@ body {
   padding: 5px 5px 5px 5px;
 }
 
+#info #filename,
+#editform #filename {
+    width: 232px;
+}
+
+#info #extension,
+#editform #extension {
+    width: 40px;
+}
+
 #info .float-left {
 	margin-top: 2px;
 	margin-right: 20px;
@@ -181,7 +191,7 @@ body {
 }
 
 .clear {
-	clear:both;
+	clear: both;
 }
 
 #upload_header {
@@ -247,6 +257,66 @@ body {
   float: right; 
   padding-top: 1px;
 }
+
+.oopscontent {
+    width: 400px;
+}
+
+.oopscontent img {
+    width: 400px;
+    border: 0;
+}
+
+.editor {
+    width: 705px;
+    height: 450px;
+    border-color: #cccccc;
+}
+
+/* Content display {{{ */
+.display-audio,
+.display-file {
+    width: 500px;
+}
+
+.display-image {
+    margin-bottom: -6px;
+    max-width: 800px;
+}
+
+.display-pdf {
+    width: 910px;
+    height: 800px;
+}
+
+.display-video {
+    width: 800px;
+}
+
+.scrollable {
+    overflow: auto;
+}
+
+.storycontent {
+    background-color: #f0e0d6;
+}
+
+#editform,
+#editform .editor {
+    display: none;
+}
+
+#codeb {
+    white-space: pre-wrap;
+}
+
+#editor {
+    display: none;
+    border: 0;
+    width: 794px;
+    height: 800px;
+}
+/* }}} */
 
 /* cat.js */
 .qq-uploader { position:relative; width: 100%;}

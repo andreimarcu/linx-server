@@ -26,6 +26,8 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
+
 	http.ServeFile(w, r, filePath)
 }
 

@@ -5,33 +5,36 @@ Dropzone.options.dropzone = {
 		var upload = document.createElement("div");
 		upload.className = "upload";
 
-		var left = document.createElement("span");
-		left.innerHTML = file.name;
-		file.leftElement = left;
-		upload.appendChild(left);
+		var fileLabel = document.createElement("span");
+		fileLabel.innerHTML = file.name;
+		file.fileLabel = fileLabel;
+		upload.appendChild(fileLabel);
 
-		var right = document.createElement("div");
-		right.className = "right";
-		var rightleft = document.createElement("span");
-		rightleft.className = "cancel";
-		rightleft.innerHTML = "Cancel";
-		rightleft.onclick = function(ev) {
-			this.removeFile(file);
-		}.bind(this);
+		var fileActions = document.createElement("div");
+		fileActions.className = "right";
+		file.fileActions = fileActions;
+		upload.appendChild(fileActions);
 
-		var rightright = document.createElement("span");
-		right.appendChild(rightleft);
-		file.rightLeftElement = rightleft;
-		right.appendChild(rightright);
-		file.rightRightElement = rightright;
-		file.rightElement = right;
-		upload.appendChild(right);
+		var cancelAction = document.createElement("span");
+		cancelAction.className = "cancel";
+		cancelAction.innerHTML = "Cancel";
+		cancelAction.addEventListener('click', function(ev) {
+		    this.removeFile(file);
+		}.bind(this));
+		file.cancelActionElement = cancelAction;
+		fileActions.appendChild(cancelAction);
+
+		var progress = document.createElement("span");
+		file.progressElement = progress;
+		fileActions.appendChild(progress);
+
 		file.uploadElement = upload;
+
 		document.getElementById("uploads").appendChild(upload);
 	},
 	uploadprogress: function(file, p, bytesSent) {
 		p = parseInt(p);
-		file.rightRightElement.innerHTML = p + "%";
+		file.progressElement.innerHTML = p + "%";
 		file.uploadElement.setAttribute("style", 'background-image: -webkit-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -moz-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -ms-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -o-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%)');
 	},
 	sending: function(file, xhr, formData) {
@@ -39,36 +42,48 @@ Dropzone.options.dropzone = {
 		formData.append("expires", document.getElementById("expires").selectedOptions[0].value);
 	},
 	success: function(file, resp) {
-		file.rightLeftElement.innerHTML = "";
-		file.leftElement.innerHTML = '<a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
-		file.rightRightElement.innerHTML = "Delete";
-		file.rightRightElement.className = "cancel";
-		file.rightRightElement.onclick = function(ev) {
+        file.fileActions.removeChild(file.progressElement);
+
+        var fileLabelLink = document.createElement("a");
+        fileLabelLink.href = resp.url;
+        fileLabelLink.target = "_blank";
+        fileLabelLink.innerHTML = resp.url;
+        file.fileLabel.innerHTML = "";
+        file.fileLabelLink = fileLabelLink;
+        file.fileLabel.appendChild(fileLabelLink);
+
+        var deleteAction = document.createElement("span");
+        deleteAction.innerHTML = "Delete";
+        deleteAction.className = "cancel";
+		deleteAction.addEventListener('click', function(ev) {
 		    xhr = new XMLHttpRequest();
 			xhr.open("DELETE", resp.url, true);
 			xhr.setRequestHeader("X-Delete-Key", resp.delete_key);
 			xhr.onreadystatechange = function(file) {
-				if (xhr.status === 200) {
-					file.leftElement.innerHTML = 'Deleted <a target="_blank" href="' + resp.url + '">' + resp.url + '</a>';
-					file.leftElement.className = "deleted";
-					file.rightRightElement.onclick = null;
-					file.rightRightElement.innerHTML = "";					
+				if (xhr.readyState == 4 && xhr.status === 200) {
+				    var text = document.createTextNode("Deleted ");
+				    file.fileLabel.insertBefore(text, file.fileLabelLink);
+					file.fileLabel.className = "deleted";
+					file.fileActions.removeChild(file.cancelActionElement);
 				}
 			}.bind(this, file);
 			xhr.send();
-		}.bind(this);
+		});
+		file.fileActions.removeChild(file.cancelActionElement);
+		file.cancelActionElement = deleteAction;
+		file.fileActions.appendChild(deleteAction);
 	},
 	error: function(file, resp, xhrO) {
-		file.rightLeftElement.onclick = null;
-		file.rightLeftElement.innerHTML = "";
-		file.rightRightElement.innerHTML = "";
+        file.fileActions.removeChild(file.cancelActionElement);
+        file.fileActions.removeChild(file.progressElement);
+
 		if (file.status === "canceled") {
-			file.leftElement.innerHTML = file.name + ": Canceled ";			
+			file.fileLabel.innerHTML = file.name + ": Canceled ";			
 		}
 		else {
-			file.leftElement.innerHTML = file.name + ": " + resp.error;
+			file.fileLabel.innerHTML = file.name + ": " + resp.error;
 		}
-		file.leftElement.className = "error";
+		file.fileLabel.className = "error";
 	},
 
     maxFilesize: 4096,

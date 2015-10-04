@@ -4,7 +4,7 @@
     <form id="reply" action='/upload' method='post'>
     <div id="main">
         <div id="info" class="ninfo">
-            <input style ="width:232px;" class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" style="width:40px;" name='extension' type='text' value="" placeholder="txt" /></span>
+            <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
 
             <div class="right">
                 <select id="expiry" name="expires">
@@ -27,7 +27,7 @@
         </div>
 
     <div id="inner_content">
-        <textarea name='content' id="content" class="editor" style="width: 705px; height: 450px; border-color: #cccccc;"></textarea>
+        <textarea name='content' id="content" class="editor"></textarea>
     </div>
 
     </div>

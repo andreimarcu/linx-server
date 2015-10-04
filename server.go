@@ -19,15 +19,18 @@ import (
 )
 
 var Config struct {
-	bind          string
-	filesDir      string
-	metaDir       string
-	noLogs        bool
-	allowHotlink  bool
-	siteName      string
-	siteURL       string
-	fastcgi       bool
-	remoteUploads bool
+	bind                      string
+	filesDir                  string
+	metaDir                   string
+	noLogs                    bool
+	allowHotlink              bool
+	siteName                  string
+	siteURL                   string
+	fastcgi                   bool
+	remoteUploads             bool
+	contentSecurityPolicy     string
+	fileContentSecurityPolicy string
+	xFrameOptions             string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -37,6 +40,11 @@ var timeStarted time.Time
 var timeStartedStr string
 
 func setup() {
+	goji.Use(ContentSecurityPolicy(CSPOptions{
+		policy: Config.contentSecurityPolicy,
+		frame:  Config.xFrameOptions,
+	}))
+
 	if Config.noLogs {
 		goji.Abandon(middleware.Logger)
 	}
@@ -126,6 +134,14 @@ func main() {
 		"serve through fastcgi")
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
 		"enable remote uploads")
+	flag.StringVar(&Config.contentSecurityPolicy, "contentSecurityPolicy",
+		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
+		"value of default Content-Security-Policy header")
+	flag.StringVar(&Config.fileContentSecurityPolicy, "fileContentSecurityPolicy",
+		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;",
+		"value of Content-Security-Policy header for file access")
+	flag.StringVar(&Config.xFrameOptions, "xFrameOptions", "SAMEORIGIN",
+		"value of X-Frame-Options header")
 	flag.Parse()
 
 	setup()
