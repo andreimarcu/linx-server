@@ -278,8 +278,8 @@ func TestPutAndDelete(t *testing.T) {
 	req.Header.Set("X-Delete-Key", myjson.Delete_Key)
 	goji.DefaultMux.ServeHTTP(w, req)
 
-	if w.Code != 404 {
-		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
+	if w.Code != 200 {
+		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
 	}
 
 	// Make sure it's actually gone
@@ -334,8 +334,8 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	req.Header.Set("X-Delete-Key", "supersecret")
 	goji.DefaultMux.ServeHTTP(w, req)
 
-	if w.Code != 404 {
-		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
+	if w.Code != 200 {
+		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
 	}
 
 	// Make sure it's actually gone

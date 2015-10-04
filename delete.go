@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -38,7 +39,7 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		notFoundHandler(c, w, r) // 404 - file deleted
+		fmt.Fprintf(w, "DELETED")
 		return
 
 	} else {
