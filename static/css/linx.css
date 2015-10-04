@@ -271,6 +271,9 @@ body {
     width: 705px;
     height: 450px;
     border-color: #cccccc;
+    font-family: monospace;
+    resize: none;
+    overflow: auto;
 }
 
 /* Content display {{{ */
@@ -312,10 +315,8 @@ body {
 
 #editor {
     display: none;
-    border: 0;
     width: 794px;
     height: 800px;
-    font-family: monospace;
     font-size: 13px;
 }
 /* }}} */
