@@ -312,8 +312,9 @@ body {
 
 #editor {
     display: none;
+    border: 0;
+    width: 794px;
     height: 800px;
-    font-size: 11px;
 }
 /* }}} */
 
