@@ -60,7 +60,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		upReq.filename = headers.Filename
 	} else {
 		if r.FormValue("content") == "" {
-			oopsHandler(c, w, r, RespHTML, "Could not upload file.")
+			oopsHandler(c, w, r, RespHTML, "Empty file")
 			return
 		}
 		extension := r.FormValue("extension")

@@ -28,17 +28,12 @@ function edit() {
     
     var editordiv = document.getElementById("editor");
     editordiv.style.display = "block";
-
-    var editor = ace.edit("editor");
-    editor.commands.bindKeys({"ctrl-l":null, 'Command-L': null, 'ctrl-R': null, 'Command-R': null, 'Ctrl-Shift-R': null, 'Command-Shift-R': null});
-    editor.commands.addCommand({name: ' ', bindKey: {win: 'Ctrl-S',  mac: 'Command-S'}, exec: function() { paste(); } });
-
 }
 
 
 function paste() {
-
-    document.getElementById("newcontent").value = editor.getSession().getValue();
+    var editordiv = document.getElementById("editor");
+    document.getElementById("newcontent").value = editordiv.value;
     document.forms["reply"].submit();
 
 }

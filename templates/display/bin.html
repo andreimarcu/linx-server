@@ -31,13 +31,10 @@
 	        </div>
 
             <input style ="width:232px;" class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<input id="extension" class="codebox" style="width:30px;" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt" />
-
-
             <textarea name='content' id="newcontent" class="editor" style="display: none;"></textarea>
+        </form>
     </div>
 
-
-</form>
 {% endblock %}
 
 {%block infomore %}
@@ -47,7 +44,7 @@
 {% block main %}
 <div id="normal-content" class="normal {% if extra.lang_hl != "story" %}fixed{% endif %}">
     <pre id="normal-code"><code id="codeb" style="white-space: pre-wrap;" class="{{ extra.lang_hl }}">{{ extra.contents }}</pre></code>
-    <div id="editor" style="display: none; height: 800px; font-size: 11px;">{{ extra.contents }}</div>
+    <textarea id="editor" style="display: none; height: 800px; font-size: 11px;">{{ extra.contents }}</textarea>
 </div>
 
 
@@ -60,11 +57,4 @@
 {% endif %}
 
 <script type="text/javascript" src="/static/js/bin.js"></script>
-<script src="/static/js/ace/ace.js"></script>
-<script type="text/javascript">
-        var editor = ace.edit("editor");
-        editor.getSession().setMode("ace/mode/{{ extra.lang_ace }}");
-        editor.setTheme("ace/theme/tomorrow");
-</script>
-
 {% endblock %}
