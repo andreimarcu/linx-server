@@ -108,6 +108,7 @@ func setup() {
 
 	goji.Get("/static/*", staticHandler)
 	goji.Get("/favicon.ico", staticHandler)
+	goji.Get("/robots.txt", staticHandler)
 	goji.Get(nameRe, fileDisplayHandler)
 	goji.Get(selifRe, fileServeHandler)
 	goji.Get(selifIndexRe, unauthorizedHandler)
