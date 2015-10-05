@@ -20,6 +20,14 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
+var fileBlacklist = map[string]bool{
+	"favicon.ico": true,
+	"index.htm":   true,
+	"index.html":  true,
+	"index.php":   true,
+	"robots.txt":  true,
+}
+
 // Describes metadata directly from the user request
 type UploadRequest struct {
 	src            io.Reader
@@ -225,6 +233,10 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 		_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
 		fileexists = err == nil
+	}
+
+	if fileBlacklist[strings.ToLower(upload.Filename)] {
+		return upload, errors.New("Prohibited filename")
 	}
 
 	dst, err := os.Create(path.Join(Config.filesDir, upload.Filename))
