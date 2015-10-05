@@ -22,6 +22,9 @@ Command-line options
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;")
+- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;"")
+- ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-fastcgi``` -- (optionally) serve through fastcgi 
 - ```-nologs``` -- (optionally) disable request logs in stdout

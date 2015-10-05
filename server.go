@@ -135,13 +135,13 @@ func main() {
 		"serve through fastcgi")
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
 		"enable remote uploads")
-	flag.StringVar(&Config.contentSecurityPolicy, "contentSecurityPolicy",
+	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
 		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
 		"value of default Content-Security-Policy header")
-	flag.StringVar(&Config.fileContentSecurityPolicy, "fileContentSecurityPolicy",
+	flag.StringVar(&Config.fileContentSecurityPolicy, "filecontentsecuritypolicy",
 		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;",
 		"value of Content-Security-Policy header for file access")
-	flag.StringVar(&Config.xFrameOptions, "xFrameOptions", "SAMEORIGIN",
+	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")
 	flag.Parse()
 
