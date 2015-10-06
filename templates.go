@@ -41,8 +41,7 @@ func (fs *Pongo2Loader) Abs(base, name string) string {
 }
 
 func populateTemplatesMap(tSet *pongo2.TemplateSet, tMap map[string]*pongo2.Template) error {
-
-	templates := [...]string{
+	templates := []string{
 		"index.html",
 		"paste.html",
 		"404.html",

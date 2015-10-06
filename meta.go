@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 )
 
 // Write metadata from Upload struct to file
@@ -47,29 +48,24 @@ func metadataRead(filename string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func metadataGetExpiry(filename string) (int64, error) {
+func metadataGetExpiry(filename string) (expiry time.Time, err error) {
 	metadata, err := metadataRead(filename)
-
-	if len(metadata) < 1 {
-		err := errors.New("ERR: Metadata file does not contain expiry")
-		return 0, err
-	}
 
 	// XXX in this case it's up to the caller to determine proper behavior
 	// for a nonexistant metadata file or broken file
 
 	if err != nil {
-		return 0, err
+		return
 	}
 
-	var expiry int64
-	expiry, err = strconv.ParseInt(metadata[0], 10, 32)
-
-	if err != nil {
-		return 0, err
-	} else {
-		return int64(expiry), err
+	if len(metadata) < 1 {
+		err = errors.New("ERR: Metadata file does not contain expiry")
+		return
 	}
+
+	expirySecs, err := strconv.ParseInt(metadata[0], 10, 64)
+	expiry = time.Unix(expirySecs, 0)
+	return
 }
 
 func metadataGetDeleteKey(filename string) (string, error) {

@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"bitbucket.org/taruti/mimemagic"
 	"github.com/dchest/uniuri"
@@ -32,7 +33,7 @@ var fileBlacklist = map[string]bool{
 type UploadRequest struct {
 	src            io.Reader
 	filename       string
-	expiry         int64 // Seconds until expiry, 0 = never
+	expiry         time.Duration // Seconds until expiry, 0 = never
 	randomBarename bool
 	deletionKey    string // Empty string if not defined
 }
@@ -41,8 +42,8 @@ type UploadRequest struct {
 type Upload struct {
 	Filename  string // Final filename on disk
 	Size      int64
-	Expiry    int64  // Unix timestamp of expiry, 0=never
-	DeleteKey string // Deletion key, one generated if not provided
+	Expiry    time.Time // Unix timestamp of expiry, 0=never
+	DeleteKey string    // Deletion key, one generated if not provided
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -243,7 +244,9 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	defer dst.Close()
 
 	// Get the rest of the metadata needed for storage
-	upload.Expiry = getFutureTimestamp(upReq.expiry)
+	if upReq.expiry != 0 {
+		upload.Expiry = time.Now().Add(upReq.expiry)
+	}
 
 	// If no delete key specified, pick a random one.
 	if upReq.deletionKey == "" {
@@ -279,7 +282,7 @@ func generateJSONresponse(upload Upload) []byte {
 		"url":        Config.siteURL + upload.Filename,
 		"filename":   upload.Filename,
 		"delete_key": upload.DeleteKey,
-		"expiry":     strconv.FormatInt(int64(upload.Expiry), 10),
+		"expiry":     strconv.FormatInt(upload.Expiry.Unix(), 10),
 		"size":       strconv.FormatInt(upload.Size, 10),
 	})
 
@@ -302,7 +305,7 @@ func barePlusExt(filename string) (barename, extension string) {
 	return
 }
 
-func parseExpiry(expStr string) int64 {
+func parseExpiry(expStr string) time.Duration {
 	if expStr == "" {
 		return 0
 	} else {
@@ -310,7 +313,7 @@ func parseExpiry(expStr string) int64 {
 		if err != nil {
 			return 0
 		} else {
-			return int64(expiry)
+			return time.Duration(expiry) * time.Second
 		}
 	}
 }

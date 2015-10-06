@@ -17,6 +17,8 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
+const maxDisplayFileSizeBytes = 1024 * 512
+
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
@@ -29,8 +31,8 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	expiry, _ := metadataGetExpiry(fileName)
 	var expiryHuman string
-	if expiry != 0 {
-		expiryHuman = humanize.RelTime(time.Now(), time.Unix(expiry, 0), "", "")
+	if !expiry.IsZero() {
+		expiryHuman = humanize.RelTime(time.Now(), expiry, "", "")
 	}
 	sizeHuman := humanize.Bytes(uint64(fileInfo.Size()))
 	extra := make(map[string]string)
@@ -47,7 +49,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		js, _ := json.Marshal(map[string]string{
 			"filename": fileName,
 			"mimetype": mimetype,
-			"expiry":   strconv.FormatInt(expiry, 10),
+			"expiry":   strconv.FormatInt(expiry.Unix(), 10),
 			"size":     strconv.FormatInt(fileInfo.Size(), 10),
 		})
 		w.Write(js)
@@ -65,7 +67,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	} else if mimetype == "application/pdf" {
 		tpl = Templates["display/pdf.html"]
 	} else if supportedBinExtension(extension) {
-		if fileInfo.Size() < 500000 {
+		if fileInfo.Size() < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
 			if err != nil {
 				tpl = Templates["display/file.html"]

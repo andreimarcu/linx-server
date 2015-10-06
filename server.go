@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -22,15 +21,15 @@ var Config struct {
 	bind                      string
 	filesDir                  string
 	metaDir                   string
-	noLogs                    bool
-	allowHotlink              bool
 	siteName                  string
 	siteURL                   string
-	fastcgi                   bool
-	remoteUploads             bool
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
 	xFrameOptions             string
+	noLogs                    bool
+	allowHotlink              bool
+	fastcgi                   bool
+	remoteUploads             bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -52,14 +51,12 @@ func setup() {
 	// make directories if needed
 	err := os.MkdirAll(Config.filesDir, 0755)
 	if err != nil {
-		fmt.Println("Error: could not create files directory")
-		os.Exit(1)
+		log.Fatal("Could not create files directory:", err)
 	}
 
 	err = os.MkdirAll(Config.metaDir, 0700)
 	if err != nil {
-		fmt.Println("Error: could not create metadata directory")
-		os.Exit(1)
+		log.Fatal("Could not create metadata directory:", err)
 	}
 
 	// ensure siteURL ends wth '/'
@@ -70,15 +67,13 @@ func setup() {
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()
 	if err != nil {
-		fmt.Println("Error: could not load templates")
-		os.Exit(1)
+		log.Fatal("Error: could not load templates", err)
 	}
 	TemplateSet := pongo2.NewSet("templates", p2l)
 	TemplateSet.Globals["sitename"] = Config.siteName
 	err = populateTemplatesMap(TemplateSet, Templates)
 	if err != nil {
-		fmt.Println("Error: could not load templates")
-		os.Exit(1)
+		log.Fatal("Error: could not load templates", err)
 	}
 
 	staticBox = rice.MustFindBox("static")
