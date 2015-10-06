@@ -21,15 +21,15 @@ var Config struct {
 	bind                      string
 	filesDir                  string
 	metaDir                   string
-	noLogs                    bool
-	allowHotlink              bool
 	siteName                  string
 	siteURL                   string
-	fastcgi                   bool
-	remoteUploads             bool
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
 	xFrameOptions             string
+	noLogs                    bool
+	allowHotlink              bool
+	fastcgi                   bool
+	remoteUploads             bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
