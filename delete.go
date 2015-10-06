@@ -10,7 +10,7 @@ import (
 )
 
 func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	requestKey := r.Header.Get("X-Delete-Key")
+	requestKey := r.Header.Get("Linx-Delete-Key")
 
 	filename := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, filename)

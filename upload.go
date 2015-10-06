@@ -172,17 +172,14 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
-	// For legacy reasons
-	if r.Header.Get("X-Randomized-Filename") == "yes" {
-		upReq.randomBarename = true
-	} else if r.Header.Get("X-Randomized-Barename") == "yes" {
+	if r.Header.Get("Linx-Randomize") == "yes" {
 		upReq.randomBarename = true
 	}
 
-	upReq.deletionKey = r.Header.Get("X-Delete-Key")
+	upReq.deletionKey = r.Header.Get("Linx-Delete-Key")
 
 	// Get seconds until expiry. Non-integer responses never expire.
-	expStr := r.Header.Get("X-File-Expiry")
+	expStr := r.Header.Get("Linx-Expiry")
 	upReq.expiry = parseExpiry(expStr)
 
 }

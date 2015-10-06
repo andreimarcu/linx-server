@@ -113,7 +113,7 @@ func TestPutRandomizedUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	req.Header.Set("X-Randomized-Barename", "yes")
+	req.Header.Set("Linx-Randomize", "yes")
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -132,7 +132,7 @@ func TestPutEmptyUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	req.Header.Set("X-Randomized-Barename", "yes")
+	req.Header.Set("Linx-Randomize", "yes")
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -194,7 +194,7 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-Randomized-Barename", "yes")
+	req.Header.Set("Linx-Randomize", "yes")
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -228,7 +228,7 @@ func TestPutExpireJSONUpload(t *testing.T) {
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-File-Expiry", "600")
+	req.Header.Set("Linx-Expiry", "600")
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -275,7 +275,7 @@ func TestPutAndDelete(t *testing.T) {
 	// Delete it
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
-	req.Header.Set("X-Delete-Key", myjson.Delete_Key)
+	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
 	goji.DefaultMux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
@@ -319,7 +319,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-Delete-Key", "supersecret")
+	req.Header.Set("Linx-Delete-Key", "supersecret")
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -331,7 +331,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	// Delete it
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
-	req.Header.Set("X-Delete-Key", "supersecret")
+	req.Header.Set("Linx-Delete-Key", "supersecret")
 	goji.DefaultMux.ServeHTTP(w, req)
 
 	if w.Code != 200 {

@@ -60,7 +60,7 @@ Dropzone.options.dropzone = {
 		deleteAction.addEventListener('click', function(ev) {
 		    xhr = new XMLHttpRequest();
 			xhr.open("DELETE", resp.url, true);
-			xhr.setRequestHeader("X-Delete-Key", resp.delete_key);
+			xhr.setRequestHeader("Linx-Delete-Key", resp.delete_key);
 			xhr.onreadystatechange = function(file) {
 				if (xhr.readyState == 4 && xhr.status === 200) {
 				    var text = document.createTextNode("Deleted ");
