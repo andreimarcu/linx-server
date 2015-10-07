@@ -248,7 +248,6 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	// Get the rest of the metadata needed for storage
 	if upReq.expiry == 0 {
 		upload.Expiry = neverExpire
-
 	} else {
 		upload.Expiry = time.Now().Add(upReq.expiry)
 	}

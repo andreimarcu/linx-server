@@ -47,13 +47,13 @@ func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, m
 	}
 
 	if rt == RespHTML {
-		Templates["oops.html"].ExecuteWriter(pongo2.Context{"msg": msg}, w)
 		w.WriteHeader(500)
+		Templates["oops.html"].ExecuteWriter(pongo2.Context{"msg": msg}, w)
 		return
 
 	} else if rt == RespPLAIN {
-		fmt.Fprintf(w, "%s", msg)
 		w.WriteHeader(500)
+		fmt.Fprintf(w, "%s", msg)
 		return
 
 	} else if rt == RespJSON {

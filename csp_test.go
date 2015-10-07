@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/zenazn/goji"
@@ -14,6 +16,15 @@ var testCSPHeaders = map[string]string{
 }
 
 func TestContentSecurityPolicy(t *testing.T) {
+	Config.siteURL = "http://linx.example.org/"
+	Config.filesDir = path.Join(os.TempDir(), generateBarename())
+	Config.metaDir = Config.filesDir + "_meta"
+	Config.noLogs = true
+	Config.siteName = "linx"
+	Config.contentSecurityPolicy = "default-src 'none'; style-src 'self';"
+	Config.xFrameOptions = "SAMEORIGIN"
+	setup()
+
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("GET", "/", nil)

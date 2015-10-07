@@ -1,21 +1,37 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/zenazn/goji"
 )
 
+type RespOkJSON struct {
+	Filename   string
+	Url        string
+	Delete_Key string
+	Expiry     string
+	Size       string
+}
+
+type RespErrJSON struct {
+	Error string
+}
+
 func TestSetup(t *testing.T) {
 	Config.siteURL = "http://linx.example.org/"
-	Config.filesDir = path.Join(os.TempDir(), randomString(10))
+	Config.filesDir = path.Join(os.TempDir(), generateBarename())
 	Config.metaDir = Config.filesDir + "_meta"
 	Config.noLogs = true
 	Config.siteName = "linx"
@@ -55,7 +71,7 @@ func TestNotFound(t *testing.T) {
 func TestFileNotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	filename := randomString(10)
+	filename := generateBarename()
 
 	req, err := http.NewRequest("GET", "/selif/"+filename, nil)
 	if err != nil {
@@ -72,7 +88,7 @@ func TestFileNotFound(t *testing.T) {
 func TestDisplayNotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	filename := randomString(10)
+	filename := generateBarename()
 
 	req, err := http.NewRequest("GET", "/"+filename, nil)
 	if err != nil {
@@ -86,10 +102,346 @@ func TestDisplayNotFound(t *testing.T) {
 	}
 }
 
+func TestPostCodeUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename()
+	extension := "txt"
+
+	form := url.Values{}
+	form.Add("content", "File content")
+	form.Add("filename", filename)
+	form.Add("extension", extension)
+
+	req, err := http.NewRequest("POST", "/upload/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.PostForm = form
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 301 {
+		t.Fatalf("Status code is not 301, but %d", w.Code)
+	}
+
+	if w.Header().Get("Location") != "/"+filename+"."+extension {
+		t.Fatalf("Was redirected to %s instead of /%s", w.Header().Get("Location"), filename)
+	}
+}
+
+func TestPostCodeExpiryJSONUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	form := url.Values{}
+	form.Add("content", "File content")
+	form.Add("filename", "")
+	form.Add("expires", "60")
+
+	req, err := http.NewRequest("POST", "/upload/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.PostForm = form
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/json")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 200, but %d", w.Code)
+	}
+
+	var myjson RespOkJSON
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	myExp, err := strconv.ParseInt(myjson.Expiry, 10, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	curTime := time.Now().Unix()
+
+	if myExp < curTime {
+		t.Fatalf("File expiry (%d) is smaller than current time (%d)", myExp, curTime)
+	}
+
+	if myjson.Size != "12" {
+		t.Fatalf("File size was not 12 but %s", myjson.Size)
+	}
+}
+
+func TestPostUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fw.Write([]byte("File content"))
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 301 {
+		t.Fatalf("Status code is not 301, but %d", w.Code)
+	}
+
+	if w.Header().Get("Location") != "/"+filename {
+		t.Fatalf("Was redirected to %s instead of /%s", w.Header().Get("Location"), filename)
+	}
+}
+
+func TestPostJSONUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fw.Write([]byte("File content"))
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Accept", "application/json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 200, but %d", w.Code)
+	}
+
+	var myjson RespOkJSON
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if myjson.Filename != filename {
+		t.Fatalf("Filename is not '%s' but '%s' ", filename, myjson.Filename)
+	}
+
+	if myjson.Expiry != "0" {
+		t.Fatalf("File expiry is not 0 but %s", myjson.Expiry)
+	}
+
+	if myjson.Size != "12" {
+		t.Fatalf("File size was not 12 but %s", myjson.Size)
+	}
+}
+
+func TestPostExpiresJSONUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fw.Write([]byte("File content"))
+
+	exp, err := mw.CreateFormField("expires")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exp.Write([]byte("60"))
+
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Accept", "application/json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 200, but %d", w.Code)
+	}
+
+	var myjson RespOkJSON
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if myjson.Filename != filename {
+		t.Fatalf("Filename is not '%s' but '%s' ", filename, myjson.Filename)
+	}
+
+	myExp, err := strconv.ParseInt(myjson.Expiry, 10, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	curTime := time.Now().Unix()
+
+	if myExp < curTime {
+		t.Fatalf("File expiry (%d) is smaller than current time (%d)", myExp, curTime)
+	}
+
+	if myjson.Size != "12" {
+		t.Fatalf("File size was not 12 but %s", myjson.Size)
+	}
+}
+
+func TestPostRandomizeJSONUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fw.Write([]byte("File content"))
+
+	rnd, err := mw.CreateFormField("randomize")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rnd.Write([]byte("true"))
+
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Accept", "application/json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 200, but %d", w.Code)
+	}
+
+	var myjson RespOkJSON
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if myjson.Filename == filename {
+		t.Fatalf("Filename is not random", filename, myjson.Filename)
+	}
+
+	if myjson.Size != "12" {
+		t.Fatalf("File size was not 12 but %s", myjson.Size)
+	}
+}
+
+func TestPostEmptyUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fw.Write([]byte(""))
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 500 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 500, but %d", w.Code)
+	}
+
+	if !strings.Contains(w.Body.String(), "Empty file") {
+		t.Fatal("Response did not contain 'Empty file'")
+	}
+}
+
+func TestPostEmptyJSONUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fw.Write([]byte(""))
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Accept", "application/json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 500 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 500, but %d", w.Code)
+	}
+
+	var myjson RespErrJSON
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if myjson.Error != "Could not upload file: Empty file" {
+		t.Fatal("Json 'error' was not 'Empty file' but " + myjson.Error)
+	}
+}
+
 func TestPutUpload(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -106,7 +458,26 @@ func TestPutUpload(t *testing.T) {
 func TestPutRandomizedUpload(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
+
+	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Linx-Randomize", "yes")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Body.String() == Config.siteURL+filename {
+		t.Fatal("Filename was not random")
+	}
+}
+
+func TestPutNoExtensionUpload(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename()
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -125,7 +496,7 @@ func TestPutRandomizedUpload(t *testing.T) {
 func TestPutEmptyUpload(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader(""))
 	if err != nil {
@@ -142,18 +513,11 @@ func TestPutEmptyUpload(t *testing.T) {
 }
 
 func TestPutJSONUpload(t *testing.T) {
-	type RespJSON struct {
-		Filename   string
-		Url        string
-		Delete_Key string
-		Expiry     string
-		Size       string
-	}
-	var myjson RespJSON
+	var myjson RespOkJSON
 
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -175,18 +539,11 @@ func TestPutJSONUpload(t *testing.T) {
 }
 
 func TestPutRandomizedJSONUpload(t *testing.T) {
-	type RespJSON struct {
-		Filename   string
-		Url        string
-		Delete_Key string
-		Expiry     string
-		Size       string
-	}
-	var myjson RespJSON
+	var myjson RespOkJSON
 
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -209,18 +566,11 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 }
 
 func TestPutExpireJSONUpload(t *testing.T) {
-	type RespJSON struct {
-		Filename   string
-		Url        string
-		Delete_Key string
-		Expiry     string
-		Size       string
-	}
-	var myjson RespJSON
+	var myjson RespOkJSON
 
 	w := httptest.NewRecorder()
 
-	filename := randomString(10) + ".ext"
+	filename := generateBarename() + ".ext"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -247,14 +597,7 @@ func TestPutExpireJSONUpload(t *testing.T) {
 }
 
 func TestPutAndDelete(t *testing.T) {
-	type RespJSON struct {
-		Filename   string
-		Url        string
-		Delete_Key string
-		Expiry     string
-		Size       string
-	}
-	var myjson RespJSON
+	var myjson RespOkJSON
 
 	w := httptest.NewRecorder()
 
@@ -302,14 +645,7 @@ func TestPutAndDelete(t *testing.T) {
 }
 
 func TestPutAndSpecificDelete(t *testing.T) {
-	type RespJSON struct {
-		Filename   string
-		Url        string
-		Delete_Key string
-		Expiry     string
-		Size       string
-	}
-	var myjson RespJSON
+	var myjson RespOkJSON
 
 	w := httptest.NewRecorder()
 

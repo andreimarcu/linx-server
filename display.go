@@ -31,7 +31,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	expiry, _ := metadataGetExpiry(fileName)
 	var expiryHuman string
-	if !expiry.IsZero() {
+	if expiry != neverExpire {
 		expiryHuman = humanize.RelTime(time.Now(), expiry, "", "")
 	}
 	sizeHuman := humanize.Bytes(uint64(fileInfo.Size()))
