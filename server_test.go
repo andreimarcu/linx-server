@@ -357,7 +357,7 @@ func TestPostRandomizeJSONUpload(t *testing.T) {
 	}
 
 	if myjson.Filename == filename {
-		t.Fatalf("Filename is not random", filename, myjson.Filename)
+		t.Fatalf("Filename (%s) is not random (%s)", filename, myjson.Filename)
 	}
 
 	if myjson.Size != "12" {
