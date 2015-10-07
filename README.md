@@ -22,6 +22,8 @@ Command-line options
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
+- ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
 - ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;")
 - ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;"")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
@@ -31,7 +33,11 @@ Command-line options
 
 Deployment
 ----------
-A suggested deployment is running nginx in front of linx-server serving through fastcgi.  
+
+#### 1. Using fastcgi
+
+A suggested deployment is running nginx in front of linx-server serving through fastcgi.
+This allows you to have nginx handle the TLS termination for example.  
 An example configuration:
 ```
 server {
@@ -46,6 +52,13 @@ server {
     }
 }
 ```
+And run linx-server with the ```-fastcgi``` option.
+
+#### 2. Using the built-in https server
+Run linx-server with the ```-certfile path/to/cert.file``` and ```-keyfile path/to/key.file``` options.
+
+#### 3. Using the built-in http server
+Run linx-server normally.
 
 Development
 -----------
