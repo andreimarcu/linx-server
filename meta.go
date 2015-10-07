@@ -23,7 +23,7 @@ func metadataWrite(filename string, upload *Upload) error {
 
 	w := bufio.NewWriter(file)
 
-	fmt.Fprintln(w, upload.Expiry)
+	fmt.Fprintln(w, upload.Expiry.Unix())
 	fmt.Fprintln(w, upload.DeleteKey)
 
 	return w.Flush()

@@ -199,8 +199,8 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	if len(extension) == 0 {
 		// Pull the first 512 bytes off for use in MIME detection
 		header = make([]byte, 512)
-		n, err := upReq.src.Read(header)
-		if n == 0 || err != nil {
+		n, _ := upReq.src.Read(header)
+		if n == 0 {
 			return upload, errors.New("Empty file")
 		}
 		header = header[:n]
@@ -246,7 +246,10 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	defer dst.Close()
 
 	// Get the rest of the metadata needed for storage
-	if upReq.expiry != 0 {
+	if upReq.expiry == 0 {
+		upload.Expiry = neverExpire
+
+	} else {
 		upload.Expiry = time.Now().Add(upReq.expiry)
 	}
 
