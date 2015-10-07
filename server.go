@@ -14,6 +14,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
 	"github.com/zenazn/goji"
+	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web/middleware"
 )
 
@@ -23,6 +24,8 @@ var Config struct {
 	metaDir                   string
 	siteName                  string
 	siteURL                   string
+	certFile                  string
+	keyFile                   string
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
 	xFrameOptions             string
@@ -126,6 +129,10 @@ func main() {
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
 		"site base url (including trailing slash)")
+	flag.StringVar(&Config.certFile, "certfile", "",
+		"path to ssl certificate (for https)")
+	flag.StringVar(&Config.keyFile, "keyfile", "",
+		"path to ssl key (for https)")
 	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
 		"serve through fastcgi")
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
@@ -142,14 +149,25 @@ func main() {
 
 	setup()
 
-	listener, err := net.Listen("tcp", Config.bind)
-	if err != nil {
-		log.Fatal("Could not bind: ", err)
-	}
-
 	if Config.fastcgi {
+		listener, err := net.Listen("tcp", Config.bind)
+		if err != nil {
+			log.Fatal("Could not bind: ", err)
+		}
+
+		log.Printf("Serving over fastcgi, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
 		fcgi.Serve(listener, goji.DefaultMux)
+	} else if Config.certFile != "" {
+		log.Printf("Serving over https, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
+		err := graceful.ListenAndServeTLS(Config.bind, Config.certFile, Config.keyFile, goji.DefaultMux)
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
-		goji.ServeListener(listener)
+		log.Printf("Serving over http, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
+		err := graceful.ListenAndServe(Config.bind, goji.DefaultMux)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
