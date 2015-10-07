@@ -150,6 +150,8 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	upReq.filename = filepath.Base(grabUrl.Path)
 	upReq.src = resp.Body
+	upReq.deletionKey = r.FormValue("deletekey")
+	upReq.expiry = parseExpiry(r.FormValue("expiry"))
 
 	upload, err := processUpload(upReq)
 
