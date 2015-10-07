@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="/static/css/github-markdown.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block main %}
+<div class="normal markdown-body">
+	{{ extra.contents|safe }}
+</div>
+{% endblock %}

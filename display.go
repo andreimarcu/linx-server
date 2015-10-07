@@ -14,6 +14,8 @@ import (
 	"bitbucket.org/taruti/mimemagic"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
+	"github.com/microcosm-cc/bluemonday"
+	"github.com/russross/blackfriday"
 	"github.com/zenazn/goji/web"
 )
 
@@ -80,6 +82,22 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		} else {
 			tpl = Templates["display/file.html"]
 		}
+	} else if extension == "md" {
+		if fileInfo.Size() < maxDisplayFileSizeBytes {
+			bytes, err := ioutil.ReadFile(filePath)
+			if err != nil {
+				tpl = Templates["display/file.html"]
+			} else {
+				unsafe := blackfriday.MarkdownCommon(bytes)
+				html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
+
+				extra["contents"] = string(html)
+				tpl = Templates["display/md.html"]
+			}
+		} else {
+			tpl = Templates["display/file.html"]
+		}
+
 	} else {
 		tpl = Templates["display/file.html"]
 	}
