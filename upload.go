@@ -220,6 +220,16 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
 
 	fileexists := err == nil
+	// Check if the delete key matches, in which case overwrite
+	if fileexists {
+		metad, merr := metadataRead(upload.Filename)
+		if merr == nil {
+			if upReq.deletionKey == metad.DeleteKey {
+				fileexists = false
+			}
+		}
+	}
+
 	for fileexists {
 		counter, err := strconv.Atoi(string(barename[len(barename)-1]))
 		if err != nil {

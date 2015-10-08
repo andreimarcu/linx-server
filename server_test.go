@@ -645,6 +645,49 @@ func TestPutAndDelete(t *testing.T) {
 	}
 }
 
+func TestPutAndOverwrite(t *testing.T) {
+	var myjson RespOkJSON
+
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Overwrite it
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("PUT", "/upload/"+myjson.Filename, strings.NewReader("New file content"))
+	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
+	}
+
+	// Make sure it's the new file
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/selif/"+myjson.Filename, nil)
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code == 404 {
+		t.Fatal("Status code was 404")
+	}
+
+	if w.Body.String() != "New file content" {
+		t.Fatal("File did not contain 'New file content")
+	}
+}
+
 func TestPutAndSpecificDelete(t *testing.T) {
 	var myjson RespOkJSON
 
