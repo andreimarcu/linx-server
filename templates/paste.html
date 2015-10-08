@@ -1,40 +1,36 @@
 {% extends "base.html" %}
 
+{% block head %}
+<link href="/static/css/hint.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
 {% block content %}
     <form id="reply" action='/upload' method='post'>
-    <div id="main">
-        <div id="info" class="ninfo">
-            <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
+        <div id="main">
+            <div id="info" class="ninfo">
+                <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
 
-            <div class="right">
-                <select id="expiry" name="expires">
-                    <option disabled=disabled>Expires:</option>
-                    <option value="0">never</option>
-                    <option value="60">a minute</option>
-                    <option value="300">5 minutes</option>
-                    <option value="3600">an hour</option>
-                    <option value="86400">a day</option>
-                    <option value="604800">a week</option>
-                    <option value="2419200">a month</option>
-                    <option value="29030400">a year</option>
-                </select>
+                <div class="right">
+                    <select id="expiry" name="expires">
+                        <option disabled=disabled>Expires:</option>
+                        <option value="0">never</option>
+                        <option value="60">a minute</option>
+                        <option value="300">5 minutes</option>
+                        <option value="3600">an hour</option>
+                        <option value="86400">a day</option>
+                        <option value="604800">a week</option>
+                        <option value="2419200">a month</option>
+                        <option value="29030400">a year</option>
+                    </select>
 
-                <input type="submit" value="Paste">
+                    <input type="submit" value="Paste">
 
+                </div>
             </div>
-            
 
+            <div id="inner_content">
+                <textarea name='content' id="content" class="editor"></textarea>
+            </div>
         </div>
-
-    <div id="inner_content">
-        <textarea name='content' id="content" class="editor"></textarea>
-    </div>
-
-    </div>
-
-
-
     </form>        
-
-
 {% endblock %}
