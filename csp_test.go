@@ -19,6 +19,7 @@ func TestContentSecurityPolicy(t *testing.T) {
 	Config.siteURL = "http://linx.example.org/"
 	Config.filesDir = path.Join(os.TempDir(), generateBarename())
 	Config.metaDir = Config.filesDir + "_meta"
+	Config.maxSize = 1024 * 1024 * 1024
 	Config.noLogs = true
 	Config.siteName = "linx"
 	Config.contentSecurityPolicy = "default-src 'none'; style-src 'self';"

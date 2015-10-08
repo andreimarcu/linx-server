@@ -6,7 +6,7 @@
 
 {% block content %} 
 <div id="fileupload">
-    <form action="/upload" class="dropzone" id="dropzone" method="POST" enctype="multipart/form-data">
+    <form action="/upload" class="dropzone" id="dropzone" method="POST" enctype="multipart/form-data" data-maxsize="{{ maxsize }}">
         <div class="fallback">
             <input id="fileinput" name="file" type="file" /><br />
             <input id="submitbtn" type="submit" value="Upload">

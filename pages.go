@@ -20,7 +20,9 @@ const (
 )
 
 func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	err := Templates["index.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := Templates["index.html"].ExecuteWriter(pongo2.Context{
+		"maxsize": Config.maxSize,
+	}, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

@@ -259,6 +259,9 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	} else if err != nil {
 		os.Remove(path.Join(Config.filesDir, upload.Filename))
 		return
+	} else if bytes > Config.maxSize {
+		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		return upload, errors.New("File too large")
 	}
 
 	upload.Metadata, err = generateMetadata(upload.Filename, expiry, upReq.deletionKey)

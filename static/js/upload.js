@@ -85,12 +85,17 @@ Dropzone.options.dropzone = {
 			file.fileLabel.innerHTML = file.name + ": Canceled ";			
 		}
 		else {
-			file.fileLabel.innerHTML = file.name + ": " + resp.error;
+			if (resp.error) {
+				file.fileLabel.innerHTML = file.name + ": " + resp.error;
+			}
+			else {
+				file.fileLabel.innerHTML = file.name + ": " + resp;
+			}
 		}
 		file.fileLabel.className = "error";
 	},
 
-    maxFilesize: 4096,
+    maxFilesize: Math.round(parseInt(document.getElementById("dropzone").getAttribute("data-maxsize"), 10) / 1024 / 1024),
 	previewsContainer: "#uploads",
 	parallelUploads: 5,
 	headers: {"Accept": "application/json"},

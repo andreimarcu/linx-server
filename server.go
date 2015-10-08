@@ -29,6 +29,7 @@ var Config struct {
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
 	xFrameOptions             string
+	maxSize                   int64
 	noLogs                    bool
 	allowHotlink              bool
 	fastcgi                   bool
@@ -129,6 +130,8 @@ func main() {
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
 		"site base url (including trailing slash)")
+	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
+		"maximum upload file size in bytes (default 4GB)")
 	flag.StringVar(&Config.certFile, "certfile", "",
 		"path to ssl certificate (for https)")
 	flag.StringVar(&Config.keyFile, "keyfile", "",

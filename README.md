@@ -22,6 +22,7 @@ Command-line options
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-maxsize 4294967296``` "maximum upload file size in bytes (default 4GB)"
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
 - ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
 - ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;")
