@@ -36,6 +36,10 @@
     margin-right: auto;
 }
 
+#uploads {
+    margin-top: 20px;
+}
+
 div.dz-default {
     border: 2px dashed #C9C9C9;
     color: #C9C9C9;
