@@ -2,6 +2,8 @@
 
 Dropzone.options.dropzone = {
 	init: function() {
+		var dzone = document.getElementById("dzone");
+		dzone.style.display = "block";
 	},
 	addedfile: function(file) {
 		var upload = document.createElement("div");
