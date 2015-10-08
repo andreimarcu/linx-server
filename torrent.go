@@ -80,8 +80,12 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
 
-	if !fileExistsAndNotExpired(fileName) {
+	err := checkFile(fileName)
+	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
+		return
+	} else if err == BadMetadata {
+		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
 

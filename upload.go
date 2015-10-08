@@ -40,10 +40,8 @@ type UploadRequest struct {
 
 // Metadata associated with a file as it would actually be stored
 type Upload struct {
-	Filename  string // Final filename on disk
-	Size      int64
-	Expiry    time.Time // Unix timestamp of expiry, 0=never
-	DeleteKey string    // Deletion key, one generated if not provided
+	Filename string // Final filename on disk
+	Metadata Metadata
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -246,34 +244,35 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	defer dst.Close()
 
 	// Get the rest of the metadata needed for storage
+	var expiry time.Time
 	if upReq.expiry == 0 {
-		upload.Expiry = neverExpire
+		expiry = neverExpire
 	} else {
-		upload.Expiry = time.Now().Add(upReq.expiry)
+		expiry = time.Now().Add(upReq.expiry)
 	}
-
-	// If no delete key specified, pick a random one.
-	if upReq.deletionKey == "" {
-		upload.DeleteKey = uniuri.NewLen(30)
-	} else {
-		upload.DeleteKey = upReq.deletionKey
-	}
-
-	metadataWrite(upload.Filename, &upload)
 
 	bytes, err := io.Copy(dst, io.MultiReader(bytes.NewReader(header), upReq.src))
 	if bytes == 0 {
 		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		os.Remove(path.Join(Config.metaDir, upload.Filename))
 		return upload, errors.New("Empty file")
 
 	} else if err != nil {
 		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		os.Remove(path.Join(Config.metaDir, upload.Filename))
 		return
 	}
 
-	upload.Size = bytes
+	upload.Metadata, err = generateMetadata(upload.Filename, expiry, upReq.deletionKey)
+	if err != nil {
+		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		return
+	}
+	err = metadataWrite(upload.Filename, &upload.Metadata)
+	if err != nil {
+		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		return
+	}
 	return
 }
 
@@ -285,9 +284,11 @@ func generateJSONresponse(upload Upload) []byte {
 	js, _ := json.Marshal(map[string]string{
 		"url":        Config.siteURL + upload.Filename,
 		"filename":   upload.Filename,
-		"delete_key": upload.DeleteKey,
-		"expiry":     strconv.FormatInt(upload.Expiry.Unix(), 10),
-		"size":       strconv.FormatInt(upload.Size, 10),
+		"delete_key": upload.Metadata.DeleteKey,
+		"expiry":     strconv.FormatInt(upload.Metadata.Expiry.Unix(), 10),
+		"size":       strconv.FormatInt(upload.Metadata.Size, 10),
+		"mimetype":   upload.Metadata.Mimetype,
+		"sha256sum":  upload.Metadata.Sha256sum,
 	})
 
 	return js

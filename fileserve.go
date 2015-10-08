@@ -13,8 +13,12 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
 
-	if !fileExistsAndNotExpired(fileName) {
+	err := checkFile(fileName)
+	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
+		return
+	} else if err == BadMetadata {
+		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
 
@@ -55,19 +59,24 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func fileExistsAndNotExpired(filename string) bool {
+func checkFile(filename string) error {
 	filePath := path.Join(Config.filesDir, filename)
 
 	_, err := os.Stat(filePath)
 	if err != nil {
-		return false
+		return NotFoundErr
 	}
 
-	if isFileExpired(filename) {
+	expired, err := isFileExpired(filename)
+	if err != nil {
+		return err
+	}
+
+	if expired {
 		os.Remove(path.Join(Config.filesDir, filename))
 		os.Remove(path.Join(Config.metaDir, filename))
-		return false
+		return NotFoundErr
 	}
 
-	return true
+	return nil
 }

@@ -23,14 +23,13 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Ensure delete key is correct
-	deleteKey, err := metadataGetDeleteKey(filename)
-
+	metadata, err := metadataRead(filename)
 	if err != nil {
 		unauthorizedHandler(c, w, r) // 401 - no metadata available
 		return
 	}
 
-	if deleteKey == requestKey {
+	if metadata.DeleteKey == requestKey {
 		fileDelErr := os.Remove(filePath)
 		metaDelErr := os.Remove(metaPath)
 

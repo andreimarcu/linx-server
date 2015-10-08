@@ -1,23 +1,16 @@
 package main
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"compress/bzip2"
-	"compress/gzip"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"bitbucket.org/taruti/mimemagic"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
 	"github.com/microcosm-cc/bluemonday"
@@ -30,21 +23,24 @@ const maxDisplayFileSizeBytes = 1024 * 512
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 	filePath := path.Join(Config.filesDir, fileName)
-	fileInfo, err := os.Stat(filePath)
 
-	if !fileExistsAndNotExpired(fileName) {
+	err := checkFile(fileName)
+	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	}
 
-	expiry, _ := metadataGetExpiry(fileName)
-	var expiryHuman string
-	if expiry != neverExpire {
-		expiryHuman = humanize.RelTime(time.Now(), expiry, "", "")
+	metadata, err := metadataRead(fileName)
+	if err != nil {
+		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
+		return
 	}
-	sizeHuman := humanize.Bytes(uint64(fileInfo.Size()))
+	var expiryHuman string
+	if metadata.Expiry != neverExpire {
+		expiryHuman = humanize.RelTime(time.Now(), metadata.Expiry, "", "")
+	}
+	sizeHuman := humanize.Bytes(uint64(metadata.Size))
 	extra := make(map[string]string)
-	files := []string{}
 
 	file, _ := os.Open(filePath)
 	defer file.Close()
@@ -52,15 +48,15 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	header := make([]byte, 512)
 	file.Read(header)
 
-	mimetype := mimemagic.Match("", header)
 	extension := strings.TrimPrefix(filepath.Ext(fileName), ".")
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
-			"filename": fileName,
-			"mimetype": mimetype,
-			"expiry":   strconv.FormatInt(expiry.Unix(), 10),
-			"size":     strconv.FormatInt(fileInfo.Size(), 10),
+			"filename":  fileName,
+			"expiry":    strconv.FormatInt(metadata.Expiry.Unix(), 10),
+			"size":      strconv.FormatInt(metadata.Size, 10),
+			"mimetype":  metadata.Mimetype,
+			"sha256sum": metadata.Sha256sum,
 		})
 		w.Write(js)
 		return
@@ -68,81 +64,20 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	var tpl *pongo2.Template
 
-	if strings.HasPrefix(mimetype, "image/") {
+	if strings.HasPrefix(metadata.Mimetype, "image/") {
 		tpl = Templates["display/image.html"]
-	} else if strings.HasPrefix(mimetype, "video/") {
+
+	} else if strings.HasPrefix(metadata.Mimetype, "video/") {
 		tpl = Templates["display/video.html"]
-	} else if strings.HasPrefix(mimetype, "audio/") {
+
+	} else if strings.HasPrefix(metadata.Mimetype, "audio/") {
 		tpl = Templates["display/audio.html"]
-	} else if mimetype == "application/pdf" {
+
+	} else if metadata.Mimetype == "application/pdf" {
 		tpl = Templates["display/pdf.html"]
-	} else if mimetype == "application/x-tar" {
-		f, _ := os.Open(filePath)
-		defer f.Close()
-
-		tReadr := tar.NewReader(f)
-		for {
-			header, err := tReadr.Next()
-			if err == io.EOF || err != nil {
-				break
-			}
-
-			if header.Typeflag == tar.TypeDir || header.Typeflag == tar.TypeReg {
-				files = append(files, header.Name)
-			}
-		}
-		sort.Strings(files)
-
-	} else if mimetype == "application/x-gzip" {
-		f, _ := os.Open(filePath)
-		defer f.Close()
-
-		gzf, err := gzip.NewReader(f)
-		if err == nil {
-			tReadr := tar.NewReader(gzf)
-			for {
-				header, err := tReadr.Next()
-				if err == io.EOF || err != nil {
-					break
-				}
-
-				if header.Typeflag == tar.TypeDir || header.Typeflag == tar.TypeReg {
-					files = append(files, header.Name)
-				}
-			}
-			sort.Strings(files)
-		}
-	} else if mimetype == "application/x-bzip" {
-		f, _ := os.Open(filePath)
-		defer f.Close()
-
-		bzf := bzip2.NewReader(f)
-		tReadr := tar.NewReader(bzf)
-		for {
-			header, err := tReadr.Next()
-			if err == io.EOF || err != nil {
-				break
-			}
-
-			if header.Typeflag == tar.TypeDir || header.Typeflag == tar.TypeReg {
-				files = append(files, header.Name)
-			}
-		}
-		sort.Strings(files)
-
-	} else if mimetype == "application/zip" {
-		f, _ := os.Open(filePath)
-		defer f.Close()
-
-		zf, err := zip.NewReader(f, fileInfo.Size())
-		if err == nil {
-			for _, f := range zf.File {
-				files = append(files, f.Name)
-			}
-		}
 
 	} else if supportedBinExtension(extension) {
-		if fileInfo.Size() < maxDisplayFileSizeBytes {
+		if metadata.Size < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
 			if err == nil {
 				extra["extension"] = extension
@@ -152,7 +87,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else if extension == "md" {
-		if fileInfo.Size() < maxDisplayFileSizeBytes {
+		if metadata.Size < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
 			if err == nil {
 				unsafe := blackfriday.MarkdownCommon(bytes)
@@ -170,12 +105,12 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = tpl.ExecuteWriter(pongo2.Context{
-		"mime":     mimetype,
+		"mime":     metadata.Mimetype,
 		"filename": fileName,
 		"size":     sizeHuman,
 		"expiry":   expiryHuman,
 		"extra":    extra,
-		"files":    files,
+		"files":    metadata.ArchiveFiles,
 	}, w)
 
 	if err != nil {
