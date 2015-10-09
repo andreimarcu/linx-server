@@ -75,6 +75,7 @@ func setup() {
 	}
 	TemplateSet := pongo2.NewSet("templates", p2l)
 	TemplateSet.Globals["sitename"] = Config.siteName
+	TemplateSet.Globals["siteurl"] = Config.siteURL
 	err = populateTemplatesMap(TemplateSet, Templates)
 	if err != nil {
 		log.Fatal("Error: could not load templates", err)
@@ -93,6 +94,8 @@ func setup() {
 	goji.Get("/", indexHandler)
 	goji.Get("/paste/", pasteHandler)
 	goji.Get("/paste", http.RedirectHandler("/paste/", 301))
+	goji.Get("/API/", apiDocHandler)
+	goji.Get("/API", http.RedirectHandler("/API/", 301))
 
 	if Config.remoteUploads {
 		goji.Get("/upload", uploadRemote)
