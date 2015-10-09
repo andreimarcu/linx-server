@@ -45,6 +45,11 @@ type Upload struct {
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize"}) {
+		badRequestHandler(c, w, r)
+		return
+	}
+
 	upReq := UploadRequest{}
 	uploadHeaderProcess(r, &upReq)
 
