@@ -119,6 +119,7 @@ func TestPostCodeUpload(t *testing.T) {
 	}
 	req.PostForm = form
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Referer", Config.siteURL)
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -128,6 +129,84 @@ func TestPostCodeUpload(t *testing.T) {
 
 	if w.Header().Get("Location") != "/"+filename+"."+extension {
 		t.Fatalf("Was redirected to %s instead of /%s", w.Header().Get("Location"), filename)
+	}
+}
+
+func TestPostCodeUploadWhitelistedHeader(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename()
+	extension := "txt"
+
+	form := url.Values{}
+	form.Add("content", "File content")
+	form.Add("filename", filename)
+	form.Add("extension", extension)
+
+	req, err := http.NewRequest("POST", "/upload/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.PostForm = form
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Linx-Expiry", "0")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 301 {
+		t.Fatalf("Status code is not 301, but %d", w.Code)
+	}
+}
+
+func TestPostCodeUploadNoReferrer(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename()
+	extension := "txt"
+
+	form := url.Values{}
+	form.Add("content", "File content")
+	form.Add("filename", filename)
+	form.Add("extension", extension)
+
+	req, err := http.NewRequest("POST", "/upload/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.PostForm = form
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 400 {
+		t.Fatalf("Status code is not 400, but %d", w.Code)
+	}
+}
+
+func TestPostCodeUploadBadOrigin(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	filename := generateBarename()
+	extension := "txt"
+
+	form := url.Values{}
+	form.Add("content", "File content")
+	form.Add("filename", filename)
+	form.Add("extension", extension)
+
+	req, err := http.NewRequest("POST", "/upload/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.PostForm = form
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Referer", Config.siteURL)
+	req.Header.Set("Origin", "http://example.com/")
+
+	goji.DefaultMux.ServeHTTP(w, req)
+
+	if w.Code != 400 {
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 }
 
@@ -146,6 +225,7 @@ func TestPostCodeExpiryJSONUpload(t *testing.T) {
 	req.PostForm = form
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Referer", Config.siteURL)
 
 	goji.DefaultMux.ServeHTTP(w, req)
 
@@ -192,6 +272,7 @@ func TestPostUpload(t *testing.T) {
 
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,6 +306,7 @@ func TestPostJSONUpload(t *testing.T) {
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -279,6 +361,7 @@ func TestPostExpiresJSONUpload(t *testing.T) {
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -339,6 +422,7 @@ func TestPostRandomizeJSONUpload(t *testing.T) {
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -382,6 +466,7 @@ func TestPostEmptyUpload(t *testing.T) {
 
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -416,6 +501,7 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 	req, err := http.NewRequest("POST", "/upload/", &b)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Referer", Config.siteURL)
 	if err != nil {
 		t.Fatal(err)
 	}

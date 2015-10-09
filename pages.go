@@ -75,6 +75,11 @@ func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, m
 	}
 }
 
+func badRequestHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusBadRequest)
+	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+}
+
 func unauthorizedHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(401)
 	err := Templates["401.html"].ExecuteWriter(pongo2.Context{}, w)
