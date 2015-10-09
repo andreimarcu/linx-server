@@ -22,11 +22,12 @@ import (
 )
 
 var fileBlacklist = map[string]bool{
-	"favicon.ico": true,
-	"index.htm":   true,
-	"index.html":  true,
-	"index.php":   true,
-	"robots.txt":  true,
+	"favicon.ico":     true,
+	"index.htm":       true,
+	"index.html":      true,
+	"index.php":       true,
+	"robots.txt":      true,
+	"crossdomain.xml": true,
 }
 
 // Describes metadata directly from the user request
