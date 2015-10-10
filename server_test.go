@@ -13,8 +13,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/zenazn/goji"
 )
 
 type RespOkJSON struct {
@@ -36,10 +34,10 @@ func TestSetup(t *testing.T) {
 	Config.maxSize = 1024 * 1024 * 1024
 	Config.noLogs = true
 	Config.siteName = "linx"
-	setup()
 }
 
 func TestIndex(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("GET", "/", nil)
@@ -47,7 +45,7 @@ func TestIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if !strings.Contains(w.Body.String(), "Click or Drop file") {
 		t.Fatal("String 'Click or Drop file' not found in index response")
@@ -55,6 +53,7 @@ func TestIndex(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("GET", "/url/should/not/exist", nil)
@@ -62,7 +61,7 @@ func TestNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatalf("Expected 404, got %d", w.Code)
@@ -70,6 +69,7 @@ func TestNotFound(t *testing.T) {
 }
 
 func TestFileNotFound(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -79,7 +79,7 @@ func TestFileNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatalf("Expected 404, got %d", w.Code)
@@ -87,6 +87,7 @@ func TestFileNotFound(t *testing.T) {
 }
 
 func TestDisplayNotFound(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -96,7 +97,7 @@ func TestDisplayNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatalf("Expected 404, got %d", w.Code)
@@ -104,6 +105,7 @@ func TestDisplayNotFound(t *testing.T) {
 }
 
 func TestPostCodeUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -122,7 +124,7 @@ func TestPostCodeUpload(t *testing.T) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Referer", Config.siteURL)
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 301 {
 		t.Fatalf("Status code is not 301, but %d", w.Code)
@@ -134,6 +136,7 @@ func TestPostCodeUpload(t *testing.T) {
 }
 
 func TestPostCodeUploadWhitelistedHeader(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -152,7 +155,7 @@ func TestPostCodeUploadWhitelistedHeader(t *testing.T) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Linx-Expiry", "0")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 301 {
 		t.Fatalf("Status code is not 301, but %d", w.Code)
@@ -160,6 +163,7 @@ func TestPostCodeUploadWhitelistedHeader(t *testing.T) {
 }
 
 func TestPostCodeUploadNoReferrer(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -177,7 +181,7 @@ func TestPostCodeUploadNoReferrer(t *testing.T) {
 	req.PostForm = form
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 400 {
 		t.Fatalf("Status code is not 400, but %d", w.Code)
@@ -185,6 +189,7 @@ func TestPostCodeUploadNoReferrer(t *testing.T) {
 }
 
 func TestPostCodeUploadBadOrigin(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -204,7 +209,7 @@ func TestPostCodeUploadBadOrigin(t *testing.T) {
 	req.Header.Set("Referer", Config.siteURL)
 	req.Header.Set("Origin", "http://example.com/")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 400 {
 		t.Fatalf("Status code is not 400, but %d", w.Code)
@@ -212,6 +217,7 @@ func TestPostCodeUploadBadOrigin(t *testing.T) {
 }
 
 func TestPostCodeExpiryJSONUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	form := url.Values{}
@@ -228,7 +234,7 @@ func TestPostCodeExpiryJSONUpload(t *testing.T) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Referer", Config.siteURL)
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Log(w.Body.String())
@@ -257,6 +263,7 @@ func TestPostCodeExpiryJSONUpload(t *testing.T) {
 }
 
 func TestPostUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -278,7 +285,7 @@ func TestPostUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 301 {
 		t.Fatalf("Status code is not 301, but %d", w.Code)
@@ -290,6 +297,7 @@ func TestPostUpload(t *testing.T) {
 }
 
 func TestPostJSONUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -312,7 +320,7 @@ func TestPostJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Log(w.Body.String())
@@ -339,6 +347,7 @@ func TestPostJSONUpload(t *testing.T) {
 }
 
 func TestPostExpiresJSONUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -367,7 +376,7 @@ func TestPostExpiresJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Log(w.Body.String())
@@ -400,6 +409,7 @@ func TestPostExpiresJSONUpload(t *testing.T) {
 }
 
 func TestPostRandomizeJSONUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -428,7 +438,7 @@ func TestPostRandomizeJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Log(w.Body.String())
@@ -451,6 +461,7 @@ func TestPostRandomizeJSONUpload(t *testing.T) {
 }
 
 func TestPostEmptyUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -472,7 +483,7 @@ func TestPostEmptyUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 500 {
 		t.Log(w.Body.String())
@@ -485,6 +496,7 @@ func TestPostEmptyUpload(t *testing.T) {
 }
 
 func TestPostEmptyJSONUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".txt"
@@ -507,7 +519,7 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 500 {
 		t.Log(w.Body.String())
@@ -526,6 +538,7 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 }
 
 func TestPutUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -535,7 +548,7 @@ func TestPutUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Body.String() != Config.siteURL+filename {
 		t.Fatal("Response was not expected URL")
@@ -543,6 +556,7 @@ func TestPutUpload(t *testing.T) {
 }
 
 func TestPutRandomizedUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -554,7 +568,7 @@ func TestPutRandomizedUpload(t *testing.T) {
 
 	req.Header.Set("Linx-Randomize", "yes")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Body.String() == Config.siteURL+filename {
 		t.Fatal("Filename was not random")
@@ -562,6 +576,7 @@ func TestPutRandomizedUpload(t *testing.T) {
 }
 
 func TestPutNoExtensionUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename()
@@ -573,7 +588,7 @@ func TestPutNoExtensionUpload(t *testing.T) {
 
 	req.Header.Set("Linx-Randomize", "yes")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Body.String() == Config.siteURL+filename {
 		t.Fatal("Filename was not random")
@@ -581,6 +596,7 @@ func TestPutNoExtensionUpload(t *testing.T) {
 }
 
 func TestPutEmptyUpload(t *testing.T) {
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -592,7 +608,7 @@ func TestPutEmptyUpload(t *testing.T) {
 
 	req.Header.Set("Linx-Randomize", "yes")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if !strings.Contains(w.Body.String(), "Empty file") {
 		t.Fatal("Response doesn't contain'Empty file'")
@@ -602,6 +618,7 @@ func TestPutEmptyUpload(t *testing.T) {
 func TestPutJSONUpload(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -613,7 +630,7 @@ func TestPutJSONUpload(t *testing.T) {
 
 	req.Header.Set("Accept", "application/json")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -628,6 +645,7 @@ func TestPutJSONUpload(t *testing.T) {
 func TestPutRandomizedJSONUpload(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -640,7 +658,7 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Linx-Randomize", "yes")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -655,6 +673,7 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 func TestPutExpireJSONUpload(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	filename := generateBarename() + ".ext"
@@ -667,7 +686,7 @@ func TestPutExpireJSONUpload(t *testing.T) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Linx-Expiry", "600")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -686,6 +705,7 @@ func TestPutExpireJSONUpload(t *testing.T) {
 func TestPutAndDelete(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
@@ -695,7 +715,7 @@ func TestPutAndDelete(t *testing.T) {
 
 	req.Header.Set("Accept", "application/json")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -706,7 +726,7 @@ func TestPutAndDelete(t *testing.T) {
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
 	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
@@ -715,7 +735,7 @@ func TestPutAndDelete(t *testing.T) {
 	// Make sure it's actually gone
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "/"+myjson.Filename, nil)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
@@ -724,7 +744,7 @@ func TestPutAndDelete(t *testing.T) {
 	// Make sure torrent is also gone
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "/"+myjson.Filename+"/torrent", nil)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
@@ -734,6 +754,7 @@ func TestPutAndDelete(t *testing.T) {
 func TestPutAndOverwrite(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
@@ -743,7 +764,7 @@ func TestPutAndOverwrite(t *testing.T) {
 
 	req.Header.Set("Accept", "application/json")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -754,7 +775,7 @@ func TestPutAndOverwrite(t *testing.T) {
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("PUT", "/upload/"+myjson.Filename, strings.NewReader("New file content"))
 	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
@@ -763,7 +784,7 @@ func TestPutAndOverwrite(t *testing.T) {
 	// Make sure it's the new file
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "/selif/"+myjson.Filename, nil)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code == 404 {
 		t.Fatal("Status code was 404")
@@ -777,6 +798,7 @@ func TestPutAndOverwrite(t *testing.T) {
 func TestPutAndSpecificDelete(t *testing.T) {
 	var myjson RespOkJSON
 
+	mux := setup()
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
@@ -787,7 +809,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Linx-Delete-Key", "supersecret")
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 	if err != nil {
@@ -798,7 +820,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("DELETE", "/"+myjson.Filename, nil)
 	req.Header.Set("Linx-Delete-Key", "supersecret")
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 200 {
 		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
@@ -807,7 +829,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	// Make sure it's actually gone
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "/"+myjson.Filename, nil)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
@@ -816,7 +838,7 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	// Make sure torrent is gone too
 	w = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "/"+myjson.Filename+"/torrent", nil)
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	if w.Code != 404 {
 		t.Fatal("Status code was not 404, but " + strconv.Itoa(w.Code))
