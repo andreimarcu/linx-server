@@ -48,6 +48,8 @@ server {
     
     client_max_body_size 4096M;
     location / {
+        proxy_set_header        X-Real-IP       $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
         fastcgi_pass 127.0.0.1:8080;
         include fastcgi_params;
     }

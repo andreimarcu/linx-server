@@ -48,6 +48,10 @@ func setup() *web.Mux {
 	// middleware
 	mux.Use(middleware.RequestID)
 
+	if Config.fastcgi {
+		mux.Use(middleware.RealIP)
+	}
+
 	if !Config.noLogs {
 		mux.Use(middleware.Logger)
 	}
