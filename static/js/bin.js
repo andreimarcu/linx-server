@@ -5,7 +5,6 @@ var navlist = document.getElementById("info").getElementsByClassName("right")[0]
 init();
 
 function init() {
-
     var editA = document.createElement('a');
 
     editA.setAttribute("href", "#");
@@ -23,8 +22,8 @@ function init() {
     document.getElementById('wordwrap').addEventListener('click', wrap);
 }
 
-
 function edit(ev) {
+    ev.preventDefault();
 
     navlist.remove();
     document.getElementById("filename").remove();
@@ -35,8 +34,8 @@ function edit(ev) {
 
     var editordiv = document.getElementById("editor");
     editordiv.style.display = "block";
+    editordiv.addEventListener('keydown', handleTab);
 }
-
 
 function paste(ev) {
     var editordiv = document.getElementById("editor");
