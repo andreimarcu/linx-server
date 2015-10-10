@@ -17,7 +17,7 @@ Get release and run
 Command-line options
 --------------------
 
-- ```-b 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
+- ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is linx)
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
