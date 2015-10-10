@@ -24,7 +24,7 @@ func TestContentSecurityPolicy(t *testing.T) {
 	Config.siteName = "linx"
 	Config.contentSecurityPolicy = "default-src 'none'; style-src 'self';"
 	Config.xFrameOptions = "SAMEORIGIN"
-	setup()
+	mux := setup()
 
 	w := httptest.NewRecorder()
 
@@ -38,7 +38,7 @@ func TestContentSecurityPolicy(t *testing.T) {
 		frame:  testCSPHeaders["X-Frame-Options"],
 	}))
 
-	goji.DefaultMux.ServeHTTP(w, req)
+	mux.ServeHTTP(w, req)
 
 	for k, v := range testCSPHeaders {
 		if w.HeaderMap[k][0] != v {
