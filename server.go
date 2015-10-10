@@ -35,6 +35,7 @@ var Config struct {
 	allowHotlink              bool
 	fastcgi                   bool
 	remoteUploads             bool
+	authFile                  string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -63,6 +64,13 @@ func setup() *web.Mux {
 		policy: Config.contentSecurityPolicy,
 		frame:  Config.xFrameOptions,
 	}))
+
+	if Config.authFile != "" {
+		mux.Use(UploadAuth(AuthOptions{
+			AuthFile:      Config.authFile,
+			UnauthMethods: []string{"GET", "HEAD", "OPTIONS", "TRACE"},
+		}))
+	}
 
 	// make directories if needed
 	err := os.MkdirAll(Config.filesDir, 0755)
@@ -103,9 +111,15 @@ func setup() *web.Mux {
 	selifIndexRe := regexp.MustCompile(`^/selif/$`)
 	torrentRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)/torrent$`)
 
-	mux.Get("/", indexHandler)
-	mux.Get("/paste/", pasteHandler)
+	if Config.authFile == "" {
+		mux.Get("/", indexHandler)
+		mux.Get("/paste/", pasteHandler)
+	} else {
+		mux.Get("/", http.RedirectHandler("/API", 303))
+		mux.Get("/paste/", http.RedirectHandler("/API/", 303))
+	}
 	mux.Get("/paste", http.RedirectHandler("/paste/", 301))
+
 	mux.Get("/API/", apiDocHandler)
 	mux.Get("/API", http.RedirectHandler("/API/", 301))
 
@@ -159,6 +173,8 @@ func main() {
 		"serve through fastcgi")
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
 		"enable remote uploads")
+	flag.StringVar(&Config.authFile, "authfile", "",
+		"path to a file containing newline-separated scrypted auth keys")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
 		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
 		"value of default Content-Security-Policy header")

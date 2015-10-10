@@ -52,6 +52,26 @@ func TestIndex(t *testing.T) {
 	}
 }
 
+func TestIndexAuthKeys(t *testing.T) {
+	Config.authFile = "/dev/null"
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 303 {
+		t.Fatalf("Status code is not 301, but %d", w.Code)
+	}
+
+	Config.authFile = ""
+}
+
 func TestNotFound(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
