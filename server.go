@@ -128,7 +128,7 @@ func setup() *web.Mux {
 }
 
 func main() {
-	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
+	flag.StringVar(&Config.bind, "bind", "127.0.0.1:8080",
 		"host to bind to (default: 127.0.0.1:8080)")
 	flag.StringVar(&Config.filesDir, "filespath", "files/",
 		"path to files directory")
