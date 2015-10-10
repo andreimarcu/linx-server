@@ -126,8 +126,8 @@ func TestPostCodeUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 301 {
-		t.Fatalf("Status code is not 301, but %d", w.Code)
+	if w.Code != 303 {
+		t.Fatalf("Status code is not 303, but %d", w.Code)
 	}
 
 	if w.Header().Get("Location") != "/"+filename+"."+extension {
@@ -157,8 +157,8 @@ func TestPostCodeUploadWhitelistedHeader(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 301 {
-		t.Fatalf("Status code is not 301, but %d", w.Code)
+	if w.Code != 303 {
+		t.Fatalf("Status code is not 303, but %d", w.Code)
 	}
 }
 
@@ -287,8 +287,8 @@ func TestPostUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 301 {
-		t.Fatalf("Status code is not 301, but %d", w.Code)
+	if w.Code != 303 {
+		t.Fatalf("Status code is not 303, but %d", w.Code)
 	}
 
 	if w.Header().Get("Location") != "/"+filename {

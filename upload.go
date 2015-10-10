@@ -103,7 +103,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/"+upload.Filename, 301)
+		http.Redirect(w, r, "/"+upload.Filename, 303)
 	}
 
 }
@@ -144,7 +144,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.FormValue("url") == "" {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", 303)
 		return
 	}
 
@@ -179,7 +179,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/"+upload.Filename, 301)
+		http.Redirect(w, r, "/"+upload.Filename, 303)
 	}
 }
 
