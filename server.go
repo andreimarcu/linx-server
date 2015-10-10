@@ -13,8 +13,8 @@ import (
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
-	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/graceful"
+	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
 )
 
@@ -42,15 +42,22 @@ var staticBox *rice.Box
 var timeStarted time.Time
 var timeStartedStr string
 
-func setup() {
-	goji.Use(ContentSecurityPolicy(CSPOptions{
+func setup() *web.Mux {
+	mux := web.New()
+
+	// middleware
+	mux.Use(middleware.RequestID)
+
+	if !Config.noLogs {
+		mux.Use(middleware.Logger)
+	}
+
+	mux.Use(middleware.Recoverer)
+	mux.Use(middleware.AutomaticOptions)
+	mux.Use(ContentSecurityPolicy(CSPOptions{
 		policy: Config.contentSecurityPolicy,
 		frame:  Config.xFrameOptions,
 	}))
-
-	if Config.noLogs {
-		goji.Abandon(middleware.Logger)
-	}
 
 	// make directories if needed
 	err := os.MkdirAll(Config.filesDir, 0755)
@@ -91,35 +98,37 @@ func setup() {
 	selifIndexRe := regexp.MustCompile(`^/selif/$`)
 	torrentRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)/torrent$`)
 
-	goji.Get("/", indexHandler)
-	goji.Get("/paste/", pasteHandler)
-	goji.Get("/paste", http.RedirectHandler("/paste/", 301))
-	goji.Get("/API/", apiDocHandler)
-	goji.Get("/API", http.RedirectHandler("/API/", 301))
+	mux.Get("/", indexHandler)
+	mux.Get("/paste/", pasteHandler)
+	mux.Get("/paste", http.RedirectHandler("/paste/", 301))
+	mux.Get("/API/", apiDocHandler)
+	mux.Get("/API", http.RedirectHandler("/API/", 301))
 
 	if Config.remoteUploads {
-		goji.Get("/upload", uploadRemote)
-		goji.Get("/upload/", uploadRemote)
+		mux.Get("/upload", uploadRemote)
+		mux.Get("/upload/", uploadRemote)
 	}
 
-	goji.Post("/upload", uploadPostHandler)
-	goji.Post("/upload/", uploadPostHandler)
-	goji.Put("/upload", uploadPutHandler)
-	goji.Put("/upload/:name", uploadPutHandler)
-	goji.Delete("/:name", deleteHandler)
+	mux.Post("/upload", uploadPostHandler)
+	mux.Post("/upload/", uploadPostHandler)
+	mux.Put("/upload", uploadPutHandler)
+	mux.Put("/upload/:name", uploadPutHandler)
+	mux.Delete("/:name", deleteHandler)
 
-	goji.Get("/static/*", staticHandler)
-	goji.Get("/favicon.ico", staticHandler)
-	goji.Get("/robots.txt", staticHandler)
-	goji.Get(nameRe, fileDisplayHandler)
-	goji.Get(selifRe, fileServeHandler)
-	goji.Get(selifIndexRe, unauthorizedHandler)
-	goji.Get(torrentRe, fileTorrentHandler)
-	goji.NotFound(notFoundHandler)
+	mux.Get("/static/*", staticHandler)
+	mux.Get("/favicon.ico", staticHandler)
+	mux.Get("/robots.txt", staticHandler)
+	mux.Get(nameRe, fileDisplayHandler)
+	mux.Get(selifRe, fileServeHandler)
+	mux.Get(selifIndexRe, unauthorizedHandler)
+	mux.Get(torrentRe, fileTorrentHandler)
+	mux.NotFound(notFoundHandler)
+
+	return mux
 }
 
 func main() {
-	flag.StringVar(&Config.bind, "b", "127.0.0.1:8080",
+	flag.StringVar(&Config.bind, "bind", "127.0.0.1:8080",
 		"host to bind to (default: 127.0.0.1:8080)")
 	flag.StringVar(&Config.filesDir, "filespath", "files/",
 		"path to files directory")
@@ -153,7 +162,7 @@ func main() {
 		"value of X-Frame-Options header")
 	flag.Parse()
 
-	setup()
+	mux := setup()
 
 	if Config.fastcgi {
 		listener, err := net.Listen("tcp", Config.bind)
@@ -162,16 +171,16 @@ func main() {
 		}
 
 		log.Printf("Serving over fastcgi, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
-		fcgi.Serve(listener, goji.DefaultMux)
+		fcgi.Serve(listener, mux)
 	} else if Config.certFile != "" {
 		log.Printf("Serving over https, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
-		err := graceful.ListenAndServeTLS(Config.bind, Config.certFile, Config.keyFile, goji.DefaultMux)
+		err := graceful.ListenAndServeTLS(Config.bind, Config.certFile, Config.keyFile, mux)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		log.Printf("Serving over http, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
-		err := graceful.ListenAndServe(Config.bind, goji.DefaultMux)
+		err := graceful.ListenAndServe(Config.bind, mux)
 		if err != nil {
 			log.Fatal(err)
 		}
