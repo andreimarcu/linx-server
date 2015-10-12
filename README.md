@@ -31,6 +31,7 @@ Command-line options
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-realip``` -- (optionally) let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
 - ````-authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
+- ````-remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
 - ```-fastcgi``` -- (optionally) serve through fastcgi 
 - ```-nologs``` -- (optionally) disable request logs in stdout
 
