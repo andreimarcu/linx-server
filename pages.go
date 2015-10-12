@@ -86,7 +86,10 @@ func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, m
 
 func badRequestHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
-	http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	err := Templates["400.html"].ExecuteWriter(pongo2.Context{}, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func unauthorizedHandler(c web.C, w http.ResponseWriter, r *http.Request) {

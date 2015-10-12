@@ -184,10 +184,10 @@ func main() {
 	flag.StringVar(&Config.remoteAuthFile, "remoteauthfile", "",
 		"path to a file containing newline-separated scrypted auth keys for remote uploads")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
-		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
+		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer origin;",
 		"value of default Content-Security-Policy header")
 	flag.StringVar(&Config.fileContentSecurityPolicy, "filecontentsecuritypolicy",
-		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;",
+		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer origin;",
 		"value of Content-Security-Policy header for file access")
 	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")

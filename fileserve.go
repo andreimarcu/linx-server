@@ -26,7 +26,8 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if !Config.allowHotlink {
 		referer := r.Header.Get("Referer")
-		if referer != "" && !strings.HasPrefix(referer, Config.siteURL) {
+		prefix := strings.TrimSuffix(Config.siteURL, "/")
+		if referer != "" && !strings.HasPrefix(referer, prefix) {
 			w.WriteHeader(403)
 			return
 		}
