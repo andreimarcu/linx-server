@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	authPrefix   = "Linx "
 	scryptSalt   = "linx-server"
 	scryptN      = 16384
 	scryptr      = 8
