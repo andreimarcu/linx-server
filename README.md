@@ -29,6 +29,7 @@ Command-line options
 - ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;"")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
+- ```-realip``` -- (optionally) let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
 - ```-fastcgi``` -- (optionally) serve through fastcgi 
 - ```-nologs``` -- (optionally) disable request logs in stdout
 
@@ -48,8 +49,6 @@ server {
     
     client_max_body_size 4096M;
     location / {
-        proxy_set_header        X-Real-IP       $remote_addr;
-        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
         fastcgi_pass 127.0.0.1:8080;
         include fastcgi_params;
     }

@@ -30,6 +30,7 @@ var Config struct {
 	fileContentSecurityPolicy string
 	xFrameOptions             string
 	maxSize                   int64
+	realIp                    bool
 	noLogs                    bool
 	allowHotlink              bool
 	fastcgi                   bool
@@ -48,7 +49,7 @@ func setup() *web.Mux {
 	// middleware
 	mux.Use(middleware.RequestID)
 
-	if Config.fastcgi {
+	if Config.realIp {
 		mux.Use(middleware.RealIP)
 	}
 
@@ -152,6 +153,8 @@ func main() {
 		"path to ssl certificate (for https)")
 	flag.StringVar(&Config.keyFile, "keyfile", "",
 		"path to ssl key (for https)")
+	flag.BoolVar(&Config.realIp, "realip", false,
+		"use X-Real-IP/X-Forwarded-For headers as original host")
 	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
 		"serve through fastcgi")
 	flag.BoolVar(&Config.remoteUploads, "remoteuploads", false,
