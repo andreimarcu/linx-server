@@ -25,8 +25,8 @@ Command-line options
 - ```-maxsize 4294967296``` maximum upload file size in bytes (default 4GB)
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
 - ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
-- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;")
-- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer none;"")
+- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer origin;")
+- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer origin;"")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-realip``` -- (optionally) let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
