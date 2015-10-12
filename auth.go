@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/base64"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -27,32 +28,25 @@ type AuthOptions struct {
 type auth struct {
 	successHandler http.Handler
 	failureHandler http.Handler
+	authKeys       []string
 	o              AuthOptions
 }
 
-func checkAuth(authFile string, decodedAuth []byte) (result bool, err error) {
-	f, err := os.Open(authFile)
-	if err != nil {
-		return
-	}
-
+func checkAuth(authKeys []string, decodedAuth []byte) (result bool, err error) {
 	checkKey, err := scrypt.Key([]byte(decodedAuth), []byte(scryptSalt), scryptN, scryptr, scryptp, scryptKeyLen)
 	if err != nil {
 		return
 	}
 
 	encodedKey := base64.StdEncoding.EncodeToString(checkKey)
-
-	scanner := bufio.NewScanner(bufio.NewReader(f))
-	for scanner.Scan() {
-		if encodedKey == scanner.Text() {
+	for _, v := range authKeys {
+		if encodedKey == v {
 			result = true
 			return
 		}
 	}
 
 	result = false
-	err = scanner.Err()
 	return
 }
 
@@ -75,7 +69,7 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := checkAuth(a.o.AuthFile, decodedAuth)
+	result, err := checkAuth(a.authKeys, decodedAuth)
 	if err != nil || !result {
 		a.failureHandler.ServeHTTP(w, r)
 		return
@@ -85,10 +79,29 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadAuth(o AuthOptions) func(http.Handler) http.Handler {
+	var authKeys []string
+
+	f, err := os.Open(o.AuthFile)
+	if err != nil {
+		log.Fatal("Failed to open authfile: ", err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		authKeys = append(authKeys, scanner.Text())
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		log.Fatal("Scanner error while reading authfile: ", err)
+	}
+
 	fn := func(h http.Handler) http.Handler {
 		return auth{
 			successHandler: h,
 			failureHandler: http.HandlerFunc(badAuthorizationHandler),
+			authKeys:       authKeys,
 			o:              o,
 		}
 	}
