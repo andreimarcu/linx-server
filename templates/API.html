@@ -59,6 +59,17 @@
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
 &#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ steurl }}/f34h4iu.jpg&#34;}</code></pre>
 
+			<h3>Overwriting a file</h3>
+
+			<p>To overwrite a file you uploaded, simply provide the <code>Linx-Delete-Key</code> header with the original file's deletion key.</p>
+
+			<p><strong>Example</p></strong>
+
+			<p>To overwrite myphoto.jpg</p>
+
+			<pre><code>$ curl -H &#34;Linx-Delete-Key: mysecret&#34; -T myphoto.jpg {{ siteurl }}upload/
+{{ siteurl }}myphoto.jpg</code></pre>
+
 			<h3>Deleting a file</h3>
 
 			<p>To delete a file you uploaded, make a DELETE request to <code>{{ siteurl }}yourfile.ext</code> with the delete key set as the <code>Linx-Delete-Key</code> header.</p>
