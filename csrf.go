@@ -16,7 +16,7 @@ func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []stri
 		return false
 	}
 
-	if origin := r.Header.Get("Origin"); origin != "" && !strings.HasPrefix(origin, prefix) {
+	if origin := r.Header.Get("Origin"); origin != "" && !strings.HasPrefix(origin, strings.TrimSuffix(prefix, "/")) {
 		return false
 	}
 
