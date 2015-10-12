@@ -248,7 +248,7 @@ func TestPostCodeUploadBadOrigin(t *testing.T) {
 	req.PostForm = form
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Referer", Config.siteURL)
-	req.Header.Set("Origin", "http://example.com/")
+	req.Header.Set("Origin", "http://example.com")
 
 	mux.ServeHTTP(w, req)
 
@@ -274,6 +274,7 @@ func TestPostCodeExpiryJSONUpload(t *testing.T) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Referer", Config.siteURL)
+	req.Header.Set("Origin", strings.TrimSuffix(Config.siteURL, "/"))
 
 	mux.ServeHTTP(w, req)
 
