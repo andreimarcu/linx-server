@@ -36,6 +36,7 @@ var Config struct {
 	fastcgi                   bool
 	remoteUploads             bool
 	authFile                  string
+	remoteAuthFile            string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -43,6 +44,7 @@ var TemplateSet *pongo2.TemplateSet
 var staticBox *rice.Box
 var timeStarted time.Time
 var timeStartedStr string
+var remoteAuthKeys []string
 
 func setup() *web.Mux {
 	mux := web.New()
@@ -126,6 +128,10 @@ func setup() *web.Mux {
 	if Config.remoteUploads {
 		mux.Get("/upload", uploadRemote)
 		mux.Get("/upload/", uploadRemote)
+
+		if Config.remoteAuthFile != "" {
+			remoteAuthKeys = readAuthKeys(Config.remoteAuthFile)
+		}
 	}
 
 	mux.Post("/upload", uploadPostHandler)
@@ -175,6 +181,8 @@ func main() {
 		"enable remote uploads")
 	flag.StringVar(&Config.authFile, "authfile", "",
 		"path to a file containing newline-separated scrypted auth keys")
+	flag.StringVar(&Config.remoteAuthFile, "remoteauthfile", "",
+		"path to a file containing newline-separated scrypted auth keys for remote uploads")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
 		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer none;",
 		"value of default Content-Security-Policy header")
