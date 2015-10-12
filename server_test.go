@@ -52,7 +52,7 @@ func TestIndex(t *testing.T) {
 	}
 }
 
-func TestAuthKeysRedirects(t *testing.T) {
+func TestAuthKeys(t *testing.T) {
 	Config.authFile = "/dev/null"
 
 	redirects := []string{
@@ -75,6 +75,19 @@ func TestAuthKeysRedirects(t *testing.T) {
 		if w.Code != 303 {
 			t.Fatalf("Status code is not 303, but %d", w.Code)
 		}
+	}
+
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("POST", "/paste/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 401 {
+		t.Fatalf("Status code is not 401, but %d", w.Code)
 	}
 
 	Config.authFile = ""
