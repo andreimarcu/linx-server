@@ -24,7 +24,7 @@ type AuthOptions struct {
 	UnauthMethods []string
 }
 
-type uploadBasicAuth struct {
+type auth struct {
 	successHandler http.Handler
 	failureHandler http.Handler
 	o              AuthOptions
@@ -56,7 +56,7 @@ func checkAuth(authFile string, decodedAuth []byte) (result bool, err error) {
 	return
 }
 
-func (a uploadBasicAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if sliceContains(a.o.UnauthMethods, r.Method) {
 		// allow unauthenticated methods
 		a.successHandler.ServeHTTP(w, r)
@@ -86,7 +86,7 @@ func (a uploadBasicAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func UploadAuth(o AuthOptions) func(http.Handler) http.Handler {
 	fn := func(h http.Handler) http.Handler {
-		return uploadBasicAuth{
+		return auth{
 			successHandler: h,
 			failureHandler: http.HandlerFunc(badAuthorizationHandler),
 			o:              o,
