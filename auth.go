@@ -32,6 +32,28 @@ type auth struct {
 	o              AuthOptions
 }
 
+func readAuthKeys(authFile string) []string {
+	var authKeys []string
+
+	f, err := os.Open(authFile)
+	if err != nil {
+		log.Fatal("Failed to open authfile: ", err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		authKeys = append(authKeys, scanner.Text())
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		log.Fatal("Scanner error while reading authfile: ", err)
+	}
+
+	return authKeys
+}
+
 func checkAuth(authKeys []string, decodedAuth []byte) (result bool, err error) {
 	checkKey, err := scrypt.Key([]byte(decodedAuth), []byte(scryptSalt), scryptN, scryptr, scryptp, scryptKeyLen)
 	if err != nil {
@@ -79,29 +101,11 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadAuth(o AuthOptions) func(http.Handler) http.Handler {
-	var authKeys []string
-
-	f, err := os.Open(o.AuthFile)
-	if err != nil {
-		log.Fatal("Failed to open authfile: ", err)
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		authKeys = append(authKeys, scanner.Text())
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		log.Fatal("Scanner error while reading authfile: ", err)
-	}
-
 	fn := func(h http.Handler) http.Handler {
 		return auth{
 			successHandler: h,
 			failureHandler: http.HandlerFunc(badAuthorizationHandler),
-			authKeys:       authKeys,
+			authKeys:       readAuthKeys(o.AuthFile),
 			o:              o,
 		}
 	}
