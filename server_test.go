@@ -52,6 +52,47 @@ func TestIndex(t *testing.T) {
 	}
 }
 
+func TestAuthKeys(t *testing.T) {
+	Config.authFile = "/dev/null"
+
+	redirects := []string{
+		"/",
+		"/paste/",
+	}
+
+	mux := setup()
+
+	for _, v := range redirects {
+		w := httptest.NewRecorder()
+
+		req, err := http.NewRequest("GET", v, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		mux.ServeHTTP(w, req)
+
+		if w.Code != 303 {
+			t.Fatalf("Status code is not 303, but %d", w.Code)
+		}
+	}
+
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("POST", "/paste/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 401 {
+		t.Fatalf("Status code is not 401, but %d", w.Code)
+	}
+
+	Config.authFile = ""
+}
+
 func TestNotFound(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()

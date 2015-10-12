@@ -138,6 +138,19 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
+	if Config.remoteAuthFile != "" {
+		result, err := checkAuth(remoteAuthKeys, []byte(r.FormValue("key")))
+		if err != nil || !result {
+			unauthorizedHandler(c, w, r)
+		}
+	} else {
+		// strict referrer checking is mandatory without remote auth keys
+		if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize"}) {
+			badRequestHandler(c, w, r)
+			return
+		}
+	}
+
 	if r.FormValue("url") == "" {
 		http.Redirect(w, r, "/", 303)
 		return
