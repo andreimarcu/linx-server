@@ -7,8 +7,9 @@ import (
 
 func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []string) bool {
 	p := strings.TrimSuffix(prefix, "/")
-	if origin := r.Header.Get("Origin"); origin != "" && !strings.HasPrefix(origin, p) {
-		return false
+	if origin := r.Header.Get("Origin"); origin != "" {
+		// if there's an Origin header, check it and ignore the rest
+		return strings.HasPrefix(origin, p)
 	}
 
 	for _, header := range whitelistHeaders {
