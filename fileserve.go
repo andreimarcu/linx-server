@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -26,8 +27,9 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if !Config.allowHotlink {
 		referer := r.Header.Get("Referer")
-		prefix := strings.TrimSuffix(Config.siteURL, "/")
-		if referer != "" && !strings.HasPrefix(referer, prefix) {
+		u, _ := url.Parse(referer)
+		p, _ := url.Parse(Config.siteURL)
+		if referer != "" && !sameOrigin(u, p) {
 			w.WriteHeader(403)
 			return
 		}
