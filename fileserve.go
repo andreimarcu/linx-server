@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -40,8 +38,6 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filePath)
 }
 
-var staticCache = make(map[string][]byte)
-
 func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	if path[len(path)-1:] == "/" {
@@ -53,23 +49,15 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 		filePath := strings.TrimPrefix(path, "/static/")
-
-		_, exists := staticCache[filePath]
-		if !exists {
-			file, err := staticBox.Open(filePath)
-			if err != nil {
-				notFoundHandler(c, w, r)
-				return
-			}
-
-			buf := bytes.NewBuffer(nil)
-			io.Copy(buf, file)
-			staticCache[filePath] = buf.Bytes()
+		file, err := staticBox.Open(filePath)
+		if err != nil {
+			notFoundHandler(c, w, r)
+			return
 		}
 
 		w.Header().Set("Etag", timeStartedStr)
 		w.Header().Set("Cache-Control", "max-age=86400")
-		http.ServeContent(w, r, filePath, timeStarted, bytes.NewReader(staticCache[filePath]))
+		http.ServeContent(w, r, filePath, timeStarted, file)
 		return
 	}
 }
