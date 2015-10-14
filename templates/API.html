@@ -11,6 +11,11 @@
 
 			<h2>API</h2>
 
+			{% if using_auth %}
+			<h3>Keys</h3>
+			<p>This instance uses API Keys, therefore you will need to provide a key for uploading and deleting files.<br/> To do so, add the <code>Linx-Api-Key</code> header with your key.</p>
+			{% endif %}
+
 			<h3>Uploading a file</h3>
 
 			<p>To upload a file, make a PUT request to <code>{{ siteurl }}upload/</code> and you will get the url of your upload back.</p>
@@ -45,19 +50,35 @@
 
 			<p>Uploading myphoto.jpg</p>
 
+			{% if using_auth %}
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -T myphoto.jpg {{ siteurl }}upload/  
+{{ siteurl }}myphoto.jpg</code></pre>
+			{% else %}
 			<pre><code>$ curl -T myphoto.jpg {{ siteurl }}upload/  
 {{ siteurl }}myphoto.jpg</code></pre>
+			{% endif %}
 
 			<p>Uploading myphoto.jpg with an expiry of 20 minutes</p>
 
+			{% if using_auth %}
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Linx-Expiry: 1200&#34; -T myphoto.jpg {{ siteurl }}upload/
+{{ siteurl }}myphoto.jpg</code></pre>
+			{% else %}
 			<pre><code>$ curl -H &#34;Linx-Expiry: 1200&#34; -T myphoto.jpg {{ siteurl }}upload/
 {{ siteurl }}myphoto.jpg</code></pre>
+			{% endif %}
 
 			<p>Uploading myphoto.jpg with a random filename and getting a json response:</p>
 
+			{% if using_auth %}
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}/upload/  
+{&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
+&#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ steurl }}/f34h4iu.jpg&#34;}</code></pre>
+			{% else %}
 			<pre><code>$ curl -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}/upload/  
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
 &#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ steurl }}/f34h4iu.jpg&#34;}</code></pre>
+			{% endif %}
 
 			<h3>Overwriting a file</h3>
 
@@ -67,8 +88,13 @@
 
 			<p>To overwrite myphoto.jpg</p>
 
+			{% if using_auth %}
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Linx-Delete-Key: mysecret&#34; -T myphoto.jpg {{ siteurl }}upload/
+{{ siteurl }}myphoto.jpg</code></pre>
+			{% else %}
 			<pre><code>$ curl -H &#34;Linx-Delete-Key: mysecret&#34; -T myphoto.jpg {{ siteurl }}upload/
 {{ siteurl }}myphoto.jpg</code></pre>
+			{% endif %}
 
 			<h3>Deleting a file</h3>
 
@@ -78,8 +104,13 @@
 
 			<p>To delete myphoto.jpg</p>
 
+			{% if using_auth %}
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Linx-Delete-Key: mysecret&#34; -X DELETE {{ siteurl }}myphoto.jpg
+DELETED</code></pre>
+			{% else %}
 			<pre><code>$ curl -H &#34;Linx-Delete-Key: mysecret&#34; -X DELETE {{ siteurl }}myphoto.jpg
 DELETED</code></pre>
+			{% endif %}
 
 			<h3>Information about a file</h3>
 
