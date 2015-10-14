@@ -98,6 +98,7 @@ func setup() *web.Mux {
 	TemplateSet := pongo2.NewSet("templates", p2l)
 	TemplateSet.Globals["sitename"] = Config.siteName
 	TemplateSet.Globals["siteurl"] = Config.siteURL
+	TemplateSet.Globals["using_auth"] = Config.authFile != ""
 	err = populateTemplatesMap(TemplateSet, Templates)
 	if err != nil {
 		log.Fatal("Error: could not load templates", err)

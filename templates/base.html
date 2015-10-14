@@ -13,8 +13,10 @@
 		<div id="container">
 			<div id="header">
 				<div id="navigation" class="right">
+					{% if !using_auth %}
 					<a href="/">Upload</a> | 
 					<a href="/paste/">Paste</a> | 
+					{% endif %}
 					<a href="/API/">API</a>
 				</div>
 				<h2><a href="/"  title="{{ sitename }}">{{ sitename }}</a></h2>
