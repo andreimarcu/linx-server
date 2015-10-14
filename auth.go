@@ -6,13 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"golang.org/x/crypto/scrypt"
 )
 
 const (
-	authPrefix   = "Linx "
 	scryptSalt   = "linx-server"
 	scryptN      = 16384
 	scryptr      = 8
@@ -54,8 +52,8 @@ func readAuthKeys(authFile string) []string {
 	return authKeys
 }
 
-func checkAuth(authKeys []string, decodedAuth []byte) (result bool, err error) {
-	checkKey, err := scrypt.Key([]byte(decodedAuth), []byte(scryptSalt), scryptN, scryptr, scryptp, scryptKeyLen)
+func checkAuth(authKeys []string, key string) (result bool, err error) {
+	checkKey, err := scrypt.Key([]byte(key), []byte(scryptSalt), scryptN, scryptr, scryptp, scryptKeyLen)
 	if err != nil {
 		return
 	}
@@ -79,19 +77,9 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authHeader := r.Header.Get("Authorization")
-	if !strings.HasPrefix(authHeader, authPrefix) {
-		a.failureHandler.ServeHTTP(w, r)
-		return
-	}
+	key := r.Header.Get("Linx-Api-Key")
 
-	decodedAuth, err := base64.StdEncoding.DecodeString(authHeader[len(authPrefix):])
-	if err != nil {
-		a.failureHandler.ServeHTTP(w, r)
-		return
-	}
-
-	result, err := checkAuth(a.authKeys, decodedAuth)
+	result, err := checkAuth(a.authKeys, key)
 	if err != nil || !result {
 		a.failureHandler.ServeHTTP(w, r)
 		return

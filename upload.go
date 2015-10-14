@@ -139,9 +139,10 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	if Config.remoteAuthFile != "" {
-		result, err := checkAuth(remoteAuthKeys, []byte(r.FormValue("key")))
+		result, err := checkAuth(remoteAuthKeys, r.FormValue("key"))
 		if err != nil || !result {
 			unauthorizedHandler(c, w, r)
+			return
 		}
 	} else {
 		// strict referrer checking is mandatory without remote auth keys

@@ -139,6 +139,7 @@ func setup() *web.Mux {
 	mux.Post("/upload/", uploadPostHandler)
 	mux.Put("/upload", uploadPutHandler)
 	mux.Put("/upload/:name", uploadPutHandler)
+
 	mux.Delete("/:name", deleteHandler)
 
 	mux.Get("/static/*", staticHandler)
