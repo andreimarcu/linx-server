@@ -8,7 +8,7 @@ import (
 // Do a strict referrer check, matching against both the Origin header (if
 // present) and the Referrer header. If a list of headers is specified, then
 // Referrer checking will be skipped if any of those headers are present.
-func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []string) bool {
+func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []string, allowBlank bool) bool {
 	p, _ := url.Parse(prefix)
 
 	// if there's an Origin header, check it and skip other checks
@@ -25,7 +25,7 @@ func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []stri
 
 	referrer := r.Header.Get("Referer")
 
-	if referrer == "" {
+	if allowBlank && referrer == "" {
 		return true
 	}
 
