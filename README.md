@@ -1,39 +1,61 @@
 
-Linx Server
+linx-server
 ======
 [![Build Status](https://travis-ci.org/andreimarcu/linx-server.svg?branch=master)](https://travis-ci.org/andreimarcu/linx-server)  
 
+Self-hosted file/media sharing website.  
 
-Soon-to-be opensource replacement of Linx (media-sharing website)
 
-**Consider it in pre-alpha development stages.**
+### Features
+
+- Display common filetypes (image, video, audio, markdown, pdf)  
+- Display syntax-highlighted code with in-place editing
+- Documented API with keys if need to restrict uploads
+- Torrent download of files using web seeding
+- File expiry, deletion key, and random filename options
+
+
+### Screenshots
+<img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530123/4211e946-7372-11e5-9cb5-9956c5c49d95.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530124/4217db8a-7372-11e5-957d-b3abb873dc80.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530125/4219b8a6-7372-11e5-8b71-eeefb8b603d1.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530126/421a5964-7372-11e5-8601-5147e64af6fd.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530127/421b0576-7372-11e5-8ed5-557035bb9f9e.png" />   
+
 
 Get release and run
 -------------------
 1. Grab the latest binary from the [releases](https://github.com/andreimarcu/linx-server/releases)
 2. Run ```./linx-server...```
-  
-  
-Command-line options
---------------------
 
+  
+Usage
+-----
+
+#### Common options
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is linx)
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
 - ```-maxsize 4294967296``` maximum upload file size in bytes (default 4GB)
-- ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
-- ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
 - ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer origin;")
 - ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer origin;"")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
-- ```-realip``` -- (optionally) let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
-- ````-authfile path/to/authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
-- ````-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
-- ```-fastcgi``` -- (optionally) serve through fastcgi 
 - ```-nologs``` -- (optionally) disable request logs in stdout
+
+#### SSL with built-in server 
+- ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
+- ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
+
+#### Use with http proxy 
+- ```-realip``` -- let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
+
+#### Use with fastcgi
+- ```-fastcgi``` -- serve through fastcgi 
+
+#### Require API Keys for uploads
+- ```-authfile path/to/authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
+- ```-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
+
+A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
 
 Deployment
 ----------
@@ -72,11 +94,6 @@ The official IRC channel is #linx on irc.oftc.net
 1. ```go get -u github.com/andreimarcu/linx-server ```
 2. ```cd $GOPATH/src/github.com/andreimarcu/linx-server ```
 3. ```go build && ./linx-server```
-
-
-TODO
-----
-Please refer to the [main TODO issue](https://github.com/andreimarcu/linx-server/issues/1) 
 
 
 License
