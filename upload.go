@@ -46,7 +46,7 @@ type Upload struct {
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}, false) {
+	if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}) {
 		badRequestHandler(c, w, r)
 		return
 	}
@@ -142,12 +142,6 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 		result, err := checkAuth(remoteAuthKeys, r.FormValue("key"))
 		if err != nil || !result {
 			unauthorizedHandler(c, w, r)
-			return
-		}
-	} else {
-		// strict referrer checking is mandatory without remote auth keys
-		if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}, true) {
-			badRequestHandler(c, w, r)
 			return
 		}
 	}
