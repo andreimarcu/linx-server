@@ -24,6 +24,11 @@ func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []stri
 	}
 
 	referrer := r.Header.Get("Referer")
+
+	if referrer == "" {
+		return true
+	}
+
 	u, _ := url.Parse(referrer)
 	return sameOrigin(u, p)
 }
