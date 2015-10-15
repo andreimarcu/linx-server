@@ -275,6 +275,14 @@ body {
     overflow: auto;
 }
 
+.storygreen {
+    color: #789922;
+}
+
+.storyred {
+  color: #800000;
+}
+
 /* Content display {{{ */
 .display-audio,
 .display-file {
@@ -300,7 +308,7 @@ body {
 }
 
 .storycontent {
-    background-color: #f0e0d6;
+    background-color: #f0e0d6 !important;
 }
 
 #editform,

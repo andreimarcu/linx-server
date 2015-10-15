@@ -866,6 +866,5 @@ var extensionToHl = map[string]string{
 	"cmake":  "cmake",
 	"bat":    "dos",
 	"scala":  "scala",
-	"story":  "story",
 	"txt":    "text",
 }

@@ -41,6 +41,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 	sizeHuman := humanize.Bytes(uint64(metadata.Size))
 	extra := make(map[string]string)
+	lines := []string{}
 
 	file, _ := os.Open(filePath)
 	defer file.Close()
@@ -86,6 +87,15 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 				tpl = Templates["display/bin.html"]
 			}
 		}
+	} else if extension == "story" {
+		if metadata.Size < maxDisplayFileSizeBytes {
+			bytes, err := ioutil.ReadFile(filePath)
+			if err == nil {
+				extra["contents"] = string(bytes)
+				lines = strings.Split(extra["contents"], "\n")
+				tpl = Templates["display/story.html"]
+			}
+		}
 	} else if extension == "md" {
 		if metadata.Size < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
@@ -110,6 +120,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		"size":     sizeHuman,
 		"expiry":   expiryHuman,
 		"extra":    extra,
+		"lines":    lines,
 		"files":    metadata.ArchiveFiles,
 	}, w)
 

@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 
 {% block head %}
-    {% if extra.extension == "story" %}
-    <link href="/static/css/highlight/story.css" rel="stylesheet" type="text/css">
-    {% else %}
     <link href="/static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css">
-    {% endif %}
     {% endblock %}
 
 {% block innercontentmore %} class="scrollable"{% endblock %}
-{% block mainmore %} {% if extra.extension == "story" %} class="storycontent"{% endif %} {% endblock %}
 
 {% block infoleft %}
     <div id="editform">
@@ -41,7 +36,7 @@
 {% endblock %}
 
 {% block main %}
-<div id="normal-content" class="normal {% if extra.lang_hl != "story" %}fixed{% endif %}">
+<div id="normal-content" class="normal fixed">
     <pre id="normal-code"><code id="codeb" class="{{ extra.lang_hl }}">{{ extra.contents }}</code></pre>
     <textarea id="editor" class="editor">{{ extra.contents }}</textarea>
 </div>
