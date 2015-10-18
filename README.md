@@ -35,7 +35,8 @@ Usage
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
-- ```-maxsize 4294967296``` maximum upload file size in bytes (default 4GB)
+- ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
+- ```-allowhotlink``` -- Allow file hotlinking
 - ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer origin;")
 - ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; sandbox; referrer origin;"")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
