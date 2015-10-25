@@ -29,6 +29,16 @@ Get release and run
 Usage
 -----
 
+#### Configuration
+All configuration options are accepted either as arguments or can be placed in an ini-style file as such:  
+```ini
+sitename = "my linx"  
+siteurl = "https://linx.example.com"  
+remoteuploads = true
+# etc
+```  
+...and then invoke ```linx-server -config path/to/config.ini```  
+
 #### Common options
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is linx)

@@ -13,6 +13,7 @@ import (
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
+	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji/graceful"
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
@@ -194,7 +195,8 @@ func main() {
 		"value of Content-Security-Policy header for file access")
 	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")
-	flag.Parse()
+
+	iniflags.Parse()
 
 	mux := setup()
 
