@@ -335,6 +335,9 @@ func barePlusExt(filename string) (barename, extension string) {
 	extension = barePlusRe.ReplaceAllString(extension, "")
 	barename = barePlusRe.ReplaceAllString(barename, "")
 
+	extension = strings.Trim(extension, "-")
+	barename = strings.Trim(barename, "-")
+
 	return
 }
 
