@@ -15,6 +15,7 @@ import (
 	"path"
 	"sort"
 	"time"
+	"unicode/utf8"
 
 	"bitbucket.org/taruti/mimemagic"
 	"github.com/dchest/uniuri"
@@ -63,6 +64,15 @@ func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, e
 	file.Read(header)
 
 	m.Mimetype = mimemagic.Match("", header)
+
+	if m.Mimetype == "" {
+		// Check if the file seems anything like text
+		if utf8.Valid(header) {
+			m.Mimetype = "text/plain"
+		} else {
+			m.Mimetype = "application/octet-stream"
+		}
+	}
 
 	// Compute the sha256sum
 	hasher := sha256.New()
