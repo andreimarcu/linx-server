@@ -77,7 +77,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	} else if metadata.Mimetype == "application/pdf" {
 		tpl = Templates["display/pdf.html"]
 
-	} else if metadata.Mimetype == "text/plain" || supportedBinExtension(extension) {
+	} else if metadata.Mimetype[:5] == "text/" || supportedBinExtension(extension) {
 		if metadata.Size < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
 			if err == nil {
