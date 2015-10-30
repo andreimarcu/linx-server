@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link href='/static/css/dropzone.css' media='screen, projection' rel='stylesheet' type='text/css'>
+<link href='{{ sitepath }}static/css/dropzone.css' media='screen, projection' rel='stylesheet' type='text/css'>
 {% endblock %}
 
 {% block content %} 
 <div id="fileupload">
-    <form action="/upload" class="dropzone" id="dropzone" method="POST" enctype="multipart/form-data" data-maxsize="{{ maxsize }}">
+    <form action="{{ sitepath }}upload" class="dropzone" id="dropzone" method="POST" enctype="multipart/form-data" data-maxsize="{{ maxsize }}">
         <div class="fallback">
             <input id="fileinput" name="file" type="file" /><br />
             <input id="submitbtn" type="submit" value="Upload">
@@ -39,6 +39,6 @@
     <div class="clear"></div>
 </div>
 
-<script src="/static/js/dropzone.js"></script>
-<script src="/static/js/upload.js"></script>
+<script src="{{ sitepath }}static/js/dropzone.js"></script>
+<script src="{{ sitepath }}static/js/upload.js"></script>
 {% endblock %}

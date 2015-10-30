@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <link href="/static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css">
+    <link href="{{ sitepath }}static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css">
     {% endblock %}
 
 {% block innercontentmore %} class="scrollable"{% endblock %}
 
 {% block infoleft %}
     <div id="editform">
-        <form id="reply" action='/upload' method='post' >
+        <form id="reply" action='{{ sitepath }}upload' method='post' >
             <div class="right">
                 <select id="expiry" name="expires">
                     <option disabled=disabled>Expires:</option>
@@ -43,10 +43,10 @@
 
 
 {% if extra.lang_hl != "text" %}
-<script src="/static/js/highlight/highlight.pack.js"></script>
-<script src="/static/js/bin_hljs.js"></script>
+<script src="{{ sitepath }}static/js/highlight/highlight.pack.js"></script>
+<script src="{{ sitepath }}static/js/bin_hljs.js"></script>
 {% endif %}
 
-<script src="/static/js/util.js"></script>
-<script src="/static/js/bin.js"></script>
+<script src="{{ sitepath }}static/js/util.js"></script>
+<script src="{{ sitepath }}static/js/bin.js"></script>
 {% endblock %}

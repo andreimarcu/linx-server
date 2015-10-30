@@ -69,8 +69,11 @@ remoteuploads = true
 
 A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
 
+
 Deployment
 ----------
+Linx-server supports being deployed in a subdirectory (ie. example.com/mylinx/) as well as on its own (example.com/).
+
 
 #### 1. Using fastcgi
 
@@ -97,6 +100,7 @@ Run linx-server with the ```-certfile path/to/cert.file``` and ```-keyfile path/
 
 #### 3. Using the built-in http server
 Run linx-server normally.
+
 
 Development
 -----------

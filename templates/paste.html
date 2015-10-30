@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block head %}
-<link href="/static/css/hint.css" rel="stylesheet" type="text/css">
+<link href="{{ sitepath }}static/css/hint.css" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block content %}
-    <form id="reply" action='/upload' method='post'>
+    <form id="reply" action='{{ sitepath }}upload' method='post'>
         <div id="main">
             <div id="info" class="ninfo">
                 <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
@@ -34,6 +34,6 @@
         </div>
     </form>        
 
-<script src="/static/js/util.js"></script>
-<script src="/static/js/paste.js"></script>
+<script src="{{ sitepath }}static/js/util.js"></script>
+<script src="{{ sitepath }}static/js/paste.js"></script>
 {% endblock %}

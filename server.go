@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/fcgi"
+	"net/url"
 	"os"
 	"regexp"
 	"strconv"
@@ -25,6 +26,7 @@ var Config struct {
 	metaDir                   string
 	siteName                  string
 	siteURL                   string
+	sitePath                  string
 	certFile                  string
 	keyFile                   string
 	contentSecurityPolicy     string
@@ -91,6 +93,13 @@ func setup() *web.Mux {
 		Config.siteURL = Config.siteURL + "/"
 	}
 
+	parsedUrl, err := url.Parse(Config.siteURL)
+	if err != nil {
+		log.Fatal("Could not parse siteurl:", err)
+	}
+
+	Config.sitePath = parsedUrl.Path
+
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()
 	if err != nil {
@@ -99,6 +108,7 @@ func setup() *web.Mux {
 	TemplateSet := pongo2.NewSet("templates", p2l)
 	TemplateSet.Globals["sitename"] = Config.siteName
 	TemplateSet.Globals["siteurl"] = Config.siteURL
+	TemplateSet.Globals["sitepath"] = Config.sitePath
 	TemplateSet.Globals["using_auth"] = Config.authFile != ""
 	err = populateTemplatesMap(TemplateSet, Templates)
 	if err != nil {
@@ -110,43 +120,43 @@ func setup() *web.Mux {
 	timeStartedStr = strconv.FormatInt(timeStarted.Unix(), 10)
 
 	// Routing setup
-	nameRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)$`)
-	selifRe := regexp.MustCompile(`^/selif/(?P<name>[a-z0-9-\.]+)$`)
-	selifIndexRe := regexp.MustCompile(`^/selif/$`)
-	torrentRe := regexp.MustCompile(`^/(?P<name>[a-z0-9-\.]+)/torrent$`)
+	nameRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)$`)
+	selifRe := regexp.MustCompile("^" + Config.sitePath + `selif/(?P<name>[a-z0-9-\.]+)$`)
+	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + `selif/$`)
+	torrentRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/torrent$`)
 
 	if Config.authFile == "" {
-		mux.Get("/", indexHandler)
-		mux.Get("/paste/", pasteHandler)
+		mux.Get(Config.sitePath, indexHandler)
+		mux.Get(Config.sitePath+"paste/", pasteHandler)
 	} else {
-		mux.Get("/", http.RedirectHandler("/API", 303))
-		mux.Get("/paste/", http.RedirectHandler("/API/", 303))
+		mux.Get(Config.sitePath, http.RedirectHandler(Config.sitePath+"API", 303))
+		mux.Get(Config.sitePath+"paste/", http.RedirectHandler(Config.sitePath+"API/", 303))
 	}
-	mux.Get("/paste", http.RedirectHandler("/paste/", 301))
+	mux.Get(Config.sitePath+"paste", http.RedirectHandler(Config.sitePath+"paste/", 301))
 
-	mux.Get("/API/", apiDocHandler)
-	mux.Get("/API", http.RedirectHandler("/API/", 301))
+	mux.Get(Config.sitePath+"API/", apiDocHandler)
+	mux.Get(Config.sitePath+"API", http.RedirectHandler(Config.sitePath+"API/", 301))
 
 	if Config.remoteUploads {
-		mux.Get("/upload", uploadRemote)
-		mux.Get("/upload/", uploadRemote)
+		mux.Get(Config.sitePath+"upload", uploadRemote)
+		mux.Get(Config.sitePath+"upload/", uploadRemote)
 
 		if Config.remoteAuthFile != "" {
 			remoteAuthKeys = readAuthKeys(Config.remoteAuthFile)
 		}
 	}
 
-	mux.Post("/upload", uploadPostHandler)
-	mux.Post("/upload/", uploadPostHandler)
-	mux.Put("/upload", uploadPutHandler)
-	mux.Put("/upload/", uploadPutHandler)
-	mux.Put("/upload/:name", uploadPutHandler)
+	mux.Post(Config.sitePath+"upload", uploadPostHandler)
+	mux.Post(Config.sitePath+"upload/", uploadPostHandler)
+	mux.Put(Config.sitePath+"upload", uploadPutHandler)
+	mux.Put(Config.sitePath+"upload/", uploadPutHandler)
+	mux.Put(Config.sitePath+"upload/:name", uploadPutHandler)
 
-	mux.Delete("/:name", deleteHandler)
+	mux.Delete(Config.sitePath+":name", deleteHandler)
 
-	mux.Get("/static/*", staticHandler)
-	mux.Get("/favicon.ico", staticHandler)
-	mux.Get("/robots.txt", staticHandler)
+	mux.Get(Config.sitePath+"static/*", staticHandler)
+	mux.Get(Config.sitePath+"favicon.ico", staticHandler)
+	mux.Get(Config.sitePath+"robots.txt", staticHandler)
 	mux.Get(nameRe, fileDisplayHandler)
 	mux.Get(selifRe, fileServeHandler)
 	mux.Get(selifIndexRe, unauthorizedHandler)

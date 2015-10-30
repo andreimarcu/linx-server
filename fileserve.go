@@ -45,10 +45,10 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		if path == "/favicon.ico" {
-			path = "/static/images/favicon.gif"
+			path = Config.sitePath + "/static/images/favicon.gif"
 		}
 
-		filePath := strings.TrimPrefix(path, "/static/")
+		filePath := strings.TrimPrefix(path, Config.sitePath+"static/")
 		file, err := staticBox.Open(filePath)
 		if err != nil {
 			notFoundHandler(c, w, r)
