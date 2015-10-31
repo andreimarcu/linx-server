@@ -15,7 +15,7 @@ import (
 	"path"
 	"sort"
 	"time"
-	"unicode/utf8"
+	"unicode"
 
 	"bitbucket.org/taruti/mimemagic"
 	"github.com/dchest/uniuri"
@@ -67,7 +67,7 @@ func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, e
 
 	if m.Mimetype == "" {
 		// Check if the file seems anything like text
-		if utf8.Valid(header) {
+		if printable(header) {
 			m.Mimetype = "text/plain"
 		} else {
 			m.Mimetype = "application/octet-stream"
@@ -195,4 +195,24 @@ func metadataRead(filename string) (metadata Metadata, err error) {
 	metadata.Size = mjson.Size
 
 	return
+}
+
+func printable(data []byte) bool {
+	for i, b := range data {
+		r := rune(b)
+
+		// A null terminator that's not at the beginning of the file
+		if r == 0 && i == 0 {
+			return false
+		} else if r == 0 && i < 0 {
+			continue
+		}
+
+		if r > unicode.MaxASCII {
+			return false
+		}
+
+	}
+
+	return true
 }
