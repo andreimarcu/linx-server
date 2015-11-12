@@ -2,5 +2,6 @@
 
 hljs.tabReplace = '    ';
 hljs.initHighlightingOnLoad();
+hljs.initLineNumbersOnLoad();
 
 // @license-end
