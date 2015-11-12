@@ -28,7 +28,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(referer)
 		p, _ := url.Parse(Config.siteURL)
 		if referer != "" && !sameOrigin(u, p) {
-			w.WriteHeader(403)
+			http.Redirect(w, r, Config.sitePath+fileName, 303)
 			return
 		}
 	}
