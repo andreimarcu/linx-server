@@ -86,16 +86,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 				tpl = Templates["display/story.html"]
 			}
 		}
-	} else if strings.HasPrefix(metadata.Mimetype, "text/") || supportedBinExtension(extension) {
-		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := ioutil.ReadFile(filePath)
-			if err == nil {
-				extra["extension"] = extension
-				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
-				extra["contents"] = string(bytes)
-				tpl = Templates["display/bin.html"]
-			}
-		}
+
 	} else if extension == "md" {
 		if metadata.Size < maxDisplayFileSizeBytes {
 			bytes, err := ioutil.ReadFile(filePath)
@@ -105,6 +96,17 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 				extra["contents"] = string(html)
 				tpl = Templates["display/md.html"]
+			}
+		}
+
+	} else if strings.HasPrefix(metadata.Mimetype, "text/") || supportedBinExtension(extension) {
+		if metadata.Size < maxDisplayFileSizeBytes {
+			bytes, err := ioutil.ReadFile(filePath)
+			if err == nil {
+				extra["extension"] = extension
+				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
+				extra["contents"] = string(bytes)
+				tpl = Templates["display/bin.html"]
 			}
 		}
 	}
