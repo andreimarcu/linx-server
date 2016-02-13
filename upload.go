@@ -322,20 +322,35 @@ func generateJSONresponse(upload Upload) []byte {
 	return js
 }
 
-var barePlusRe = regexp.MustCompile(`[^A-Za-z0-9\-]`)
+var bareRe = regexp.MustCompile(`[^A-Za-z0-9\-]`)
+var extRe = regexp.MustCompile(`[^A-Za-z0-9\-\.]`)
+var compressedExts = map[string]bool{
+	".bz2": true,
+	".gz":  true,
+	".xz":  true,
+}
+var archiveExts = map[string]bool{
+	".tar": true,
+}
 
 func barePlusExt(filename string) (barename, extension string) {
-
 	filename = strings.TrimSpace(filename)
 	filename = strings.ToLower(filename)
 
 	extension = path.Ext(filename)
 	barename = filename[:len(filename)-len(extension)]
+	if compressedExts[extension] {
+		ext2 := path.Ext(barename)
+		if archiveExts[ext2] {
+			barename = barename[:len(barename)-len(ext2)]
+			extension = ext2 + extension
+		}
+	}
 
-	extension = barePlusRe.ReplaceAllString(extension, "")
-	barename = barePlusRe.ReplaceAllString(barename, "")
+	extension = extRe.ReplaceAllString(extension, "")
+	barename = bareRe.ReplaceAllString(barename, "")
 
-	extension = strings.Trim(extension, "-")
+	extension = strings.Trim(extension, "-.")
 	barename = strings.Trim(barename, "-")
 
 	return
