@@ -887,6 +887,24 @@ func TestPutAndSpecificDelete(t *testing.T) {
 	}
 }
 
+func TestExtension(t *testing.T) {
+	barename, extension := barePlusExt("test.jpg.gz")
+	if barename != "testjpg" {
+		t.Fatal("Barename was not testjpg, but " + barename)
+	}
+	if extension != "gz" {
+		t.Fatal("Extension was not gz, but " + extension)
+	}
+
+	barename, extension = barePlusExt("test.tar.gz")
+	if barename != "test" {
+		t.Fatal("Barename was not test, but " + barename)
+	}
+	if extension != "tar.gz" {
+		t.Fatal("Extension was not tar.gz, but " + extension)
+	}
+}
+
 func TestShutdown(t *testing.T) {
 	os.RemoveAll(Config.filesDir)
 	os.RemoveAll(Config.metaDir)
