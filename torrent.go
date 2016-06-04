@@ -37,7 +37,7 @@ func hashPiece(piece []byte) []byte {
 	return h.Sum(nil)
 }
 
-func createTorrent(fileName string, filePath string) ([]byte, error) {
+func createTorrent(fileName string, filePath string, r *http.Request) ([]byte, error) {
 	chunk := make([]byte, TORRENT_PIECE_LENGTH)
 
 	torrent := Torrent{
@@ -46,7 +46,7 @@ func createTorrent(fileName string, filePath string) ([]byte, error) {
 			PieceLength: TORRENT_PIECE_LENGTH,
 			Name:        fileName,
 		},
-		UrlList: []string{fmt.Sprintf("%sselif/%s", Config.siteURL, fileName)},
+		UrlList: []string{fmt.Sprintf("%sselif/%s", getSiteURL(r), fileName)},
 	}
 
 	f, err := os.Open(filePath)
@@ -89,7 +89,7 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encoded, err := createTorrent(fileName, filePath)
+	encoded, err := createTorrent(fileName, filePath, r)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "Could not create torrent.")
 		return

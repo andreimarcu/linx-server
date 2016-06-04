@@ -102,17 +102,21 @@ func setup() *web.Mux {
 		log.Fatal("Could not create metadata directory:", err)
 	}
 
-	// ensure siteURL ends wth '/'
-	if lastChar := Config.siteURL[len(Config.siteURL)-1:]; lastChar != "/" {
-		Config.siteURL = Config.siteURL + "/"
-	}
+	if Config.siteURL != "" {
+		// ensure siteURL ends wth '/'
+		if lastChar := Config.siteURL[len(Config.siteURL)-1:]; lastChar != "/" {
+			Config.siteURL = Config.siteURL + "/"
+		}
 
-	parsedUrl, err := url.Parse(Config.siteURL)
-	if err != nil {
-		log.Fatal("Could not parse siteurl:", err)
-	}
+		parsedUrl, err := url.Parse(Config.siteURL)
+		if err != nil {
+			log.Fatal("Could not parse siteurl:", err)
+		}
 
-	Config.sitePath = parsedUrl.Path
+		Config.sitePath = parsedUrl.Path
+	} else {
+		Config.sitePath = "/"
+	}
 
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()
@@ -121,7 +125,6 @@ func setup() *web.Mux {
 	}
 	TemplateSet := pongo2.NewSet("templates", p2l)
 	TemplateSet.Globals["sitename"] = Config.siteName
-	TemplateSet.Globals["siteurl"] = Config.siteURL
 	TemplateSet.Globals["sitepath"] = Config.sitePath
 	TemplateSet.Globals["using_auth"] = Config.authFile != ""
 	err = populateTemplatesMap(TemplateSet, Templates)
@@ -193,7 +196,7 @@ func main() {
 		"Allow hotlinking of files")
 	flag.StringVar(&Config.siteName, "sitename", "linx",
 		"name of the site")
-	flag.StringVar(&Config.siteURL, "siteurl", "http://"+Config.bind+"/",
+	flag.StringVar(&Config.siteURL, "siteurl", "",
 		"site base url (including trailing slash)")
 	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
 		"maximum upload file size in bytes (default 4GB)")
@@ -232,16 +235,16 @@ func main() {
 			log.Fatal("Could not bind: ", err)
 		}
 
-		log.Printf("Serving over fastcgi, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
+		log.Printf("Serving over fastcgi, bound on %s", Config.bind)
 		fcgi.Serve(listener, mux)
 	} else if Config.certFile != "" {
-		log.Printf("Serving over https, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
+		log.Printf("Serving over https, bound on %s", Config.bind)
 		err := graceful.ListenAndServeTLS(Config.bind, Config.certFile, Config.keyFile, mux)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		log.Printf("Serving over http, bound on %s, using siteurl %s", Config.bind, Config.siteURL)
+		log.Printf("Serving over http, bound on %s", Config.bind)
 		err := graceful.ListenAndServe(Config.bind, mux)
 		if err != nil {
 			log.Fatal(err)

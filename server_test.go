@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"mime/multipart"
 	"net/http"
@@ -921,6 +922,102 @@ func TestExtension(t *testing.T) {
 	if extension != "tar.gz" {
 		t.Fatal("Extension was not tar.gz, but " + extension)
 	}
+}
+
+func TestInferSiteURL(t *testing.T) {
+	oldSiteURL := Config.siteURL
+	oldSitePath := Config.sitePath
+	Config.siteURL = ""
+	Config.sitePath = "/linxtest/"
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/API/", nil)
+	req.Host = "example.com:8080"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if !strings.Contains(w.Body.String(), "http://example.com:8080/upload/") {
+		t.Fatal("Site URL not found properly embedded in response")
+	}
+
+	Config.siteURL = oldSiteURL
+	Config.sitePath = oldSitePath
+}
+
+func TestInferSiteURLProxied(t *testing.T) {
+	oldSiteURL := Config.siteURL
+	Config.siteURL = ""
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/API/", nil)
+	req.Header.Add("X-Forwarded-Proto", "https")
+	req.Host = "example.com:8080"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if !strings.Contains(w.Body.String(), "https://example.com:8080/upload/") {
+		t.Fatal("Site URL not found properly embedded in response")
+	}
+
+	Config.siteURL = oldSiteURL
+}
+
+func TestInferSiteURLHTTPS(t *testing.T) {
+	oldSiteURL := Config.siteURL
+	oldCertFile := Config.certFile
+	Config.siteURL = ""
+	Config.certFile = "/dev/null"
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/API/", nil)
+	req.Host = "example.com"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if !strings.Contains(w.Body.String(), "https://example.com/upload/") {
+		t.Fatal("Site URL not found properly embedded in response")
+	}
+
+	Config.siteURL = oldSiteURL
+	Config.certFile = oldCertFile
+}
+
+func TestInferSiteURLHTTPSFastCGI(t *testing.T) {
+	oldSiteURL := Config.siteURL
+	Config.siteURL = ""
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/API/", nil)
+	req.Host = "example.com"
+	req.TLS = &tls.ConnectionState{HandshakeComplete: true}
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if !strings.Contains(w.Body.String(), "https://example.com/upload/") {
+		t.Fatal("Site URL not found properly embedded in response")
+	}
+
+	Config.siteURL = oldSiteURL
 }
 
 func TestShutdown(t *testing.T) {
