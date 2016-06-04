@@ -47,8 +47,8 @@ remoteuploads = true
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
 - ```-allowhotlink``` -- Allow file hotlinking
-- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; referrer origin;")
-- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; referrer origin;")
+- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
+- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-nologs``` -- (optionally) disable request logs in stdout
