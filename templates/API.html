@@ -74,13 +74,13 @@
 			<p>Uploading myphoto.jpg with a random filename and getting a json response:</p>
 
 			{% if using_auth %}
-			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}/upload/  
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}upload/  
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
-&#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ steurl }}/f34h4iu.jpg&#34;}</code></pre>
+&#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ siteurl }}f34h4iu.jpg&#34;}</code></pre>
 			{% else %}
 			<pre><code>$ curl -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}/upload/  
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
-&#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ steurl }}/f34h4iu.jpg&#34;}</code></pre>
+&#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ siteurl }}f34h4iu.jpg&#34;}</code></pre>
 			{% endif %}
 
 			<h3>Overwriting a file</h3>
