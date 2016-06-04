@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/GeertJohan/go.rice"
@@ -19,6 +20,17 @@ import (
 	"github.com/zenazn/goji/web"
 	"github.com/zenazn/goji/web/middleware"
 )
+
+type headerList []string
+
+func (h *headerList) String() string {
+	return strings.Join(*h, ",")
+}
+
+func (h *headerList) Set(value string) error {
+	*h = append(*h, value)
+	return nil
+}
 
 var Config struct {
 	bind                      string
@@ -40,6 +52,7 @@ var Config struct {
 	remoteUploads             bool
 	authFile                  string
 	remoteAuthFile            string
+	addHeaders                headerList
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -69,6 +82,7 @@ func setup() *web.Mux {
 		policy: Config.contentSecurityPolicy,
 		frame:  Config.xFrameOptions,
 	}))
+	mux.Use(AddHeaders(Config.addHeaders))
 
 	if Config.authFile != "" {
 		mux.Use(UploadAuth(AuthOptions{
@@ -205,6 +219,8 @@ func main() {
 		"value of Content-Security-Policy header for file access")
 	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")
+	flag.Var(&Config.addHeaders, "addheader",
+		"Add an arbitrary header to the response. This option can be used multiple times.")
 
 	iniflags.Parse()
 

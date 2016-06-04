@@ -52,6 +52,24 @@ func TestIndex(t *testing.T) {
 	}
 }
 
+func TestAddHeader(t *testing.T) {
+	Config.addHeaders = []string{"Linx-Test: It works!"}
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if w.Header().Get("Linx-Test") != "It works!" {
+		t.Fatal("Header 'Linx-Test: It works!' not found in index response")
+	}
+}
+
 func TestAuthKeys(t *testing.T) {
 	Config.authFile = "/dev/null"
 
