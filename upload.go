@@ -46,7 +46,7 @@ type Upload struct {
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	if !strictReferrerCheck(r, Config.siteURL, []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}) {
+	if !strictReferrerCheck(r, getSiteURL(r), []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}) {
 		badRequestHandler(c, w, r)
 		return
 	}
@@ -94,7 +94,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		js := generateJSONresponse(upload)
+		js := generateJSONresponse(upload, r)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
@@ -124,7 +124,7 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		js := generateJSONresponse(upload)
+		js := generateJSONresponse(upload, r)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
@@ -133,7 +133,7 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, Config.siteURL+upload.Filename)
+		fmt.Fprintf(w, getSiteURL(r)+upload.Filename)
 	}
 }
 
@@ -174,7 +174,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		js := generateJSONresponse(upload)
+		js := generateJSONresponse(upload, r)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
@@ -308,9 +308,9 @@ func generateBarename() string {
 	return uniuri.NewLenChars(8, []byte("abcdefghijklmnopqrstuvwxyz0123456789"))
 }
 
-func generateJSONresponse(upload Upload) []byte {
+func generateJSONresponse(upload Upload, r *http.Request) []byte {
 	js, _ := json.Marshal(map[string]string{
-		"url":        Config.siteURL + upload.Filename,
+		"url":        getSiteURL(r) + upload.Filename,
 		"filename":   upload.Filename,
 		"delete_key": upload.Metadata.DeleteKey,
 		"expiry":     strconv.FormatInt(upload.Metadata.Expiry.Unix(), 10),

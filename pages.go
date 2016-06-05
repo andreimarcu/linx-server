@@ -36,7 +36,7 @@ func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func apiDocHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	err := Templates["API.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := Templates["API.html"].ExecuteWriter(pongo2.Context{"siteurl": getSiteURL(r)}, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")
 	}
