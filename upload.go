@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -232,9 +231,8 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-	_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
+	fileexists, _ := fileBackend.Exists(upload.Filename)
 
-	fileexists := err == nil
 	// Check if the delete key matches, in which case overwrite
 	if fileexists {
 		metad, merr := metadataRead(upload.Filename)
@@ -254,19 +252,12 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		}
 		upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-		_, err = os.Stat(path.Join(Config.filesDir, upload.Filename))
-		fileexists = err == nil
+		fileexists, err = fileBackend.Exists(upload.Filename)
 	}
 
 	if fileBlacklist[strings.ToLower(upload.Filename)] {
 		return upload, errors.New("Prohibited filename")
 	}
-
-	dst, err := os.Create(path.Join(Config.filesDir, upload.Filename))
-	if err != nil {
-		return
-	}
-	defer dst.Close()
 
 	// Get the rest of the metadata needed for storage
 	var expiry time.Time
@@ -276,29 +267,22 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		expiry = time.Now().Add(upReq.expiry)
 	}
 
-	bytes, err := io.Copy(dst, io.MultiReader(bytes.NewReader(header), upReq.src))
-	if bytes == 0 {
-		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		return upload, errors.New("Empty file")
-
-	} else if err != nil {
-		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		return
+	bytes, err := fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
+	if err != nil {
+		return upload, err
 	} else if bytes > Config.maxSize {
-		os.Remove(path.Join(Config.filesDir, upload.Filename))
+		fileBackend.Delete(upload.Filename)
 		return upload, errors.New("File too large")
 	}
 
 	upload.Metadata, err = generateMetadata(upload.Filename, expiry, upReq.deletionKey)
 	if err != nil {
-		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		fileBackend.Delete(upload.Filename)
 		return
 	}
 	err = metadataWrite(upload.Filename, &upload.Metadata)
 	if err != nil {
-		os.Remove(path.Join(Config.filesDir, upload.Filename))
-		os.Remove(path.Join(Config.metaDir, upload.Filename))
+		fileBackend.Delete(upload.Filename)
 		return
 	}
 	return

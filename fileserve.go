@@ -3,8 +3,6 @@ package main
 import (
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"strings"
 
 	"github.com/zenazn/goji/web"
@@ -12,7 +10,6 @@ import (
 
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
-	filePath := path.Join(Config.filesDir, fileName)
 
 	err := checkFile(fileName)
 	if err == NotFoundErr {
@@ -35,7 +32,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
 
-	http.ServeFile(w, r, filePath)
+	fileBackend.ServeFile(fileName, w, r)
 }
 
 func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -63,9 +60,7 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func checkFile(filename string) error {
-	filePath := path.Join(Config.filesDir, filename)
-
-	_, err := os.Stat(filePath)
+	_, err := fileBackend.Exists(filename)
 	if err != nil {
 		return NotFoundErr
 	}
@@ -76,8 +71,8 @@ func checkFile(filename string) error {
 	}
 
 	if expired {
-		os.Remove(path.Join(Config.filesDir, filename))
-		os.Remove(path.Join(Config.metaDir, filename))
+		fileBackend.Delete(filename)
+		metaBackend.Delete(filename)
 		return NotFoundErr
 	}
 

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path"
 	"time"
 
 	"github.com/zeebo/bencode"
@@ -37,7 +35,7 @@ func hashPiece(piece []byte) []byte {
 	return h.Sum(nil)
 }
 
-func createTorrent(fileName string, filePath string, r *http.Request) ([]byte, error) {
+func createTorrent(fileName string, f io.ReadCloser, r *http.Request) ([]byte, error) {
 	chunk := make([]byte, TORRENT_PIECE_LENGTH)
 
 	torrent := Torrent{
@@ -47,11 +45,6 @@ func createTorrent(fileName string, filePath string, r *http.Request) ([]byte, e
 			Name:        fileName,
 		},
 		UrlList: []string{fmt.Sprintf("%sselif/%s", getSiteURL(r), fileName)},
-	}
-
-	f, err := os.Open(filePath)
-	if err != nil {
-		return []byte{}, err
 	}
 
 	for {
@@ -66,8 +59,6 @@ func createTorrent(fileName string, filePath string, r *http.Request) ([]byte, e
 		torrent.Info.Pieces += string(hashPiece(chunk[:n]))
 	}
 
-	f.Close()
-
 	data, err := bencode.EncodeBytes(&torrent)
 	if err != nil {
 		return []byte{}, err
@@ -78,7 +69,6 @@ func createTorrent(fileName string, filePath string, r *http.Request) ([]byte, e
 
 func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
-	filePath := path.Join(Config.filesDir, fileName)
 
 	err := checkFile(fileName)
 	if err == NotFoundErr {
@@ -89,7 +79,14 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encoded, err := createTorrent(fileName, filePath, r)
+	f, err := fileBackend.Open(fileName)
+	if err != nil {
+		oopsHandler(c, w, r, RespHTML, "Could not create torrent.")
+		return
+	}
+	defer f.Close()
+
+	encoded, err := createTorrent(fileName, f, r)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "Could not create torrent.")
 		return

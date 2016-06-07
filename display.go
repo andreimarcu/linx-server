@@ -2,10 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -22,7 +19,6 @@ const maxDisplayFileSizeBytes = 1024 * 512
 
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
-	filePath := path.Join(Config.filesDir, fileName)
 
 	err := checkFile(fileName)
 	if err == NotFoundErr {
@@ -43,7 +39,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	extra := make(map[string]string)
 	lines := []string{}
 
-	file, _ := os.Open(filePath)
+	file, _ := fileBackend.Open(fileName)
 	defer file.Close()
 
 	header := make([]byte, 512)
@@ -79,7 +75,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	} else if extension == "story" {
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := ioutil.ReadFile(filePath)
+			bytes, err := fileBackend.Get(fileName)
 			if err == nil {
 				extra["contents"] = string(bytes)
 				lines = strings.Split(extra["contents"], "\n")
@@ -89,7 +85,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	} else if extension == "md" {
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := ioutil.ReadFile(filePath)
+			bytes, err := fileBackend.Get(fileName)
 			if err == nil {
 				unsafe := blackfriday.MarkdownCommon(bytes)
 				html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
@@ -101,7 +97,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	} else if strings.HasPrefix(metadata.Mimetype, "text/") || supportedBinExtension(extension) {
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := ioutil.ReadFile(filePath)
+			bytes, err := fileBackend.Get(fileName)
 			if err == nil {
 				extra["extension"] = extension
 				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
