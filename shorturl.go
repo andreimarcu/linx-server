@@ -3,15 +3,24 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/zenazn/goji/web"
 )
 
-type shortenedURL struct {
+type shortenerRequest struct {
+	LongURL string `json:"longUrl"`
+}
+
+type shortenerResponse struct {
 	Kind    string `json:"kind"`
 	ID      string `json:"id"`
 	LongURL string `json:"longUrl"`
+	Error   struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
 }
 
 func shortURLHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -25,14 +34,14 @@ func shortURLHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	metadata, err := metadataRead(fileName)
 	if err != nil {
-		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
+		oopsHandler(c, w, r, RespJSON, "Corrupt metadata.")
 		return
 	}
 
 	if metadata.ShortURL == "" {
 		url, err := shortenURL(getSiteURL(r) + fileName)
 		if err != nil {
-			oopsHandler(c, w, r, RespAUTO, "Something went wrong")
+			oopsHandler(c, w, r, RespJSON, err.Error())
 			return
 		}
 
@@ -40,7 +49,7 @@ func shortURLHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 		err = metadataWrite(fileName, &metadata)
 		if err != nil {
-			oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
+			oopsHandler(c, w, r, RespJSON, "Corrupt metadata.")
 			return
 		}
 	}
@@ -58,7 +67,7 @@ func shortenURL(url string) (string, error) {
 		apiURL += "?key=" + Config.googleShorterAPIKey
 	}
 
-	jsonStr, _ := json.Marshal(shortenedURL{LongURL: url})
+	jsonStr, _ := json.Marshal(shortenerRequest{LongURL: url})
 
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -70,11 +79,15 @@ func shortenURL(url string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	shortened := new(shortenedURL)
-	err = json.NewDecoder(resp.Body).Decode(shortened)
+	shortenerResponse := new(shortenerResponse)
+	err = json.NewDecoder(resp.Body).Decode(shortenerResponse)
 	if err != nil {
 		return "", err
 	}
 
-	return shortened.ID, err
+	if shortenerResponse.Error.Message != "" {
+		return "", errors.New(shortenerResponse.Error.Message)
+	}
+
+	return shortenerResponse.ID, nil
 }

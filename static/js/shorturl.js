@@ -7,16 +7,18 @@ document.getElementById('shorturl').addEventListener('click', function (e) {
     xhr.open("GET", e.target.dataset.url, true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status === 200) {
-
+        if (xhr.readyState === 4) {
             var resp = JSON.parse(xhr.responseText);
-            if (!resp.shortUrl) return;
 
-            e.target.innerText = resp.shortUrl;
-            e.target.href = resp.shortUrl;
-            e.target.setAttribute('aria-label', 'Click to copy into clipboard')
+            if (xhr.status === 200 && resp.error == null) {
+                e.target.innerText = resp.shortUrl;
+                e.target.href = resp.shortUrl;
+                e.target.setAttribute('aria-label', 'Click to copy into clipboard')
 
-            copy(resp.shortUrl);
+                copy(resp.shortUrl);
+            } else {
+                e.target.setAttribute('aria-label', resp.error)
+            }
         }
     };
     xhr.send();
