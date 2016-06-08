@@ -17,6 +17,7 @@
             {% endif %}
             {% block infomore %}{% endblock %}
             <span>{{ size }}</span> |
+            <a class="hint--top" aria-label="Click to retrieve shortened url" id="shorturl" data-url="{{ sitepath }}{{filename}}/short" style="cursor: pointer;">short url</a> |
             <a href="{{ filename }}/torrent" download>torrent</a> |
             <a href="{{ sitepath }}selif/{{ filename }}" download>get</a>
         </div>
@@ -32,4 +33,7 @@
       </div>
 
     </div>
+
+    <script src="{{ sitepath }}static/js/clipboard.js"></script>
+    <script src="{{ sitepath }}static/js/shorturl.js"></script>
 {% endblock %}

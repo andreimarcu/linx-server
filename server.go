@@ -55,6 +55,7 @@ var Config struct {
 	authFile                  string
 	remoteAuthFile            string
 	addHeaders                headerList
+	googleShorterAPIKey       string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -145,6 +146,7 @@ func setup() *web.Mux {
 	selifRe := regexp.MustCompile("^" + Config.sitePath + `selif/(?P<name>[a-z0-9-\.]+)$`)
 	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + `selif/$`)
 	torrentRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/torrent$`)
+	shortRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/short$`)
 
 	if Config.authFile == "" {
 		mux.Get(Config.sitePath, indexHandler)
@@ -182,6 +184,7 @@ func setup() *web.Mux {
 	mux.Get(selifRe, fileServeHandler)
 	mux.Get(selifIndexRe, unauthorizedHandler)
 	mux.Get(torrentRe, fileTorrentHandler)
+	mux.Get(shortRe, shortURLHandler)
 	mux.NotFound(notFoundHandler)
 
 	return mux
@@ -228,6 +231,8 @@ func main() {
 		"value of X-Frame-Options header")
 	flag.Var(&Config.addHeaders, "addheader",
 		"Add an arbitrary header to the response. This option can be used multiple times.")
+	flag.StringVar(&Config.googleShorterAPIKey, "googleapikey", "",
+		"API Key for Google's URL Shortener.")
 
 	iniflags.Parse()
 
