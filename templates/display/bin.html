@@ -2,6 +2,7 @@
 
 {% block head %}
     <link href="{{ sitepath }}static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css">
+    <link href="{{ sitepath }}static/css/highlight/lines.css" rel="stylesheet" type="text/css">
     {% endblock %}
 
 {% block innercontentmore %} class="scrollable"{% endblock %}
@@ -44,7 +45,6 @@
 
 {% if extra.lang_hl != "text" %}
 <script src="{{ sitepath }}static/js/highlight/highlight.pack.js"></script>
-<script src="{{ sitepath }}static/js/highlight/highlightjs-line-numbers.min.js"></script>
 <script src="{{ sitepath }}static/js/bin_hljs.js"></script>
 {% endif %}
 

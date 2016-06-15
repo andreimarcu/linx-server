@@ -1,0 +1,28 @@
+#normal-code {
+    border-left: 1px solid #ccc;
+    margin-left: 36px;
+    position: relative;
+}
+
+#normal-code code {
+    counter-reset: linenumbers;
+}
+
+#normal-code code div:before {
+    content: counter(linenumbers);
+    counter-increment: linenumbers;
+    left: -36px;
+    width: 28px;
+    position: absolute;
+
+    text-align: right;
+    padding-right: 5px;
+    color: #999;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

@@ -2,6 +2,14 @@
 
 hljs.tabReplace = '    ';
 hljs.initHighlightingOnLoad();
-hljs.initLineNumbersOnLoad();
+
+var codeb = document.getElementById("codeb");
+var lines = codeb.innerHTML.split("\n");
+codeb.innerHTML = "";
+for (var i = 0; i < lines.length; i++) {
+	var div = document.createElement("div");
+	div.innerHTML = lines[i] + "\n";
+	codeb.appendChild(div);
+};
 
 // @license-end
