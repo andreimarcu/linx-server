@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"io"
+	"net/http"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
@@ -70,4 +72,16 @@ func populateTemplatesMap(tSet *pongo2.TemplateSet, tMap map[string]*pongo2.Temp
 	}
 
 	return nil
+}
+
+func renderTemplate(tpl *pongo2.Template, context pongo2.Context, r *http.Request, writer io.Writer) error {
+	if Config.siteName == "" {
+		parts := strings.Split(r.Host, ":")
+		context["sitename"] = parts[0]
+	}
+
+	context["sitepath"] = Config.sitePath
+	context["using_auth"] = Config.authFile != ""
+
+	return tpl.ExecuteWriter(context, writer)
 }

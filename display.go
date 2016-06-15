@@ -112,7 +112,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/file.html"]
 	}
 
-	err = tpl.ExecuteWriter(pongo2.Context{
+	err = renderTemplate(tpl, pongo2.Context{
 		"mime":     metadata.Mimetype,
 		"filename": fileName,
 		"size":     sizeHuman,
@@ -120,7 +120,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		"extra":    extra,
 		"lines":    lines,
 		"files":    metadata.ArchiveFiles,
-	}, w)
+	}, r, w)
 
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")

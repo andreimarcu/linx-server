@@ -131,9 +131,6 @@ func setup() *web.Mux {
 		log.Fatal("Error: could not load templates", err)
 	}
 	TemplateSet := pongo2.NewSet("templates", p2l)
-	TemplateSet.Globals["sitename"] = Config.siteName
-	TemplateSet.Globals["sitepath"] = Config.sitePath
-	TemplateSet.Globals["using_auth"] = Config.authFile != ""
 	err = populateTemplatesMap(TemplateSet, Templates)
 	if err != nil {
 		log.Fatal("Error: could not load templates", err)
@@ -201,7 +198,7 @@ func main() {
 		"remove stdout output for each request")
 	flag.BoolVar(&Config.allowHotlink, "allowhotlink", false,
 		"Allow hotlinking of files")
-	flag.StringVar(&Config.siteName, "sitename", "linx",
+	flag.StringVar(&Config.siteName, "sitename", "",
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "",
 		"site base url (including trailing slash)")

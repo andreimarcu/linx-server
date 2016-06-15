@@ -20,23 +20,25 @@ const (
 )
 
 func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	err := Templates["index.html"].ExecuteWriter(pongo2.Context{
+	err := renderTemplate(Templates["index.html"], pongo2.Context{
 		"maxsize": Config.maxSize,
-	}, w)
+	}, r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	err := Templates["paste.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := renderTemplate(Templates["paste.html"], pongo2.Context{}, r, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")
 	}
 }
 
 func apiDocHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	err := Templates["API.html"].ExecuteWriter(pongo2.Context{"siteurl": getSiteURL(r)}, w)
+	err := renderTemplate(Templates["API.html"], pongo2.Context{
+		"siteurl": getSiteURL(r),
+	}, r, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")
 	}
@@ -44,7 +46,7 @@ func apiDocHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func notFoundHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
-	err := Templates["404.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := renderTemplate(Templates["404.html"], pongo2.Context{}, r, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")
 	}
@@ -57,7 +59,7 @@ func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, m
 
 	if rt == RespHTML {
 		w.WriteHeader(500)
-		Templates["oops.html"].ExecuteWriter(pongo2.Context{"msg": msg}, w)
+		renderTemplate(Templates["oops.html"], pongo2.Context{"msg": msg}, r, w)
 		return
 
 	} else if rt == RespPLAIN {
@@ -86,7 +88,7 @@ func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, m
 
 func badRequestHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
-	err := Templates["400.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := renderTemplate(Templates["400.html"], pongo2.Context{}, r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -94,7 +96,7 @@ func badRequestHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func unauthorizedHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(401)
-	err := Templates["401.html"].ExecuteWriter(pongo2.Context{}, w)
+	err := renderTemplate(Templates["401.html"], pongo2.Context{}, r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
