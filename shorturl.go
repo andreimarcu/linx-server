@@ -62,11 +62,7 @@ func shortURLHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func shortenURL(url string) (string, error) {
-	apiURL := "https://www.googleapis.com/urlshortener/v1/url"
-	if Config.googleShorterAPIKey != "" {
-		apiURL += "?key=" + Config.googleShorterAPIKey
-	}
-
+	apiURL := "https://www.googleapis.com/urlshortener/v1/url?key=" + Config.googleShorterAPIKey
 	jsonStr, _ := json.Marshal(shortenerRequest{LongURL: url})
 
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonStr))

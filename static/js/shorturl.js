@@ -14,8 +14,6 @@ document.getElementById('shorturl').addEventListener('click', function (e) {
                 e.target.innerText = resp.shortUrl;
                 e.target.href = resp.shortUrl;
                 e.target.setAttribute('aria-label', 'Click to copy into clipboard')
-
-                copy(resp.shortUrl);
             } else {
                 e.target.setAttribute('aria-label', resp.error)
             }
@@ -24,18 +22,18 @@ document.getElementById('shorturl').addEventListener('click', function (e) {
     xhr.send();
 });
 
-function copy(someText) {
-    var clipboard = new Clipboard('#shorturl', {
-        text: function () {
-            return someText;
-        }
-    });
+var clipboard = new Clipboard("#shorturl", {
+    text: function (trigger) {
+        if (trigger.href == null) return;
 
-    clipboard.on('success', function (e) {
-        e.trigger.setAttribute('aria-label', 'Successfully copied')
-    });
+        return trigger.href;
+    }
+});
 
-    clipboard.on('error', function (e) {
-        e.trigger.setAttribute('aria-label', 'Your browser does not support coping to clipboard')
-    });
-}
+clipboard.on('success', function (e) {
+    e.trigger.setAttribute('aria-label', 'Successfully copied')
+});
+
+clipboard.on('error', function (e) {
+    e.trigger.setAttribute('aria-label', 'Your browser does not support coping to clipboard')
+});

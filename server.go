@@ -184,7 +184,11 @@ func setup() *web.Mux {
 	mux.Get(selifRe, fileServeHandler)
 	mux.Get(selifIndexRe, unauthorizedHandler)
 	mux.Get(torrentRe, fileTorrentHandler)
-	mux.Get(shortRe, shortURLHandler)
+
+	if Config.googleShorterAPIKey != "" {
+		mux.Get(shortRe, shortURLHandler)
+	}
+
 	mux.NotFound(notFoundHandler)
 
 	return mux
