@@ -23,7 +23,7 @@ Self-hosted file/media sharing website.
 Get release and run
 -------------------
 1. Grab the latest binary from the [releases](https://github.com/andreimarcu/linx-server/releases)
-2. Run ```./linx-server...```
+2. Run ```./linx-server```
 
   
 Usage
@@ -32,17 +32,16 @@ Usage
 #### Configuration
 All configuration options are accepted either as arguments or can be placed in an ini-style file as such:  
 ```ini
-sitename = "my linx"  
-siteurl = "https://linx.example.com"  
-remoteuploads = true
+maxsize = 4294967296
+allowhotlink = true
 # etc
 ```  
 ...and then invoke ```linx-server -config path/to/config.ini```  
 
-#### Common options
+#### Options
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
-- ```-sitename myLinx``` -- the site name displayed on top (default is linx)
-- ```-siteurl "http://mylinx.example.org/"``` -- the site url (for generating links)
+- ```-sitename myLinx``` -- the site name displayed on top (default is inferred from Host header)
+- ```-siteurl "http://mylinx.example.org/"``` -- the site url (default is inferred from execution context)
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
