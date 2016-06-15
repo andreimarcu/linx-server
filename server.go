@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/GeertJohan/go.rice"
+	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/flosch/pongo2"
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji/graceful"
@@ -61,6 +63,8 @@ var staticBox *rice.Box
 var timeStarted time.Time
 var timeStartedStr string
 var remoteAuthKeys []string
+var metaBackend backends.StorageBackend
+var fileBackend backends.StorageBackend
 
 func setup() *web.Mux {
 	mux := web.New()
@@ -117,6 +121,9 @@ func setup() *web.Mux {
 	} else {
 		Config.sitePath = "/"
 	}
+
+	metaBackend = localfs.NewLocalfsBackend(Config.metaDir)
+	fileBackend = localfs.NewLocalfsBackend(Config.filesDir)
 
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()

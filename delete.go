@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/zenazn/goji/web"
 )
@@ -13,11 +12,9 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	requestKey := r.Header.Get("Linx-Delete-Key")
 
 	filename := c.URLParams["name"]
-	filePath := path.Join(Config.filesDir, filename)
-	metaPath := path.Join(Config.metaDir, filename)
 
 	// Ensure requested file actually exists
-	if _, readErr := os.Stat(filePath); os.IsNotExist(readErr) {
+	if _, readErr := fileBackend.Exists(filename); os.IsNotExist(readErr) {
 		notFoundHandler(c, w, r) // 404 - file doesn't exist
 		return
 	}
@@ -30,8 +27,8 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if metadata.DeleteKey == requestKey {
-		fileDelErr := os.Remove(filePath)
-		metaDelErr := os.Remove(metaPath)
+		fileDelErr := fileBackend.Delete(filename)
+		metaDelErr := metaBackend.Delete(filename)
 
 		if (fileDelErr != nil) || (metaDelErr != nil) {
 			oopsHandler(c, w, r, RespPLAIN, "Could not delete")

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/zeebo/bencode"
@@ -11,7 +12,13 @@ func TestCreateTorrent(t *testing.T) {
 	fileName := "server.go"
 	var decoded Torrent
 
-	encoded, err := createTorrent(fileName, fileName, nil)
+	f, err := os.Open("server.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	encoded, err := createTorrent(fileName, f, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +54,13 @@ func TestCreateTorrent(t *testing.T) {
 func TestCreateTorrentWithImage(t *testing.T) {
 	var decoded Torrent
 
-	encoded, err := createTorrent("test.jpg", "static/images/404.jpg", nil)
+	f, err := os.Open("static/images/404.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	encoded, err := createTorrent("test.jpg", f, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

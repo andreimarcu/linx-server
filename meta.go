@@ -3,6 +3,7 @@ package main
 import (
 	"archive/tar"
 	"archive/zip"
+	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
 	"crypto/sha256"
@@ -10,9 +11,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
-	"os"
-	"path"
 	"sort"
 	"time"
 	"unicode"
@@ -43,14 +41,17 @@ var NotFoundErr = errors.New("File not found.")
 var BadMetadata = errors.New("Corrupted metadata.")
 
 func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, err error) {
-	file, err := os.Open(path.Join(Config.filesDir, fName))
-	fileInfo, err := os.Stat(path.Join(Config.filesDir, fName))
+	file, err := fileBackend.Open(fName)
 	if err != nil {
 		return
 	}
 	defer file.Close()
 
-	m.Size = fileInfo.Size()
+	m.Size, err = fileBackend.Size(fName)
+	if err != nil {
+		return
+	}
+
 	m.Expiry = exp
 
 	if delKey == "" {
@@ -138,12 +139,6 @@ func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, e
 }
 
 func metadataWrite(filename string, metadata *Metadata) error {
-	file, err := os.Create(path.Join(Config.metaDir, filename))
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
 	mjson := MetadataJSON{}
 	mjson.DeleteKey = metadata.DeleteKey
 	mjson.Mimetype = metadata.Mimetype
@@ -157,8 +152,7 @@ func metadataWrite(filename string, metadata *Metadata) error {
 		return err
 	}
 
-	_, err = file.Write(byt)
-	if err != nil {
+	if _, err := metaBackend.Put(filename, bytes.NewBuffer(byt)); err != nil {
 		return err
 	}
 
@@ -166,7 +160,7 @@ func metadataWrite(filename string, metadata *Metadata) error {
 }
 
 func metadataRead(filename string) (metadata Metadata, err error) {
-	b, err := ioutil.ReadFile(path.Join(Config.metaDir, filename))
+	b, err := metaBackend.Get(filename)
 	if err != nil {
 		// Metadata does not exist, generate one
 		newMData, err := generateMetadata(filename, neverExpire, "")
@@ -174,7 +168,8 @@ func metadataRead(filename string) (metadata Metadata, err error) {
 			return metadata, err
 		}
 		metadataWrite(filename, &newMData)
-		b, err = ioutil.ReadFile(path.Join(Config.metaDir, filename))
+
+		b, err = metaBackend.Get(filename)
 		if err != nil {
 			return metadata, BadMetadata
 		}
