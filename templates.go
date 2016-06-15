@@ -78,6 +78,8 @@ func renderTemplate(tpl *pongo2.Template, context pongo2.Context, r *http.Reques
 	if Config.siteName == "" {
 		parts := strings.Split(r.Host, ":")
 		context["sitename"] = parts[0]
+	} else {
+		context["sitename"] = Config.siteName
 	}
 
 	context["sitepath"] = Config.sitePath
