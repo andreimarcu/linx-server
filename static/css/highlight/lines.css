@@ -18,6 +18,7 @@
     text-align: right;
     padding-right: 5px;
     color: #999;
+    overflow-wrap: normal;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
