@@ -88,6 +88,9 @@ Dropzone.options.dropzone = {
 			if (resp.error) {
 				file.fileLabel.innerHTML = file.name + ": " + resp.error;
 			}
+			else if (resp.includes("<html")) {
+				file.fileLabel.innerHTML = file.name + ": Server Error";
+			}
 			else {
 				file.fileLabel.innerHTML = file.name + ": " + resp;
 			}
