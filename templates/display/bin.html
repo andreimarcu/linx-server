@@ -2,8 +2,10 @@
 
 {% block head %}
     <link href="{{ sitepath }}static/css/highlight/tomorrow.css" rel="stylesheet" type="text/css">
+{% if extra.lang_hl != "text" %}
     <link href="{{ sitepath }}static/css/highlight/lines.css" rel="stylesheet" type="text/css">
-    {% endblock %}
+{% endif %}
+{% endblock %}
 
 {% block innercontentmore %} class="scrollable"{% endblock %}
 
