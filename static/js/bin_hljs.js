@@ -12,4 +12,7 @@ for (var i = 0; i < lines.length; i++) {
 	codeb.appendChild(div);
 };
 
+
+var ncode = document.getElementById("normal-code");
+ncode.className = "linenumbers";
 // @license-end

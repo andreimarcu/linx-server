@@ -1,14 +1,14 @@
-#normal-code {
+.linenumbers {
     border-left: 1px solid #ccc;
     margin-left: 36px;
     position: relative;
 }
 
-#normal-code code {
+.linenumbers code {
     counter-reset: linenumbers;
 }
 
-#normal-code code div:before {
+.linenumbers code div:before {
     content: counter(linenumbers);
     counter-increment: linenumbers;
     left: -36px;
