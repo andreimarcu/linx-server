@@ -39,12 +39,6 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	extra := make(map[string]string)
 	lines := []string{}
 
-	file, _ := fileBackend.Open(fileName)
-	defer file.Close()
-
-	header := make([]byte, 512)
-	file.Read(header)
-
 	extension := strings.TrimPrefix(filepath.Ext(fileName), ".")
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
