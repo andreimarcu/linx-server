@@ -230,6 +230,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	}
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
+	upload.Filename = strings.Replace(upload.Filename, " ", "", -1)
 
 	fileexists, _ := fileBackend.Exists(upload.Filename)
 
