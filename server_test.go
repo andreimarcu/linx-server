@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -611,7 +612,7 @@ func TestPutUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Body.String() != Config.siteURL+filename {
+	if w.Body.String() != fmt.Sprintf("%s\n", Config.siteURL+filename) {
 		t.Fatal("Response was not expected URL")
 	}
 }
