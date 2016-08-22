@@ -1,0 +1,8 @@
+[Unit]
+Description=Self-hosted file/code/media sharing website
+After=network.target
+
+[Service]
+User=linx
+Group=linx
+ExecStart=/usr/bin/linx-server
