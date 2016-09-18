@@ -101,6 +101,15 @@ Run linx-server with the ```-certfile path/to/cert.file``` and ```-keyfile path/
 #### 3. Using the built-in http server
 Run linx-server normally.
 
+#### 4. Using Docker with the built-in http server
+First, build the image:
+```docker build -t linx-server .```
+
+You'll need some directories for the persistent storage. For the purposes of this example, we will use `/media/meta` and `/media/files`.
+
+Then, run it:
+```docker run -p 8080:8080 -v /media/meta:/data/meta -v /media/files:/data/files linx-server```
+
 
 Development
 -----------
