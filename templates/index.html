@@ -20,14 +20,9 @@
             <div id="expiry">
                 <label>File expiry: 
                 <select name="expires" id="expires">
-                    <option value="0">never</option>
-                    <option value="60">a minute</option>
-                    <option value="300">5 minutes</option>
-                    <option value="3600">an hour</option>
-                    <option value="86400">a day</option>
-                    <option value="604800">a week</option>
-                    <option value="2419200">a month</option>
-                    <option value="29030400">a year</option>
+                    {% for expiry in expirylist %}
+                    <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
+                    {% endfor %}
                 </select>
                 </label>
             </div>

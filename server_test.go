@@ -54,6 +54,44 @@ func TestIndex(t *testing.T) {
 	}
 }
 
+func TestIndexStandardMaxExpiry(t *testing.T) {
+	mux := setup()
+	Config.maxExpiry = 60
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if strings.Contains(w.Body.String(), ">1 hour</object>") {
+		t.Fatal("String '>1 hour</object>' found in index response")
+	}
+
+	Config.maxExpiry = 0
+}
+
+func TestIndexWeirdMaxExpiry(t *testing.T) {
+	mux := setup()
+	Config.maxExpiry = 1500
+	w := httptest.NewRecorder()
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mux.ServeHTTP(w, req)
+
+	if strings.Contains(w.Body.String(), ">never</object>") {
+		t.Fatal("String '>never</object>' found in index response")
+	}
+
+	Config.maxExpiry = 0
+}
+
 func TestAddHeader(t *testing.T) {
 	Config.addHeaders = []string{"Linx-Test: It works!"}
 
@@ -406,6 +444,62 @@ func TestPostJSONUpload(t *testing.T) {
 	if myjson.Size != "12" {
 		t.Fatalf("File size was not 12 but %s", myjson.Size)
 	}
+}
+
+func TestPostJSONUploadMaxExpiry(t *testing.T) {
+	mux := setup()
+	Config.maxExpiry = 300
+
+	testExpiries := []string{"86400", "-150"}
+	for _, expiry := range testExpiries {
+		w := httptest.NewRecorder()
+
+		filename := generateBarename() + ".txt"
+
+		var b bytes.Buffer
+		mw := multipart.NewWriter(&b)
+		fw, err := mw.CreateFormFile("file", filename)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		fw.Write([]byte("File content"))
+		mw.Close()
+
+		req, err := http.NewRequest("POST", "/upload/", &b)
+		req.Header.Set("Content-Type", mw.FormDataContentType())
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Linx-Expiry", expiry)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		mux.ServeHTTP(w, req)
+
+		if w.Code != 200 {
+			t.Log(w.Body.String())
+			t.Fatalf("Status code is not 200, but %d", w.Code)
+		}
+
+		var myjson RespOkJSON
+		err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+		if err != nil {
+			fmt.Println(w.Body.String())
+			t.Fatal(err)
+		}
+
+		myExp, err := strconv.ParseInt(myjson.Expiry, 10, 64)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expected := time.Now().Add(time.Duration(Config.maxExpiry) * time.Second).Unix()
+		if myExp != expected {
+			t.Fatalf("File expiry is not %d but %s", expected, myjson.Expiry)
+		}
+	}
+
+	Config.maxExpiry = 0
 }
 
 func TestPostExpiresJSONUpload(t *testing.T) {

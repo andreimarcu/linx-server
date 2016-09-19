@@ -47,6 +47,7 @@ var Config struct {
 	fileContentSecurityPolicy string
 	xFrameOptions             string
 	maxSize                   int64
+	maxExpiry                 uint64
 	realIp                    bool
 	noLogs                    bool
 	allowHotlink              bool
@@ -211,6 +212,8 @@ func main() {
 		"site base url (including trailing slash)")
 	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
 		"maximum upload file size in bytes (default 4GB)")
+	flag.Uint64Var(&Config.maxExpiry, "maxexpiry", 0,
+		"maximum expiration time in seconds (default is 0, which is no expiry)")
 	flag.StringVar(&Config.certFile, "certfile", "",
 		"path to ssl certificate (for https)")
 	flag.StringVar(&Config.keyFile, "keyfile", "",
