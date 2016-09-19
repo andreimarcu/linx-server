@@ -45,6 +45,7 @@ allowhotlink = true
 - ```-filespath files/"``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
+- ```-maxexpiry 86400``` -- maximum expiration time in seconds (default is 0, which is no expiry)
 - ```-allowhotlink``` -- Allow file hotlinking
 - ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
 - ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
