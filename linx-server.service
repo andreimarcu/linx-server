@@ -6,3 +6,6 @@ After=network.target
 User=linx
 Group=linx
 ExecStart=/usr/bin/linx-server
+
+[Install]
+WantedBy=multi-user.target
