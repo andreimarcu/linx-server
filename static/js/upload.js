@@ -43,7 +43,7 @@ Dropzone.options.dropzone = {
 	},
 	sending: function(file, xhr, formData) {
 		formData.append("randomize", document.getElementById("randomize").checked);
-		formData.append("expires", document.getElementById("expires").selectedOptions[0].value);
+		formData.append("expires", document.getElementById("expires").value);
 	},
 	success: function(file, resp) {
         file.fileActions.removeChild(file.progressElement);
