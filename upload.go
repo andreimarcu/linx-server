@@ -349,7 +349,7 @@ func parseExpiry(expStr string) time.Duration {
 		if err != nil {
 			return time.Duration(Config.maxExpiry) * time.Second
 		} else {
-			if Config.maxExpiry > 0 && expiry > Config.maxExpiry {
+			if Config.maxExpiry > 0 && (expiry > Config.maxExpiry || expiry == 0) {
 				expiry = Config.maxExpiry
 			}
 			return time.Duration(expiry) * time.Second
