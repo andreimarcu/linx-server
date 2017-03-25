@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/taruti/mimemagic"
 	"github.com/dchest/uniuri"
 	"github.com/zenazn/goji/web"
+	"gopkg.in/h2non/filetype.v1"
 )
 
 var fileBlacklist = map[string]bool{
@@ -218,15 +218,12 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		header = header[:n]
 
 		// Determine the type of file from header
-		mimetype := mimemagic.Match("", header)
-
-		// If the mime type is in our map, use that
-		// otherwise just use "ext"
-		if val, exists := mimeToExtension[mimetype]; exists {
-			extension = val
-		} else {
+		kind, err := filetype.Match(header)
+		if err != nil {
 			extension = "ext"
 		}
+
+		extension = kind.Extension
 	}
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
