@@ -15,8 +15,8 @@ import (
 	"time"
 	"unicode"
 
-	"bitbucket.org/taruti/mimemagic"
 	"github.com/dchest/uniuri"
+	"gopkg.in/h2non/filetype.v1"
 )
 
 type MetadataJSON struct {
@@ -66,7 +66,12 @@ func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, e
 	header := make([]byte, 512)
 	file.Read(header)
 
-	m.Mimetype = mimemagic.Match("", header)
+	kind, err := filetype.Match(header)
+	if err != nil {
+		m.Mimetype = "application/octet-stream"
+	} else {
+		m.Mimetype = kind.MIME.Value
+	}
 
 	if m.Mimetype == "" {
 		// Check if the file seems anything like text
