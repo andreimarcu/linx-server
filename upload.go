@@ -219,11 +219,11 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 
 		// Determine the type of file from header
 		kind, err := filetype.Match(header)
-		if err != nil {
-			extension = "ext"
+		if err != nil || kind.Extension == "unknown" {
+			extension = "file"
+		} else {
+			extension = kind.Extension
 		}
-
-		extension = kind.Extension
 	}
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")

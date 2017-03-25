@@ -699,7 +699,7 @@ func TestPutUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -717,7 +717,7 @@ func TestPutRandomizedUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -757,7 +757,7 @@ func TestPutEmptyUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader(""))
 	if err != nil {
@@ -779,7 +779,7 @@ func TestPutJSONUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -806,7 +806,7 @@ func TestPutRandomizedJSONUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
@@ -834,7 +834,7 @@ func TestPutExpireJSONUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
 
-	filename := generateBarename() + ".ext"
+	filename := generateBarename() + ".file"
 
 	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
 	if err != nil {
