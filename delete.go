@@ -28,7 +28,7 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if metadata.DeleteKey == requestKey {
 		fileDelErr := fileBackend.Delete(filename)
-		metaDelErr := metaBackend.Delete(filename)
+		metaDelErr := metaStorageBackend.Delete(filename)
 
 		if (fileDelErr != nil) || (metaDelErr != nil) {
 			oopsHandler(c, w, r, RespPLAIN, "Could not delete")

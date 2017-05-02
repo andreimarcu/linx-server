@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/andreimarcu/linx-server/backends"
 	"github.com/zenazn/goji/web"
 )
 
@@ -15,7 +16,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
-	} else if err == BadMetadata {
+	} else if err == backends.BadMetadata {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
@@ -72,7 +73,7 @@ func checkFile(filename string) error {
 
 	if expired {
 		fileBackend.Delete(filename)
-		metaBackend.Delete(filename)
+		metaStorageBackend.Delete(filename)
 		return NotFoundErr
 	}
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
 	"github.com/microcosm-cc/bluemonday"
@@ -32,7 +33,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var expiryHuman string
-	if metadata.Expiry != neverExpire {
+	if metadata.Expiry != expiry.NeverExpire {
 		expiryHuman = humanize.RelTime(time.Now(), metadata.Expiry, "", "")
 	}
 	sizeHuman := humanize.Bytes(uint64(metadata.Size))

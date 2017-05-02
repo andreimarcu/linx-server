@@ -65,6 +65,21 @@ func (b LocalfsBackend) Size(key string) (int64, error) {
 	return fileInfo.Size(), nil
 }
 
+func (b LocalfsBackend) List() ([]string, error) {
+	var output []string
+
+	files, err := ioutil.ReadDir(b.basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		output = append(output, file.Name())
+	}
+
+	return output, nil
+}
+
 func NewLocalfsBackend(basePath string) LocalfsBackend {
 	return LocalfsBackend{basePath: basePath}
 }

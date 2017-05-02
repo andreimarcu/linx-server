@@ -21,3 +21,8 @@ type StorageBackend interface {
 	ServeFile(key string, w http.ResponseWriter, r *http.Request)
 	Size(key string) (int64, error)
 }
+
+type MetaStorageBackend interface {
+	StorageBackend
+	List() ([]string, error)
+}

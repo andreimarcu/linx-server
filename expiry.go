@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dustin/go-humanize"
 )
 
@@ -21,14 +22,6 @@ type ExpirationTime struct {
 	Human   string
 }
 
-var neverExpire = time.Unix(0, 0)
-
-// Determine if a file with expiry set to "ts" has expired yet
-func isTsExpired(ts time.Time) bool {
-	now := time.Now()
-	return ts != neverExpire && now.After(ts)
-}
-
 // Determine if the given filename is expired
 func isFileExpired(filename string) (bool, error) {
 	metadata, err := metadataRead(filename)
@@ -36,7 +29,7 @@ func isFileExpired(filename string) (bool, error) {
 		return false, err
 	}
 
-	return isTsExpired(metadata.Expiry), nil
+	return expiry.IsTsExpired(metadata.Expiry), nil
 }
 
 // Return a list of expiration times and their humanized versions
@@ -45,16 +38,16 @@ func listExpirationTimes() []ExpirationTime {
 	actualExpiryInList := false
 	var expiryList []ExpirationTime
 
-	for _, expiry := range defaultExpiryList {
-		if Config.maxExpiry == 0 || expiry <= Config.maxExpiry {
-			if expiry == Config.maxExpiry {
+	for _, expiryEntry := range defaultExpiryList {
+		if Config.maxExpiry == 0 || expiryEntry <= Config.maxExpiry {
+			if expiryEntry == Config.maxExpiry {
 				actualExpiryInList = true
 			}
 
-			duration := time.Duration(expiry) * time.Second
+			duration := time.Duration(expiryEntry) * time.Second
 			expiryList = append(expiryList, ExpirationTime{
-				expiry,
-				humanize.RelTime(epoch, epoch.Add(duration), "", ""),
+				Seconds: expiryEntry,
+				Human:   humanize.RelTime(epoch, epoch.Add(duration), "", ""),
 			})
 		}
 	}
