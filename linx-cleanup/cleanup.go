@@ -20,6 +20,7 @@ func main() {
 		"path to metadata directory")
 	flag.BoolVar(&noLogs, "nologs", false,
 		"don't log deleted files")
+	flag.Parse()
 
 	metaStorageBackend := localfs.NewLocalfsBackend(metaDir)
 	metaBackend := metajson.NewMetaJSONBackend(metaStorageBackend)
