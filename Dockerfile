@@ -1,7 +1,7 @@
 FROM golang:alpine
 
 RUN set -ex \
-        && apk add --no-cache --virtual .build-deps git mercurial \
+        && apk add --no-cache --virtual .build-deps git \
         && go get github.com/andreimarcu/linx-server \
         && apk del .build-deps
 

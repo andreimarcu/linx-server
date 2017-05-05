@@ -15,6 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
 	"github.com/zenazn/goji/web"
 	"gopkg.in/h2non/filetype.v1"
@@ -41,7 +43,7 @@ type UploadRequest struct {
 // Metadata associated with a file as it would actually be stored
 type Upload struct {
 	Filename string // Final filename on disk
-	Metadata Metadata
+	Metadata backends.Metadata
 }
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -258,11 +260,11 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	}
 
 	// Get the rest of the metadata needed for storage
-	var expiry time.Time
+	var fileExpiry time.Time
 	if upReq.expiry == 0 {
-		expiry = neverExpire
+		fileExpiry = expiry.NeverExpire
 	} else {
-		expiry = time.Now().Add(upReq.expiry)
+		fileExpiry = time.Now().Add(upReq.expiry)
 	}
 
 	bytes, err := fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
@@ -273,7 +275,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		return upload, errors.New("File too large")
 	}
 
-	upload.Metadata, err = generateMetadata(upload.Filename, expiry, upReq.deletionKey)
+	upload.Metadata, err = generateMetadata(upload.Filename, fileExpiry, upReq.deletionKey)
 	if err != nil {
 		fileBackend.Delete(upload.Filename)
 		return
@@ -342,14 +344,14 @@ func parseExpiry(expStr string) time.Duration {
 	if expStr == "" {
 		return time.Duration(Config.maxExpiry) * time.Second
 	} else {
-		expiry, err := strconv.ParseUint(expStr, 10, 64)
+		fileExpiry, err := strconv.ParseUint(expStr, 10, 64)
 		if err != nil {
 			return time.Duration(Config.maxExpiry) * time.Second
 		} else {
-			if Config.maxExpiry > 0 && (expiry > Config.maxExpiry || expiry == 0) {
-				expiry = Config.maxExpiry
+			if Config.maxExpiry > 0 && (fileExpiry > Config.maxExpiry || fileExpiry == 0) {
+				fileExpiry = Config.maxExpiry
 			}
-			return time.Duration(expiry) * time.Second
+			return time.Duration(fileExpiry) * time.Second
 		}
 	}
 }

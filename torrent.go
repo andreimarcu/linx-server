@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/andreimarcu/linx-server/backends"
 	"github.com/zeebo/bencode"
 	"github.com/zenazn/goji/web"
 )
@@ -74,7 +75,7 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
-	} else if err == BadMetadata {
+	} else if err == backends.BadMetadata {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}

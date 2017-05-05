@@ -3,46 +3,25 @@ package main
 import (
 	"archive/tar"
 	"archive/zip"
-	"bytes"
 	"compress/bzip2"
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"io"
 	"sort"
 	"time"
 	"unicode"
 
+	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
 	"gopkg.in/h2non/filetype.v1"
 )
 
-type MetadataJSON struct {
-	DeleteKey    string   `json:"delete_key"`
-	Sha256sum    string   `json:"sha256sum"`
-	Mimetype     string   `json:"mimetype"`
-	Size         int64    `json:"size"`
-	Expiry       int64    `json:"expiry"`
-	ArchiveFiles []string `json:"archive_files,omitempty"`
-	ShortURL     string   `json:"short_url"`
-}
-
-type Metadata struct {
-	DeleteKey    string
-	Sha256sum    string
-	Mimetype     string
-	Size         int64
-	Expiry       time.Time
-	ArchiveFiles []string
-	ShortURL     string
-}
-
 var NotFoundErr = errors.New("File not found.")
-var BadMetadata = errors.New("Corrupted metadata.")
 
-func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, err error) {
+func generateMetadata(fName string, exp time.Time, delKey string) (m backends.Metadata, err error) {
 	file, err := fileBackend.Open(fName)
 	if err != nil {
 		return
@@ -145,58 +124,22 @@ func generateMetadata(fName string, exp time.Time, delKey string) (m Metadata, e
 	return
 }
 
-func metadataWrite(filename string, metadata *Metadata) error {
-	mjson := MetadataJSON{}
-	mjson.DeleteKey = metadata.DeleteKey
-	mjson.Mimetype = metadata.Mimetype
-	mjson.ArchiveFiles = metadata.ArchiveFiles
-	mjson.Sha256sum = metadata.Sha256sum
-	mjson.Expiry = metadata.Expiry.Unix()
-	mjson.Size = metadata.Size
-	mjson.ShortURL = metadata.ShortURL
-
-	byt, err := json.Marshal(mjson)
-	if err != nil {
-		return err
-	}
-
-	if _, err := metaBackend.Put(filename, bytes.NewBuffer(byt)); err != nil {
-		return err
-	}
-
-	return nil
+func metadataWrite(filename string, metadata *backends.Metadata) error {
+	return metaBackend.Put(filename, metadata)
 }
 
-func metadataRead(filename string) (metadata Metadata, err error) {
-	b, err := metaBackend.Get(filename)
+func metadataRead(filename string) (metadata backends.Metadata, err error) {
+	metadata, err = metaBackend.Get(filename)
 	if err != nil {
 		// Metadata does not exist, generate one
-		newMData, err := generateMetadata(filename, neverExpire, "")
+		newMData, err := generateMetadata(filename, expiry.NeverExpire, "")
 		if err != nil {
 			return metadata, err
 		}
 		metadataWrite(filename, &newMData)
 
-		b, err = metaBackend.Get(filename)
-		if err != nil {
-			return metadata, BadMetadata
-		}
+		metadata, err = metaBackend.Get(filename)
 	}
-
-	mjson := MetadataJSON{}
-
-	err = json.Unmarshal(b, &mjson)
-	if err != nil {
-		return metadata, BadMetadata
-	}
-
-	metadata.DeleteKey = mjson.DeleteKey
-	metadata.Mimetype = mjson.Mimetype
-	metadata.ArchiveFiles = mjson.ArchiveFiles
-	metadata.Sha256sum = mjson.Sha256sum
-	metadata.Expiry = time.Unix(mjson.Expiry, 0)
-	metadata.Size = mjson.Size
-	metadata.ShortURL = mjson.ShortURL
 
 	return
 }

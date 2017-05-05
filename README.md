@@ -71,6 +71,23 @@ allowhotlink = true
 A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
 
 
+Cleaning up expired files
+-------------------------
+When files expire, access is disabled immediately, but the files and metadata
+will persist on disk until someone attempts to access them. If you'd like to
+automatically clean up files that have expired, you can use the included
+`linx-cleanup` utility. To run it automatically, use a cronjob or similar type
+of scheduled task.
+
+You should be careful to ensure that only one instance of `linx-client` runs at
+a time to avoid unexpected behavior. It does not implement any type of locking.
+
+#### Options
+- ```-filespath files/``` -- Path to stored uploads (default is files/)
+- ```-metapath meta/``` -- Path to stored information about uploads (default is meta/)
+- ```-nologs``` -- (optionally) disable deletion logs in stdout
+
+
 Deployment
 ----------
 Linx-server supports being deployed in a subdirectory (ie. example.com/mylinx/) as well as on its own (example.com/).
