@@ -34,11 +34,15 @@ func main() {
 	for _, filename := range files {
 		metadata, err := metaBackend.Get(filename)
 		if err != nil {
-			log.Printf("Failed to find metadata for %s", filename)
+			if !noLogs {
+				log.Printf("Failed to find metadata for %s", filename)
+			}
 		}
 
 		if expiry.IsTsExpired(metadata.Expiry) {
-			log.Printf("Delete %s", filename)
+			if !noLogs {
+				log.Printf("Delete %s", filename)
+			}
 			fileBackend.Delete(filename)
 			metaStorageBackend.Delete(filename)
 		}
