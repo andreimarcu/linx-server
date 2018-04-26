@@ -5,6 +5,8 @@ RUN set -ex \
         && go get github.com/andreimarcu/linx-server \
         && apk del .build-deps
 
+RUN mkdir -p /data/files && mkdir -p /data/meta && chown -R 65534:65534 /data
+
 VOLUME ["/data/files", "/data/meta"]
 
 EXPOSE 8080
