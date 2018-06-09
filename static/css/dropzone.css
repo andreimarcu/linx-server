@@ -31,9 +31,16 @@
     border: 2px solid #FAFBFC;
 }
 
-#dropzone { width: 400px;
+#dropzone {
+    width: 400px;
     margin-left: auto;
     margin-right: auto;
+}
+
+@media(max-width: 450px) {
+  #dropzone {
+      width: auto;
+  }
 }
 
 #uploads {
