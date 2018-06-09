@@ -71,19 +71,18 @@ body {
   -webkit-box-shadow: 1px 1px 1px 1px #ccc;
   box-shadow: 1px 1px 1px 1px #ccc;
   margin-bottom: 15px;
+}
 
+.dinfo #filename {
+	margin: 2px 15px 0 0;
 }
 
 #info {
-	text-align: left;
-
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
   background-color: white;
   padding: 5px 5px 5px 5px;
-}
-
-#info #filename,
-#editform #filename {
-    width: 232px;
 }
 
 #info #extension,
@@ -91,12 +90,7 @@ body {
     width: 40px;
 }
 
-#info .float-left {
-	margin-top: 2px;
-	margin-right: 20px;
-}
-
-#info .right {
+#info .text-right {
 	font-size: 13px;
 }
 
@@ -113,6 +107,11 @@ body {
 #info input[type=text] {
   border: 0;
     color: #556A7F;
+}
+
+#info input[type=checkbox] {
+	margin: 0;
+	vertical-align: bottom;
 }
 
 #footer {
@@ -158,7 +157,8 @@ body {
 }
 
 .fixed {
-    width: 800px;
+    width: 80vw;
+    max-width: 800px;
 }
 
 .needs-border {
@@ -245,17 +245,26 @@ body {
 }
 
 #choices {
-  float: left; 
-  width: 100%; 
-  text-align: left; 
-  vertical-align: bottom; 
-  margin-top: 5px; 
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
   font-size:13px;
 }
 
+#choices label:first-child {
+	margin-right: 15px;
+}
+
 #expiry {
-  float: right; 
   padding-top: 1px;
+}
+
+#randomize {
+  vertical-align: bottom;
+  margin: 0;
 }
 
 .oopscontent {
@@ -267,8 +276,13 @@ body {
     border: 0;
 }
 
+.error-404 img {
+    max-width: 90vw;
+}
+
 .editor {
-    width: 705px;
+    width: 90vw;
+    max-width: 705px;
     height: 450px;
     border-color: #cccccc;
     font-family: monospace;
@@ -287,7 +301,7 @@ body {
 /* Content display {{{ */
 .display-audio,
 .display-file {
-    width: 500px;
+    width: 100%;
 }
 
 .display-image {

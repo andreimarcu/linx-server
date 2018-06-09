@@ -7,11 +7,11 @@
 {% block content %}
 
     <div id="info" class="dinfo">
-        <div class="float-left" id="filename">
+        <div id="filename">
             {{ filename }}
         </div>
 
-        <div class="right">
+        <div class='text-right'>
             {% if expiry %}
             <span>file expires in {{ expiry }}</span> | 
             {% endif %}
@@ -22,7 +22,6 @@
         </div>
 
         {% block infoleft %}{% endblock %}
-        <div class="clear"></div>
     </div>
 
     <div id="main" {% block mainmore %}{% endblock %}>
