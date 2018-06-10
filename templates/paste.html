@@ -4,17 +4,17 @@
     <form id="reply" action='{{ sitepath }}upload' method='post'>
         <div id="main">
             <div id="info" class="ninfo">
-                <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
-
-                <div class="right">
+                <div>
+                    <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
+                </div>
+                <div>
+                    <input type="submit" value="Paste">
                     <select id="expiry" name="expires">
                         <option disabled="disabled">Expires:</option>
                         {% for expiry in expirylist %}
                         <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
                         {% endfor %}
                     </select>
-
-                    <input type="submit" value="Paste">
                 </div>
             </div>
 
