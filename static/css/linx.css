@@ -284,9 +284,10 @@ body {
   color: #800000;
 }
 
-.qrcode > img {
+.qrcode > canvas, .qrcode > img {
   margin: 0 auto;
   padding: 10px;
+  display: block;
 }
 
 /* Content display {{{ */
