@@ -284,6 +284,11 @@ body {
   color: #800000;
 }
 
+.qrcode > img {
+  margin: 0 auto;
+  padding: 10px;
+}
+
 /* Content display {{{ */
 .display-audio,
 .display-file {

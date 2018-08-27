@@ -56,6 +56,12 @@ Dropzone.options.dropzone = {
         file.fileLabelLink = fileLabelLink;
         file.fileLabel.appendChild(fileLabelLink);
 
+        var qrCode = document.createElement("div");
+        qrCode.className = "qrcode";
+        file.uploadElement.qrCode = qrCode;
+        file.uploadElement.appendChild(qrCode);
+        new QRCode(qrCode, resp.url);
+
         var deleteAction = document.createElement("span");
         deleteAction.innerHTML = "Delete";
         deleteAction.className = "cancel";
@@ -69,6 +75,7 @@ Dropzone.options.dropzone = {
 				    file.fileLabel.insertBefore(text, file.fileLabelLink);
 					file.fileLabel.className = "deleted";
 					file.fileActions.removeChild(file.cancelActionElement);
+					file.uploadElement.qrCode.remove();
 				}
 			}.bind(this, file);
 			xhr.send();
