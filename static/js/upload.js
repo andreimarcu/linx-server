@@ -3,15 +3,11 @@
 var qrCodeCheckbox = document.getElementById("qrcode-show");
 if (qrCodeCheckbox !== null) {
   qrCodeCheckbox.addEventListener('change', function() {
-    var qrCodeCheckbox = document.getElementById("qrcode-show");
-    if (qrCodeCheckbox == null) {
-      return;
-    }
     var qrCodes = document.getElementsByClassName('qrcode');
     for(var i=0; i<qrCodes.length; i++) {
       qrCodes[i].style.display = qrCodeCheckbox.checked ? "block" : "none";
     }
-  })
+  });
 }
 
 Dropzone.options.dropzone = {
@@ -74,7 +70,6 @@ Dropzone.options.dropzone = {
         qrCode.className = "qrcode";
         file.uploadElement.qrCode = qrCode;
         // Determine if the QR code should be shown or not
-        var qrCodeCheckbox = document.getElementById("qrcode-show");
         if (qrCodeCheckbox !== null) {
             qrCode.style.display = qrCodeCheckbox.checked ? "block" : "none";
         }
