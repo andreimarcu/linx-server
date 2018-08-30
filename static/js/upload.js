@@ -1,5 +1,19 @@
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
 
+var qrCodeCheckbox = document.getElementById("qrcode-show");
+if (qrCodeCheckbox !== null) {
+  qrCodeCheckbox.addEventListener('change', function() {
+    var qrCodeCheckbox = document.getElementById("qrcode-show");
+    if (qrCodeCheckbox == null) {
+      return;
+    }
+    var qrCodes = document.getElementsByClassName('qrcode');
+    for(var i=0; i<qrCodes.length; i++) {
+      qrCodes[i].style.display = qrCodeCheckbox.checked ? "block" : "none";
+    }
+  })
+}
+
 Dropzone.options.dropzone = {
 	init: function() {
 		var dzone = document.getElementById("dzone");
@@ -59,6 +73,12 @@ Dropzone.options.dropzone = {
         var qrCode = document.createElement("div");
         qrCode.className = "qrcode";
         file.uploadElement.qrCode = qrCode;
+        // Determine if the QR code should be shown or not
+        var qrCodeCheckbox = document.getElementById("qrcode-show");
+        if (qrCodeCheckbox !== null) {
+            qrCode.style.display = qrCodeCheckbox.checked ? "block" : "none";
+        }
+
         file.uploadElement.appendChild(qrCode);
         new QRCode(qrCode, resp.url);
 

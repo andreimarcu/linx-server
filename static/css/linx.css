@@ -284,6 +284,7 @@ body {
   color: #800000;
 }
 
+/* Center the QR code */
 .qrcode > canvas, .qrcode > img {
   margin: 0 auto;
   padding: 10px;
