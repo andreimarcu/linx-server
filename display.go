@@ -22,7 +22,7 @@ const maxDisplayFileSizeBytes = 1024 * 512
 var cliUserAgentRe = regexp.MustCompile("(?i)(lib)?curl|wget")
 
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	if cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) {
+	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) {
 		fileServeHandler(c, w, r)
 		return
 	}
