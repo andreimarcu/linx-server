@@ -1149,8 +1149,8 @@ func TestPutAndGetCLI(t *testing.T) {
 	mux.ServeHTTP(w, req)
 
 	contentType := w.Header().Get("Content-Type")
-	if !strings.HasPrefix(contentType, "text/html") {
-		t.Fatalf("Didn't receive file display page but %v", w)
+	if strings.HasPrefix(contentType, "text/plain") {
+		t.Fatalf("Didn't receive file display page but %s", contentType)
 	}
 
 	// request file with wget user agent
@@ -1163,7 +1163,7 @@ func TestPutAndGetCLI(t *testing.T) {
 	mux.ServeHTTP(w, req)
 
 	contentType = w.Header().Get("Content-Type")
-	if strings.HasPrefix(contentType, "text/html") {
+	if !strings.HasPrefix(contentType, "text/plain") {
 		t.Fatalf("Didn't receive file directly but %s", contentType)
 	}
 
