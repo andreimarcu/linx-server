@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +19,14 @@ import (
 
 const maxDisplayFileSizeBytes = 1024 * 512
 
+var cliUserAgentRe = regexp.MustCompile("(?i)(lib)?curl|wget")
+
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) {
+		fileServeHandler(c, w, r)
+		return
+	}
+
 	fileName := c.URLParams["name"]
 
 	err := checkFile(fileName)

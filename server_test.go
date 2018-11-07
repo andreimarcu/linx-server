@@ -1121,3 +1121,50 @@ func TestShutdown(t *testing.T) {
 	os.RemoveAll(Config.filesDir)
 	os.RemoveAll(Config.metaDir)
 }
+
+func TestPutAndGetCLI(t *testing.T) {
+	var myjson RespOkJSON
+	mux := setup()
+
+	// upload file
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Accept", "application/json")
+	mux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// request file without wget user agent
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", myjson.Url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mux.ServeHTTP(w, req)
+
+	contentType := w.Header().Get("Content-Type")
+	if strings.HasPrefix(contentType, "text/plain") {
+		t.Fatalf("Didn't receive file display page but %s", contentType)
+	}
+
+	// request file with wget user agent
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", myjson.Url, nil)
+	req.Header.Set("User-Agent", "wget")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mux.ServeHTTP(w, req)
+
+	contentType = w.Header().Get("Content-Type")
+	if !strings.HasPrefix(contentType, "text/plain") {
+		t.Fatalf("Didn't receive file directly but %s", contentType)
+	}
+
+}

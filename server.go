@@ -58,6 +58,7 @@ var Config struct {
 	remoteAuthFile            string
 	addHeaders                headerList
 	googleShorterAPIKey       string
+	noDirectAgents            bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -243,6 +244,8 @@ func main() {
 		"Add an arbitrary header to the response. This option can be used multiple times.")
 	flag.StringVar(&Config.googleShorterAPIKey, "googleapikey", "",
 		"API Key for Google's URL Shortener.")
+	flag.BoolVar(&Config.noDirectAgents, "nodirectagents", false,
+		"disable serving files directly for wget/curl user agents")
 
 	iniflags.Parse()
 
