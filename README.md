@@ -52,7 +52,6 @@ allowhotlink = true
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-nologs``` -- (optionally) disable request logs in stdout
-- ```-googleapikey``` -- (optionally) API Key for Google's URL Shortener. ([How to create one](https://developers.google.com/url-shortener/v1/getting_started#APIKey))
 
 #### SSL with built-in server 
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)

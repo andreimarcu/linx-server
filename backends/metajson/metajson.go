@@ -15,7 +15,6 @@ type MetadataJSON struct {
 	Size         int64    `json:"size"`
 	Expiry       int64    `json:"expiry"`
 	ArchiveFiles []string `json:"archive_files,omitempty"`
-	ShortURL     string   `json:"short_url"`
 }
 
 type MetaJSONBackend struct {
@@ -30,7 +29,6 @@ func (m MetaJSONBackend) Put(key string, metadata *backends.Metadata) error {
 	mjson.Sha256sum = metadata.Sha256sum
 	mjson.Expiry = metadata.Expiry.Unix()
 	mjson.Size = metadata.Size
-	mjson.ShortURL = metadata.ShortURL
 
 	byt, err := json.Marshal(mjson)
 	if err != nil {
@@ -63,7 +61,6 @@ func (m MetaJSONBackend) Get(key string) (metadata backends.Metadata, err error)
 	metadata.Sha256sum = mjson.Sha256sum
 	metadata.Expiry = time.Unix(mjson.Expiry, 0)
 	metadata.Size = mjson.Size
-	metadata.ShortURL = mjson.ShortURL
 
 	return
 }
