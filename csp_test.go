@@ -12,6 +12,7 @@ import (
 
 var testCSPHeaders = map[string]string{
 	"Content-Security-Policy": "default-src 'none'; style-src 'self';",
+	"Referrer-Policy":         "strict-origin-when-cross-origin",
 	"X-Frame-Options":         "SAMEORIGIN",
 }
 
@@ -22,8 +23,9 @@ func TestContentSecurityPolicy(t *testing.T) {
 	Config.maxSize = 1024 * 1024 * 1024
 	Config.noLogs = true
 	Config.siteName = "linx"
-	Config.contentSecurityPolicy = "default-src 'none'; style-src 'self';"
-	Config.xFrameOptions = "SAMEORIGIN"
+	Config.contentSecurityPolicy = testCSPHeaders["Content-Security-Policy"]
+	Config.referrerPolicy = testCSPHeaders["Referrer-Policy"]
+	Config.xFrameOptions = testCSPHeaders["X-Frame-Options"]
 	mux := setup()
 
 	w := httptest.NewRecorder()
@@ -34,8 +36,9 @@ func TestContentSecurityPolicy(t *testing.T) {
 	}
 
 	goji.Use(ContentSecurityPolicy(CSPOptions{
-		policy: testCSPHeaders["Content-Security-Policy"],
-		frame:  testCSPHeaders["X-Frame-Options"],
+		policy:         testCSPHeaders["Content-Security-Policy"],
+		referrerPolicy: testCSPHeaders["Referrer-Policy"],
+		frame:          testCSPHeaders["X-Frame-Options"],
 	}))
 
 	mux.ServeHTTP(w, req)

@@ -32,6 +32,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
+	w.Header().Set("Referrer-Policy", Config.fileReferrerPolicy)
 
 	fileBackend.ServeFile(fileName, w, r)
 }
