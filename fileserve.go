@@ -41,7 +41,10 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Etag", metadata.Sha256sum)
 	w.Header().Set("Cache-Control", "max-age=0")
 
-	fileBackend.ServeFile(fileName, w, r)
+	err = fileBackend.ServeFile(fileName, w, r)
+	if err != nil {
+		oopsHandler(c, w, r, RespAUTO, err.Error())
+	}
 }
 
 func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {

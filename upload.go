@@ -70,7 +70,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			upReq.randomBarename = true
 		}
 		upReq.expiry = parseExpiry(r.Form.Get("expires"))
-		upReq.src = file
+		upReq.src = http.MaxBytesReader(w, file, Config.maxSize)
 		upReq.filename = headers.Filename
 	} else {
 		if r.FormValue("content") == "" {
@@ -82,7 +82,13 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			extension = "txt"
 		}
 
-		upReq.src = strings.NewReader(r.FormValue("content"))
+		content := r.FormValue("content")
+		if int64(len(content)) > Config.maxSize {
+			oopsHandler(c, w, r, RespJSON, "Content length exceeds max size")
+			return
+		}
+
+		upReq.src = strings.NewReader(content)
 		upReq.expiry = parseExpiry(r.FormValue("expires"))
 		upReq.filename = r.FormValue("filename") + "." + extension
 	}
@@ -115,7 +121,7 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	upReq.filename = c.URLParams["name"]
-	upReq.src = r.Body
+	upReq.src = http.MaxBytesReader(w, r.Body, Config.maxSize)
 
 	upload, err := processUpload(upReq)
 
@@ -162,7 +168,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq.filename = filepath.Base(grabUrl.Path)
-	upReq.src = resp.Body
+	upReq.src = http.MaxBytesReader(w, resp.Body, Config.maxSize)
 	upReq.deletionKey = r.FormValue("deletekey")
 	upReq.randomBarename = r.FormValue("randomize") == "yes"
 	upReq.expiry = parseExpiry(r.FormValue("expiry"))
@@ -267,12 +273,9 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		fileExpiry = time.Now().Add(upReq.expiry)
 	}
 
-	bytes, err := fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
+	_, err = fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
 	if err != nil {
 		return upload, err
-	} else if bytes > Config.maxSize {
-		fileBackend.Delete(upload.Filename)
-		return upload, errors.New("File too large")
 	}
 
 	upload.Metadata, err = generateMetadata(upload.Filename, fileExpiry, upReq.deletionKey)
