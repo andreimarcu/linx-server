@@ -29,7 +29,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	fileName := c.URLParams["name"]
 
-	err := checkFile(fileName)
+	_, err := checkFile(fileName)
 	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
 		return

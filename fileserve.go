@@ -6,18 +6,22 @@ import (
 	"strings"
 
 	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/zenazn/goji/web"
 )
 
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
-	err := checkFile(fileName)
+	metadata, err := checkFile(fileName)
 	if err == NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err == backends.BadMetadata {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
+		return
+	} else if err != nil {
+		oopsHandler(c, w, r, RespAUTO, err.Error())
 		return
 	}
 
@@ -33,6 +37,9 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
 	w.Header().Set("Referrer-Policy", Config.fileReferrerPolicy)
+
+	w.Header().Set("Etag", metadata.Sha256sum)
+	w.Header().Set("Cache-Control", "max-age=0")
 
 	fileBackend.ServeFile(fileName, w, r)
 }
@@ -61,22 +68,24 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkFile(filename string) error {
-	_, err := fileBackend.Exists(filename)
+func checkFile(filename string) (metadata backends.Metadata, err error) {
+	_, err = fileBackend.Exists(filename)
 	if err != nil {
-		return NotFoundErr
+		err = NotFoundErr
+		return
 	}
 
-	expired, err := isFileExpired(filename)
+	metadata, err = metadataRead(filename)
 	if err != nil {
-		return err
+		return
 	}
 
-	if expired {
+	if expiry.IsTsExpired(metadata.Expiry) {
 		fileBackend.Delete(filename)
 		metaStorageBackend.Delete(filename)
-		return NotFoundErr
+		err = NotFoundErr
+		return
 	}
 
-	return nil
+	return
 }
