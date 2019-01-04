@@ -237,11 +237,11 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
 	upload.Filename = strings.Replace(upload.Filename, " ", "", -1)
 
-	fileexists, _ := fileBackend.Exists(upload.Filename)
+	fileexists, _ := storageBackend.Exists(upload.Filename)
 
 	// Check if the delete key matches, in which case overwrite
 	if fileexists {
-		metad, merr := metadataRead(upload.Filename)
+		metad, merr := storageBackend.Head(upload.Filename)
 		if merr == nil {
 			if upReq.deletionKey == metad.DeleteKey {
 				fileexists = false
@@ -258,7 +258,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		}
 		upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-		fileexists, err = fileBackend.Exists(upload.Filename)
+		fileexists, err = storageBackend.Exists(upload.Filename)
 	}
 
 	if fileBlacklist[strings.ToLower(upload.Filename)] {
@@ -273,21 +273,15 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		fileExpiry = time.Now().Add(upReq.expiry)
 	}
 
-	_, err = fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
+	if upReq.deletionKey == "" {
+		upReq.deletionKey = uniuri.NewLen(30)
+	}
+
+	upload.Metadata, err = storageBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src), fileExpiry, upReq.deletionKey)
 	if err != nil {
 		return upload, err
 	}
 
-	upload.Metadata, err = generateMetadata(upload.Filename, fileExpiry, upReq.deletionKey)
-	if err != nil {
-		fileBackend.Delete(upload.Filename)
-		return
-	}
-	err = metadataWrite(upload.Filename, &upload.Metadata)
-	if err != nil {
-		fileBackend.Delete(upload.Filename)
-		return
-	}
 	return
 }
 

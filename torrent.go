@@ -14,7 +14,7 @@ import (
 func createTorrent(fileName string, r *http.Request) ([]byte, error) {
 	url := fmt.Sprintf("%sselif/%s", getSiteURL(r), fileName)
 
-	t, err := fileBackend.GetTorrent(fileName, url)
+	t, err := storageBackend.GetTorrent(fileName, url)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -31,7 +31,7 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
 	_, err := checkFile(fileName)
-	if err == NotFoundErr {
+	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err == backends.BadMetadata {

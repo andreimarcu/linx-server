@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-type MetaBackend interface {
-	Get(key string) (Metadata, error)
-	Put(key string, metadata *Metadata) error
-}
-
 type Metadata struct {
 	DeleteKey    string
 	Sha256sum    string

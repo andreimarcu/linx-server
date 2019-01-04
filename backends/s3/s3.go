@@ -1,14 +1,16 @@
-package localfs
+package s3
 
 import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
+	"strconv"
+	"time"
 
 	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/helpers"
 	"github.com/andreimarcu/linx-server/torrent"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -19,7 +21,7 @@ import (
 
 type S3Backend struct {
 	bucket string
-	svc *S3
+	svc *s3.S3
 }
 
 func (b S3Backend) Delete(key string) error {
@@ -28,6 +30,9 @@ func (b S3Backend) Delete(key string) error {
 		Key: aws.String(key),
 	}
 	_, err := b.svc.DeleteObject(input)
+	if err != nil {
+		return err
+	}
 	return os.Remove(path.Join(b.bucket, key))
 }
 
@@ -40,61 +45,99 @@ func (b S3Backend) Exists(key string) (bool, error) {
 	return err == nil, err
 }
 
-func (b S3Backend) Get(key string) ([]byte, error) {
+func (b S3Backend) Head(key string) (metadata backends.Metadata, err error) {
+	input := &s3.HeadObjectInput{
+		Bucket: aws.String(b.bucket),
+		Key: aws.String(key),
+	}
+	result, err := b.svc.HeadObject(input)
+	if err != nil {
+		return
+	}
+
+	metadata, err = unmapMetadata(result.Metadata)
+	return
+}
+
+func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser, err error) {
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
 	}
 	result, err := b.svc.GetObject(input)
 	if err != nil {
-		return []byte{}, err
+		return
 	}
-	defer result.Body.Close()
 
-	return ioutil.ReadAll(result.Body)
+	metadata, err = unmapMetadata(result.Metadata)
+	r = result.Body
+	return
 }
 
-func (b S3Backend) Put(key string, r io.Reader) (int64, error) {
+func mapMetadata(m backends.Metadata) map[string]*string {
+	return map[string]*string{
+		"expiry": aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
+		"delete_key": aws.String(m.DeleteKey),
+		"size": aws.String(strconv.FormatInt(m.Size, 10)),
+		"mimetype": aws.String(m.Mimetype),
+		"sha256sum": aws.String(m.Sha256sum),
+	}
+}
+
+func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
+	expiry, err := strconv.ParseInt(*input["expiry"], 10, 64)
+	if err != nil {
+		return
+	}
+	m.Expiry = time.Unix(expiry, 0)
+
+	m.Size, err = strconv.ParseInt(*input["size"], 10, 64)
+	if err != nil {
+		return
+	}
+
+	m.DeleteKey = *input["delete_key"]
+	m.Mimetype = *input["mimetype"]
+	m.Sha256sum = *input["sha256sum"]
+	return
+}
+
+func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+	tmpDst, err := ioutil.TempFile("", "linx-server-upload")
+	if err != nil {
+		return
+	}
+	defer tmpDst.Close()
+	defer os.Remove(tmpDst.Name())
+
+	bytes, err := io.Copy(tmpDst, r)
+	if bytes == 0 {
+		return m, errors.New("Empty file")
+	} else if err != nil {
+		return m, err
+	}
+
+	m.Expiry = expiry
+	m.DeleteKey = deleteKey
+	m.Size = bytes
+	m.Mimetype, _ = helpers.DetectMime(tmpDst)
+	m.Sha256sum, _ = helpers.Sha256sum(tmpDst)
+	// XXX: we may not be able to write this to AWS easily
+	//m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, tmpDst)
+
 	uploader := s3manager.NewUploaderWithClient(b.svc)
 	input := &s3manager.UploadInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
-		Body: r,
+		Body: tmpDst,
+		Metadata: mapMetadata(m),
 	}
-	result, err := uploader.Upload(input)
+	_, err = uploader.Upload(input)
 	if err != nil {
-		return 0, err
+		return
 	}
 
-	return -1, nil
-}
-
-func (b S3Backend) Open(key string) (backends.ReadSeekCloser, error) {
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
-	}
-	result, err := b.svc.GetObject(input)
-	if err != nil {
-		return nil, err
-	}
-
-	return result.Body, nil
-}
-
-func (b S3Backend) ServeFile(key string, w http.ResponseWriter, r *http.Request) {
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
-	}
-	result, err := b.svc.GetObject(input)
-	if err != nil {
-		return err
-	}
-	defer result.Body.Close()
-
-	http.ServeContent(w, r, key, *result.LastModified, result.Body)
-	return nil
+	return
 }
 
 func (b S3Backend) Size(key string) (int64, error) {
@@ -139,7 +182,7 @@ func (b S3Backend) GetTorrent(fileName string, url string) (t torrent.Torrent, e
 func (b S3Backend) List() ([]string, error) {
 	var output []string
 	input := &s3.ListObjectsInput{
-		bucket: aws.String(b.bucket),
+		Bucket: aws.String(b.bucket),
 	}
 
 	results, err := b.svc.ListObjects(input)

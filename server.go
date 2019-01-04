@@ -16,7 +16,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
-	"github.com/andreimarcu/linx-server/backends/metajson"
+	"github.com/andreimarcu/linx-server/backends/s3"
 	"github.com/flosch/pongo2"
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji/graceful"
@@ -60,6 +60,9 @@ var Config struct {
 	remoteAuthFile            string
 	addHeaders                headerList
 	noDirectAgents            bool
+	s3Endpoint                string
+	s3Region                  string
+	s3Bucket                  string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -69,8 +72,7 @@ var timeStarted time.Time
 var timeStartedStr string
 var remoteAuthKeys []string
 var metaStorageBackend backends.MetaStorageBackend
-var metaBackend backends.MetaBackend
-var fileBackend backends.StorageBackend
+var storageBackend backends.StorageBackend
 
 func setup() *web.Mux {
 	mux := web.New()
@@ -129,9 +131,11 @@ func setup() *web.Mux {
 		Config.sitePath = "/"
 	}
 
-	metaStorageBackend = localfs.NewLocalfsBackend(Config.metaDir)
-	metaBackend = metajson.NewMetaJSONBackend(metaStorageBackend)
-	fileBackend = localfs.NewLocalfsBackend(Config.filesDir)
+	if Config.s3Bucket != "" {
+		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint)
+	} else {
+		storageBackend = localfs.NewLocalfsBackend(Config.metaDir, Config.filesDir)
+	}
 
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()
@@ -247,6 +251,12 @@ func main() {
 		"Add an arbitrary header to the response. This option can be used multiple times.")
 	flag.BoolVar(&Config.noDirectAgents, "nodirectagents", false,
 		"disable serving files directly for wget/curl user agents")
+	flag.StringVar(&Config.s3Endpoint, "s3-endpoint", "",
+		"S3 endpoint")
+	flag.StringVar(&Config.s3Region, "s3-region", "",
+		"S3 region")
+	flag.StringVar(&Config.s3Bucket, "s3-bucket", "",
+		"S3 bucket to use for files and metadata")
 
 	iniflags.Parse()
 

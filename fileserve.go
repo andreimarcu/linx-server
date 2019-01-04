@@ -1,8 +1,10 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/andreimarcu/linx-server/backends"
@@ -14,7 +16,7 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
 	metadata, err := checkFile(fileName)
-	if err == NotFoundErr {
+	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err == backends.BadMetadata {
@@ -38,12 +40,26 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
 	w.Header().Set("Referrer-Policy", Config.fileReferrerPolicy)
 
+	_, reader, err := storageBackend.Get(fileName)
+	if err != nil {
+		oopsHandler(c, w, r, RespAUTO, err.Error())
+	}
+
+	w.Header().Set("Content-Type", metadata.Mimetype)
+	w.Header().Set("Content-Length", strconv.FormatInt(metadata.Size, 10))
 	w.Header().Set("Etag", metadata.Sha256sum)
 	w.Header().Set("Cache-Control", "max-age=0")
 
-	err = fileBackend.ServeFile(fileName, w, r)
-	if err != nil {
-		oopsHandler(c, w, r, RespAUTO, err.Error())
+	// TODO: implement If-Match, If-None-Match (ETag)
+	// TODO: implement If-Unmodified-Since, If-Modified-Since (Last-Modified)
+	// TODO: implement range requests?
+
+	if r.Method != "HEAD" {
+		defer reader.Close()
+
+		if _, err = io.CopyN(w, reader, metadata.Size); err != nil {
+			oopsHandler(c, w, r, RespAUTO, err.Error())
+		}
 	}
 }
 
@@ -72,21 +88,14 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func checkFile(filename string) (metadata backends.Metadata, err error) {
-	_, err = fileBackend.Exists(filename)
-	if err != nil {
-		err = NotFoundErr
-		return
-	}
-
-	metadata, err = metadataRead(filename)
+	metadata, err = storageBackend.Head(filename)
 	if err != nil {
 		return
 	}
 
 	if expiry.IsTsExpired(metadata.Expiry) {
-		fileBackend.Delete(filename)
-		metaStorageBackend.Delete(filename)
-		err = NotFoundErr
+		storageBackend.Delete(filename)
+		err = backends.NotFoundErr
 		return
 	}
 

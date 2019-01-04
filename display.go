@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
@@ -30,12 +32,12 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
 	_, err := checkFile(fileName)
-	if err == NotFoundErr {
+	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	}
 
-	metadata, err := metadataRead(fileName)
+	metadata, err := storageBackend.Head(fileName)
 	if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
@@ -77,8 +79,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/pdf.html"]
 
 	} else if extension == "story" {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				extra["contents"] = string(bytes)
 				lines = strings.Split(extra["contents"], "\n")
@@ -87,8 +94,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if extension == "md" {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				unsafe := blackfriday.MarkdownCommon(bytes)
 				html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
@@ -99,8 +111,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if strings.HasPrefix(metadata.Mimetype, "text/") || supportedBinExtension(extension) {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				extra["extension"] = extension
 				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
