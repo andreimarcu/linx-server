@@ -2,7 +2,6 @@ package localfs
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -122,7 +121,7 @@ func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey
 	bytes, err := io.Copy(dst, r)
 	if bytes == 0 {
 		os.Remove(filePath)
-		return m, errors.New("Empty file")
+		return m, backends.FileEmptyError
 	} else if err != nil {
 		os.Remove(filePath)
 		return m, err

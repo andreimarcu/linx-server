@@ -24,3 +24,4 @@ type MetaStorageBackend interface {
 }
 
 var NotFoundErr = errors.New("File not found.")
+var FileEmptyError = errors.New("Empty file")

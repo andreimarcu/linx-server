@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -112,7 +111,7 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 
 	bytes, err := io.Copy(tmpDst, r)
 	if bytes == 0 {
-		return m, errors.New("Empty file")
+		return m, backends.FileEmptyError
 	} else if err != nil {
 		return m, err
 	}

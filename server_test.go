@@ -486,7 +486,6 @@ func TestPostJSONUploadMaxExpiry(t *testing.T) {
 		var myjson RespOkJSON
 		err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 		if err != nil {
-			fmt.Println(w.Body.String())
 			t.Fatal(err)
 		}
 
@@ -643,13 +642,9 @@ func TestPostEmptyUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
+	if w.Code != 400 {
 		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
-	}
-
-	if !strings.Contains(w.Body.String(), "Empty file") {
-		t.Fatal("Response did not contain 'Empty file'")
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 }
 
@@ -680,13 +675,9 @@ func TestPostTooLargeUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
+	if w.Code != 400 {
 		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
-	}
-
-	if !strings.Contains(w.Body.String(), "request body too large") {
-		t.Fatal("Response did not contain 'request body too large'")
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 
 	Config.maxSize = oldMaxSize
@@ -718,9 +709,9 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
+	if w.Code != 400 {
 		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 
 	var myjson RespErrJSON
@@ -729,7 +720,7 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if myjson.Error != "Could not upload file: Empty file" {
+	if myjson.Error != "Empty file" {
 		t.Fatal("Json 'error' was not 'Empty file' but " + myjson.Error)
 	}
 }
@@ -807,13 +798,8 @@ func TestPutEmptyUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
-		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
-	}
-
-	if !strings.Contains(w.Body.String(), "Empty file") {
-		t.Fatal("Response did not contain 'Empty file'")
+	if w.Code != 400 {
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 }
 
