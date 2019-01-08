@@ -46,6 +46,8 @@ var Config struct {
 	keyFile                   string
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
+	referrerPolicy            string
+	fileReferrerPolicy        string
 	xFrameOptions             string
 	maxSize                   int64
 	maxExpiry                 uint64
@@ -88,8 +90,9 @@ func setup() *web.Mux {
 	mux.Use(middleware.Recoverer)
 	mux.Use(middleware.AutomaticOptions)
 	mux.Use(ContentSecurityPolicy(CSPOptions{
-		policy: Config.contentSecurityPolicy,
-		frame:  Config.xFrameOptions,
+		policy:         Config.contentSecurityPolicy,
+		referrerPolicy: Config.referrerPolicy,
+		frame:          Config.xFrameOptions,
 	}))
 	mux.Use(AddHeaders(Config.addHeaders))
 
@@ -233,11 +236,17 @@ func main() {
 	flag.StringVar(&Config.remoteAuthFile, "remoteauthfile", "",
 		"path to a file containing newline-separated scrypted auth keys for remote uploads")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
-		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;",
+		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';",
 		"value of default Content-Security-Policy header")
 	flag.StringVar(&Config.fileContentSecurityPolicy, "filecontentsecuritypolicy",
-		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;",
+		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';",
 		"value of Content-Security-Policy header for file access")
+	flag.StringVar(&Config.referrerPolicy, "referrerpolicy",
+		"same-origin",
+		"value of default Referrer-Policy header")
+	flag.StringVar(&Config.fileReferrerPolicy, "filereferrerpolicy",
+		"same-origin",
+		"value of Referrer-Policy header for file access")
 	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")
 	flag.Var(&Config.addHeaders, "addheader",
