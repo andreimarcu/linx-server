@@ -116,15 +116,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = renderTemplate(tpl, pongo2.Context{
-		"mime":            metadata.Mimetype,
-		"filename":        fileName,
-		"size":            sizeHuman,
-		"expiry":          expiryHuman,
-		"extra":           extra,
-		"lines":           lines,
-		"files":           metadata.ArchiveFiles,
-		"shorturlEnabled": Config.googleShorterAPIKey != "",
-		"shorturl":        metadata.ShortURL,
+		"mime":     metadata.Mimetype,
+		"filename": fileName,
+		"size":     sizeHuman,
+		"expiry":   expiryHuman,
+		"extra":    extra,
+		"lines":    lines,
+		"files":    metadata.ArchiveFiles,
 	}, r, w)
 
 	if err != nil {

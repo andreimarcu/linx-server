@@ -17,7 +17,6 @@ type Metadata struct {
 	Size         int64
 	Expiry       time.Time
 	ArchiveFiles []string
-	ShortURL     string
 }
 
 var BadMetadata = errors.New("Corrupted metadata.")
