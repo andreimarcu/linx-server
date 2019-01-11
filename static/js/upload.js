@@ -102,8 +102,18 @@ Dropzone.options.dropzone = {
 	previewsContainer: "#uploads",
 	parallelUploads: 5,
 	headers: {"Accept": "application/json"},
-	dictDefaultMessage: "Click or Drop file(s)",
+	dictDefaultMessage: "Click or Drop file(s) or Paste image",
 	dictFallbackMessage: ""
+};
+
+document.onpaste = function(event) {
+	var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+	for (index in items) {
+		var item = items[index];
+		if (item.kind === "file") {
+			Dropzone.forElement("#dropzone").addFile(item.getAsFile());
+		}
+	}
 };
 
 // @end-license
