@@ -295,6 +295,7 @@ func generateBarename() string {
 func generateJSONresponse(upload Upload, r *http.Request) []byte {
 	js, _ := json.Marshal(map[string]string{
 		"url":        getSiteURL(r) + upload.Filename,
+		"direct_url": getSiteURL(r) + Config.selifPath + upload.Filename,
 		"filename":   upload.Filename,
 		"delete_key": upload.Metadata.DeleteKey,
 		"expiry":     strconv.FormatInt(upload.Metadata.Expiry.Unix(), 10),

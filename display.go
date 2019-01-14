@@ -52,11 +52,12 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
-			"filename":  fileName,
-			"expiry":    strconv.FormatInt(metadata.Expiry.Unix(), 10),
-			"size":      strconv.FormatInt(metadata.Size, 10),
-			"mimetype":  metadata.Mimetype,
-			"sha256sum": metadata.Sha256sum,
+			"filename":   fileName,
+			"direct_url": getSiteURL(r) + Config.selifPath + fileName,
+			"expiry":     strconv.FormatInt(metadata.Expiry.Unix(), 10),
+			"size":       strconv.FormatInt(metadata.Size, 10),
+			"mimetype":   metadata.Mimetype,
+			"sha256sum":  metadata.Sha256sum,
 		})
 		w.Write(js)
 		return
