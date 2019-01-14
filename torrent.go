@@ -45,7 +45,7 @@ func createTorrent(fileName string, f io.ReadCloser, r *http.Request) ([]byte, e
 			PieceLength: TORRENT_PIECE_LENGTH,
 			Name:        fileName,
 		},
-		UrlList: []string{fmt.Sprintf("%sselif/%s", getSiteURL(r), fileName)},
+		UrlList: []string{fmt.Sprintf("%s%s%s", getSiteURL(r), Config.selifPath, fileName)},
 	}
 
 	for {

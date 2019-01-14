@@ -173,7 +173,7 @@ func TestFileNotFound(t *testing.T) {
 
 	filename := generateBarename()
 
-	req, err := http.NewRequest("GET", "/selif/"+filename, nil)
+	req, err := http.NewRequest("GET", "/"+Config.selifPath+filename, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -941,7 +941,7 @@ func TestPutAndOverwrite(t *testing.T) {
 
 	// Make sure it's the new file
 	w = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", "/selif/"+myjson.Filename, nil)
+	req, err = http.NewRequest("GET", "/"+Config.selifPath+myjson.Filename, nil)
 	mux.ServeHTTP(w, req)
 
 	if w.Code == 404 {
