@@ -49,6 +49,7 @@
 
 div.dz-default {
     border: 2px dashed #C9C9C9;
+    border-radius: 5px;
     color: #C9C9C9;
     font: 14px "helvetica neue",helvetica,arial,sans-serif;
     background-color: #FAFBFC;
