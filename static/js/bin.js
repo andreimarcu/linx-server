@@ -32,13 +32,13 @@ function edit(ev) {
     var normalcontent = document.getElementById("normal-content");
     normalcontent.removeChild(document.getElementById("normal-code"));
 
-    var editordiv = document.getElementById("editor");
+    var editordiv = document.getElementById("inplace-editor");
     editordiv.style.display = "block";
     editordiv.addEventListener('keydown', handleTab);
 }
 
 function paste(ev) {
-    var editordiv = document.getElementById("editor");
+    var editordiv = document.getElementById("inplace-editor");
     document.getElementById("newcontent").value = editordiv.value;
     document.forms["reply"].submit();
 }

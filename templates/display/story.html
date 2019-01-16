@@ -10,23 +10,17 @@
 {% block infoleft %}
     <div id="editform">
         <form id="reply" action='{{ sitepath }}upload' method='post' >
-            <div class="right">
+            <div class="right pad-left">
+                <button id="save">save</button>
                 <select id="expiry" name="expires">
                     <option disabled=disabled>Expires:</option>
-                    <option value="0">never</option>
-                    <option value="60">a minute</option>
-                    <option value="300">5 minutes</option>
-                    <option value="3600">an hour</option>
-                    <option value="86400">a day</option>
-                    <option value="604800">a week</option>
-                    <option value="2419200">a month</option>
-                    <option value="29030400">a year</option>
+                        {% for expiry in expirylist %}
+                        <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
+                        {% endfor %}
                 </select>
-
-                <button id="save">save</button>
             </div>
 
-            <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)">.<input id="extension" class="codebox" name='extension' type='text' value="story" placeholder="txt">
+            <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename">.<input id="extension" class="codebox" name='extension' type='text' value="story" placeholder="txt">
             <textarea name='content' id="newcontent" class="editor"></textarea>
         </form>
     </div>
@@ -39,7 +33,7 @@
 {% block main %}
 <div id="normal-content" class="normal">
     <pre id="normal-code"><code id="codeb" class="story">{% for line in lines %}{% if line|make_list|first == ">" %}<span class="storygreen">{{ line }}</span>{% else %}<span class="storyred">{{ line }}</span>{% endif %}{% endfor %}</code></pre>
-    <textarea id="editor" class="editor">{{ extra.contents }}</textarea>
+    <textarea id="inplace-editor" class="editor">{{ extra.contents }}</textarea>
 </div>
 
 

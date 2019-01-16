@@ -121,6 +121,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		"filename": fileName,
 		"size":     sizeHuman,
 		"expiry":   expiryHuman,
+		"expirylist": listExpirationTimes(),
 		"extra":    extra,
 		"lines":    lines,
 		"files":    metadata.ArchiveFiles,
