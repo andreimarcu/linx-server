@@ -5,7 +5,6 @@ import (
 	"archive/zip"
 	"compress/bzip2"
 	"compress/gzip"
-	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -16,6 +15,7 @@ import (
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
+	"github.com/minio/sha256-simd"
 	"gopkg.in/h2non/filetype.v1"
 )
 
