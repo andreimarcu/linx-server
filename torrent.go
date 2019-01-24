@@ -3,20 +3,40 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
 	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/expiry"
+	"github.com/andreimarcu/linx-server/torrent"
 	"github.com/zeebo/bencode"
 	"github.com/zenazn/goji/web"
 )
 
-func createTorrent(fileName string, r *http.Request) ([]byte, error) {
-	url := fmt.Sprintf("%sselif/%s", getSiteURL(r), fileName)
+func createTorrent(fileName string, f io.Reader, r *http.Request) ([]byte, error) {
+	url := getSiteURL(r) + Config.selifPath + fileName
+	chunk := make([]byte, torrent.TORRENT_PIECE_LENGTH)
 
-	t, err := storageBackend.GetTorrent(fileName, url)
-	if err != nil {
-		return []byte{}, err
+	t := torrent.Torrent{
+		Encoding: "UTF-8",
+		Info: torrent.TorrentInfo{
+			PieceLength: torrent.TORRENT_PIECE_LENGTH,
+			Name:        fileName,
+		},
+		UrlList: []string{url},
+	}
+
+	for {
+		n, err := f.Read(chunk)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return []byte{}, err
+		}
+
+		t.Info.Length += n
+		t.Info.Pieces += string(torrent.HashPiece(chunk[:n]))
 	}
 
 	data, err := bencode.EncodeBytes(&t)
@@ -30,16 +50,25 @@ func createTorrent(fileName string, r *http.Request) ([]byte, error) {
 func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
-	_, err := checkFile(fileName)
+	metadata, f, err := storageBackend.Get(fileName)
 	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err == backends.BadMetadata {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
+	} else if err != nil {
+		oopsHandler(c, w, r, RespAUTO, "Could not create torrent.")
+	}
+	defer f.Close()
+
+	if expiry.IsTsExpired(metadata.Expiry) {
+		storageBackend.Delete(fileName)
+		notFoundHandler(c, w, r)
+		return
 	}
 
-	encoded, err := createTorrent(fileName, r)
+	encoded, err := createTorrent(fileName, f, r)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "Could not create torrent.")
 		return

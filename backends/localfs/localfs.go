@@ -10,7 +10,6 @@ import (
 
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/helpers"
-	"github.com/andreimarcu/linx-server/torrent"
 )
 
 type LocalfsBackend struct {
@@ -150,39 +149,6 @@ func (b LocalfsBackend) Size(key string) (int64, error) {
 	}
 
 	return fileInfo.Size(), nil
-}
-
-func (b LocalfsBackend) GetTorrent(fileName string, url string) (t torrent.Torrent, err error) {
-	chunk := make([]byte, torrent.TORRENT_PIECE_LENGTH)
-
-	t = torrent.Torrent{
-		Encoding: "UTF-8",
-		Info: torrent.TorrentInfo{
-			PieceLength: torrent.TORRENT_PIECE_LENGTH,
-			Name:        fileName,
-		},
-		UrlList: []string{url},
-	}
-
-	_, f, err := b.Get(fileName)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	for {
-		n, err := f.Read(chunk)
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return t, err
-		}
-
-		t.Info.Length += n
-		t.Info.Pieces += string(torrent.HashPiece(chunk[:n]))
-	}
-
-	return
 }
 
 func (b LocalfsBackend) List() ([]string, error) {

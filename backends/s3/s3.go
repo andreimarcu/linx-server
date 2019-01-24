@@ -9,12 +9,10 @@ import (
 
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/helpers"
-	"github.com/andreimarcu/linx-server/torrent"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/zeebo/bencode"
 )
 
 type S3Backend struct {
@@ -149,32 +147,6 @@ func (b S3Backend) Size(key string) (int64, error) {
 	}
 
 	return *result.ContentLength, nil
-}
-
-func (b S3Backend) GetTorrent(fileName string, url string) (t torrent.Torrent, err error) {
-	input := &s3.GetObjectTorrentInput{
-		Bucket: aws.String(b.bucket),
-		Key: aws.String(fileName),
-	}
-	result, err := b.svc.GetObjectTorrent(input)
-	if err != nil {
-		return
-	}
-	defer result.Body.Close()
-
-	data, err := ioutil.ReadAll(result.Body)
-	if err != nil {
-		return
-	}
-
-	err = bencode.DecodeBytes(data, &t)
-	if err != nil {
-		return
-	}
-
-	t.Info.Name = fileName
-	t.UrlList = []string{url}
-	return
 }
 
 func (b S3Backend) List() ([]string, error) {
