@@ -10,6 +10,7 @@ import (
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/helpers"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -48,6 +49,11 @@ func (b S3Backend) Head(key string) (metadata backends.Metadata, err error) {
 	}
 	result, err := b.svc.HeadObject(input)
 	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			if aerr.Code() == s3.ErrCodeNoSuchKey {
+				err = backends.NotFoundErr
+			}
+		}
 		return
 	}
 
@@ -62,6 +68,11 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 	}
 	result, err := b.svc.GetObject(input)
 	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			if aerr.Code() == s3.ErrCodeNoSuchKey {
+				err = backends.NotFoundErr
+			}
+		}
 		return
 	}
 

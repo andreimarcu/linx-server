@@ -31,14 +31,11 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	fileName := c.URLParams["name"]
 
-	_, err := checkFile(fileName)
+	metadata, err := checkFile(fileName)
 	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
-	}
-
-	metadata, err := storageBackend.Head(fileName)
-	if err != nil {
+	} else if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
