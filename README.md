@@ -42,6 +42,7 @@ allowhotlink = true
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is inferred from Host header)
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (default is inferred from execution context)
+- ```-selifpath "selif"``` -- path relative to site base url (the "selif" in https://mylinx.example.org/selif/image.jpg) where files are accessed directly (default: selif)
 - ```-filespath files/``` -- Path to store uploads (default is files/)
 - ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)

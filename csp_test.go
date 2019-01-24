@@ -23,6 +23,7 @@ func TestContentSecurityPolicy(t *testing.T) {
 	Config.maxSize = 1024 * 1024 * 1024
 	Config.noLogs = true
 	Config.siteName = "linx"
+	Config.selifPath = "selif"
 	Config.contentSecurityPolicy = testCSPHeaders["Content-Security-Policy"]
 	Config.referrerPolicy = testCSPHeaders["Referrer-Policy"]
 	Config.xFrameOptions = testCSPHeaders["X-Frame-Options"]

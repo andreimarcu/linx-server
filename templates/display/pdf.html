@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block main %}
-<object class="display-pdf" data="{{ sitepath }}selif/{{ filename }}" type="application/pdf">
+<object class="display-pdf" data="{{ sitepath }}{{ selifpath }}{{ filename }}" type="application/pdf">
 
 <p>It appears your Web browser is not configured to display PDF files. 
-No worries, just <a href="{{ sitepath }}selif/{{ filename }}">click here to download the PDF file.</a></p>
+No worries, just <a href="{{ sitepath }}{{ selifpath }}{{ filename }}">click here to download the PDF file.</a></p>
 
 </object>
 {% endblock %}

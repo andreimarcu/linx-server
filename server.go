@@ -42,6 +42,7 @@ var Config struct {
 	siteName                  string
 	siteURL                   string
 	sitePath                  string
+	selifPath                 string
 	certFile                  string
 	keyFile                   string
 	contentSecurityPolicy     string
@@ -131,6 +132,11 @@ func setup() *web.Mux {
 		Config.sitePath = "/"
 	}
 
+	Config.selifPath = strings.TrimLeft(Config.selifPath, "/")
+	if lastChar := Config.selifPath[len(Config.selifPath)-1:]; lastChar != "/" {
+		Config.selifPath = Config.selifPath + "/"
+	}
+
 	if Config.s3Bucket != "" {
 		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint)
 	} else {
@@ -154,8 +160,8 @@ func setup() *web.Mux {
 
 	// Routing setup
 	nameRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)$`)
-	selifRe := regexp.MustCompile("^" + Config.sitePath + `selif/(?P<name>[a-z0-9-\.]+)$`)
-	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + `selif/$`)
+	selifRe := regexp.MustCompile("^" + Config.sitePath + Config.selifPath + `(?P<name>[a-z0-9-\.]+)$`)
+	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + Config.selifPath + `$`)
 	torrentRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/torrent$`)
 
 	if Config.authFile == "" {
@@ -215,6 +221,8 @@ func main() {
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "",
 		"site base url (including trailing slash)")
+	flag.StringVar(&Config.selifPath, "selifpath", "selif",
+		"path relative to site base url where files are accessed directly")
 	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
 		"maximum upload file size in bytes (default 4GB)")
 	flag.Uint64Var(&Config.maxExpiry, "maxexpiry", 0,

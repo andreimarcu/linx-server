@@ -24,7 +24,7 @@ const maxDisplayFileSizeBytes = 1024 * 512
 var cliUserAgentRe = regexp.MustCompile("(?i)(lib)?curl|wget")
 
 func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) {
+	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) && !strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		fileServeHandler(c, w, r)
 		return
 	}
@@ -54,11 +54,12 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
-			"filename":  fileName,
-			"expiry":    strconv.FormatInt(metadata.Expiry.Unix(), 10),
-			"size":      strconv.FormatInt(metadata.Size, 10),
-			"mimetype":  metadata.Mimetype,
-			"sha256sum": metadata.Sha256sum,
+			"filename":   fileName,
+			"direct_url": getSiteURL(r) + Config.selifPath + fileName,
+			"expiry":     strconv.FormatInt(metadata.Expiry.Unix(), 10),
+			"size":       strconv.FormatInt(metadata.Size, 10),
+			"mimetype":   metadata.Mimetype,
+			"sha256sum":  metadata.Sha256sum,
 		})
 		w.Write(js)
 		return
@@ -133,13 +134,14 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = renderTemplate(tpl, pongo2.Context{
-		"mime":     metadata.Mimetype,
-		"filename": fileName,
-		"size":     sizeHuman,
-		"expiry":   expiryHuman,
-		"extra":    extra,
-		"lines":    lines,
-		"files":    metadata.ArchiveFiles,
+		"mime":       metadata.Mimetype,
+		"filename":   fileName,
+		"size":       sizeHuman,
+		"expiry":     expiryHuman,
+		"expirylist": listExpirationTimes(),
+		"extra":      extra,
+		"lines":      lines,
+		"files":      metadata.ArchiveFiles,
 	}, r, w)
 
 	if err != nil {
