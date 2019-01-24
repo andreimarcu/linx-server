@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path"
 	"strconv"
 	"time"
 
@@ -32,7 +31,7 @@ func (b S3Backend) Delete(key string) error {
 	if err != nil {
 		return err
 	}
-	return os.Remove(path.Join(b.bucket, key))
+	return nil
 }
 
 func (b S3Backend) Exists(key string) (bool, error) {
@@ -75,29 +74,29 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 
 func mapMetadata(m backends.Metadata) map[string]*string {
 	return map[string]*string{
-		"expiry": aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
-		"delete_key": aws.String(m.DeleteKey),
-		"size": aws.String(strconv.FormatInt(m.Size, 10)),
-		"mimetype": aws.String(m.Mimetype),
-		"sha256sum": aws.String(m.Sha256sum),
+		"Expiry": aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
+		"Delete_key": aws.String(m.DeleteKey),
+		"Size": aws.String(strconv.FormatInt(m.Size, 10)),
+		"Mimetype": aws.String(m.Mimetype),
+		"Sha256sum": aws.String(m.Sha256sum),
 	}
 }
 
 func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
-	expiry, err := strconv.ParseInt(*input["expiry"], 10, 64)
+	expiry, err := strconv.ParseInt(aws.StringValue(input["Expiry"]), 10, 64)
 	if err != nil {
 		return
 	}
 	m.Expiry = time.Unix(expiry, 0)
 
-	m.Size, err = strconv.ParseInt(*input["size"], 10, 64)
+	m.Size, err = strconv.ParseInt(aws.StringValue(input["Size"]), 10, 64)
 	if err != nil {
 		return
 	}
 
-	m.DeleteKey = *input["delete_key"]
-	m.Mimetype = *input["mimetype"]
-	m.Sha256sum = *input["sha256sum"]
+	m.DeleteKey = aws.StringValue(input["Delete_key"])
+	m.Mimetype = aws.StringValue(input["Mimetype"])
+	m.Sha256sum = aws.StringValue(input["Sha256sum"])
 	return
 }
 

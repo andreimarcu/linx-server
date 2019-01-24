@@ -50,10 +50,6 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Etag", metadata.Sha256sum)
 	w.Header().Set("Cache-Control", "max-age=0")
 
-	// TODO: implement If-Match, If-None-Match (ETag)
-	// TODO: implement If-Unmodified-Since, If-Modified-Since (Last-Modified)
-	// TODO: implement range requests?
-
 	if r.Method != "HEAD" {
 		defer reader.Close()
 
