@@ -13,6 +13,8 @@ FROM alpine:3.8
 COPY --from=build /go/bin/linx-server /usr/local/bin/linx-server
 
 ENV GOPATH /go
+ENV SSL_CERT_FILE /etc/ssl/cert.pem
+
 COPY static /go/src/github.com/andreimarcu/linx-server/static/
 COPY templates /go/src/github.com/andreimarcu/linx-server/templates/
 

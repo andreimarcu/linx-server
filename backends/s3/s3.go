@@ -22,11 +22,10 @@ type S3Backend struct {
 }
 
 func (b S3Backend) Delete(key string) error {
-	input := &s3.DeleteObjectInput{
+	_, err := b.svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
-	}
-	_, err := b.svc.DeleteObject(input)
+	})
 	if err != nil {
 		return err
 	}
@@ -34,23 +33,22 @@ func (b S3Backend) Delete(key string) error {
 }
 
 func (b S3Backend) Exists(key string) (bool, error) {
-	input := &s3.HeadObjectInput{
+	_, err := b.svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
-	}
-	_, err := b.svc.HeadObject(input)
+	})
 	return err == nil, err
 }
 
 func (b S3Backend) Head(key string) (metadata backends.Metadata, err error) {
-	input := &s3.HeadObjectInput{
+	var result *s3.HeadObjectOutput
+	result, err = b.svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
-	}
-	result, err := b.svc.HeadObject(input)
+	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
-			if aerr.Code() == s3.ErrCodeNoSuchKey {
+			if aerr.Code() == s3.ErrCodeNoSuchKey || aerr.Code() == "NotFound" {
 				err = backends.NotFoundErr
 			}
 		}
@@ -62,14 +60,14 @@ func (b S3Backend) Head(key string) (metadata backends.Metadata, err error) {
 }
 
 func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser, err error) {
-	input := &s3.GetObjectInput{
+	var result *s3.GetObjectOutput
+	result, err = b.svc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key: aws.String(key),
-	}
-	result, err := b.svc.GetObject(input)
+	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
-			if aerr.Code() == s3.ErrCodeNoSuchKey {
+			if aerr.Code() == s3.ErrCodeNoSuchKey || aerr.Code() == "NotFound" {
 				err = backends.NotFoundErr
 			}
 		}
@@ -94,7 +92,7 @@ func mapMetadata(m backends.Metadata) map[string]*string {
 func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 	expiry, err := strconv.ParseInt(aws.StringValue(input["Expiry"]), 10, 64)
 	if err != nil {
-		return
+		return m, err
 	}
 	m.Expiry = time.Unix(expiry, 0)
 
@@ -112,7 +110,7 @@ func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
 	tmpDst, err := ioutil.TempFile("", "linx-server-upload")
 	if err != nil {
-		return
+		return m, err
 	}
 	defer tmpDst.Close()
 	defer os.Remove(tmpDst.Name())
