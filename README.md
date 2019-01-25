@@ -42,9 +42,7 @@ allowhotlink = true
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is inferred from Host header)
 - ```-siteurl "http://mylinx.example.org/"``` -- the site url (default is inferred from execution context)
-- ```-selifpath "selif"``` -- path relative to site base url (the "selif" in https://mylinx.example.org/selif/image.jpg) where files are accessed directly (default: selif)
-- ```-filespath files/``` -- Path to store uploads (default is files/)
-- ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-selifpath "selif"``` -- path relative to site base url (the "selif" in mylinx.example.org/selif/image.jpg) where files are accessed directly (default: selif)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
 - ```-maxexpiry 86400``` -- maximum expiration time in seconds (default is 0, which is no expiry)
 - ```-allowhotlink``` -- Allow file hotlinking
@@ -55,6 +53,15 @@ allowhotlink = true
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-nologs``` -- (optionally) disable request logs in stdout
+
+#### Storage backends
+The following storage backends are available:
+
+|Name|Options|Notes
+|----|-------|-----
+|LocalFS|```-filespath files/``` -- Path to store uploads (default is files/)<br />```-metapath meta/``` -- Path to store information about uploads (default is meta/)|Enabled by default, this backend uses the filesystem|
+|S3|```-s3-endpoint https://...``` -- S3 endpoint<br>```-s3-region us-east-1``` -- S3 region<br>```-s3-bucket mybucket``` -- S3 bucket to use for files and metadata<br><br>Environment variables to provide:<br>```AWS_ACCESS_KEY_ID``` -- the S3 access key<br>```AWS_SECRET_ACCESS_KEY ``` -- the S3 secret key<br>```AWS_SESSION_TOKEN``` (optional) -- the S3 session token|Use with any S3-compatible provider.<br> This implementation will stream files through the linx instance (every download will request and stream the file from the S3 bucket).<br><br>For high-traffic environments, one might consider using an external caching layer such as described [in this article](https://blog.sentry.io/2017/03/01/dodging-s3-downtime-with-nginx-and-haproxy.html).|
+
 
 #### SSL with built-in server 
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
