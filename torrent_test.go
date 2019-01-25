@@ -5,12 +5,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/andreimarcu/linx-server/torrent"
 	"github.com/zeebo/bencode"
 )
 
 func TestCreateTorrent(t *testing.T) {
 	fileName := "server.go"
-	var decoded Torrent
+	var decoded torrent.Torrent
 
 	f, err := os.Open("server.go")
 	if err != nil {
@@ -52,7 +53,7 @@ func TestCreateTorrent(t *testing.T) {
 }
 
 func TestCreateTorrentWithImage(t *testing.T) {
-	var decoded Torrent
+	var decoded torrent.Torrent
 
 	f, err := os.Open("static/images/404.jpg")
 	if err != nil {
