@@ -28,10 +28,10 @@ func createTorrent(fileName string, f io.Reader, r *http.Request) ([]byte, error
 	}
 
 	for {
-		n, err := f.Read(chunk)
+		n, err := io.ReadFull(f, chunk)
 		if err == io.EOF {
 			break
-		} else if err != nil {
+		} else if err != nil && err != io.ErrUnexpectedEOF {
 			return []byte{}, err
 		}
 
@@ -58,7 +58,8 @@ func fileTorrentHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	} else if err != nil {
-		oopsHandler(c, w, r, RespAUTO, "Could not create torrent.")
+		oopsHandler(c, w, r, RespAUTO, err.Error())
+		return
 	}
 	defer f.Close()
 
