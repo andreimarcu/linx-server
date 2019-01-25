@@ -64,6 +64,7 @@ var Config struct {
 	s3Endpoint                string
 	s3Region                  string
 	s3Bucket                  string
+	s3ForcePathStyle          bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -138,7 +139,7 @@ func setup() *web.Mux {
 	}
 
 	if Config.s3Bucket != "" {
-		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint)
+		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint, Config.s3ForcePathStyle)
 	} else {
 		storageBackend = localfs.NewLocalfsBackend(Config.metaDir, Config.filesDir)
 	}
@@ -265,6 +266,8 @@ func main() {
 		"S3 region")
 	flag.StringVar(&Config.s3Bucket, "s3-bucket", "",
 		"S3 bucket to use for files and metadata")
+	flag.BoolVar(&Config.s3ForcePathStyle, "s3-force-path-style", false,
+		"Force path-style addressing for S3 (e.g. https://s3.amazonaws.com/linx/example.txt)")
 
 	iniflags.Parse()
 

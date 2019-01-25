@@ -177,13 +177,16 @@ func (b S3Backend) List() ([]string, error) {
 	return output, nil
 }
 
-func NewS3Backend(bucket string, region string, endpoint string) S3Backend {
+func NewS3Backend(bucket string, region string, endpoint string, forcePathStyle bool) S3Backend {
 	awsConfig := &aws.Config{}
 	if region != "" {
 		awsConfig.Region = aws.String(region)
 	}
 	if endpoint != "" {
 		awsConfig.Endpoint = aws.String(endpoint)
+	}
+	if forcePathStyle == true {
+		awsConfig.S3ForcePathStyle = aws.Bool(true)
 	}
 
 	sess := session.Must(session.NewSession(awsConfig))
