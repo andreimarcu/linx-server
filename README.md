@@ -16,8 +16,7 @@ Self-hosted file/media sharing website.
 
 
 ### Screenshots
-<img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530123/4211e946-7372-11e5-9cb5-9956c5c49d95.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530124/4217db8a-7372-11e5-957d-b3abb873dc80.png" />  
-<img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530844/48d6d4e2-7379-11e5-8886-d4c32c416cbc.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530845/48dc9ae4-7379-11e5-9e59-959f7c40a573.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530846/48df08ec-7379-11e5-89f6-5c3f6372384d.png" />   
+<img width="200" src="https://user-images.githubusercontent.com/4650950/51735725-0033cf00-203d-11e9-8a97-f543330a92ec.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735724-0033cf00-203d-11e9-8fe0-77442eaa8705.png" />  <img width="200" src="https://user-images.githubusercontent.com/4650950/51735726-0033cf00-203d-11e9-9fca-095a97e46ce8.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735728-0033cf00-203d-11e9-90e9-4f2d36332fc4.png" /> 
 
 
 Get release and run
