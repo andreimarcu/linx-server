@@ -1,11 +1,11 @@
 package helpers
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"unicode"
 
+	"github.com/minio/sha256-simd"
 	"gopkg.in/h2non/filetype.v1"
 )
 
