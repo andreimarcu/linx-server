@@ -65,6 +65,7 @@ var Config struct {
 	s3Region                  string
 	s3Bucket                  string
 	s3ForcePathStyle          bool
+	forceRandomFilename       bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -268,6 +269,8 @@ func main() {
 		"S3 bucket to use for files and metadata")
 	flag.BoolVar(&Config.s3ForcePathStyle, "s3-force-path-style", false,
 		"Force path-style addressing for S3 (e.g. https://s3.amazonaws.com/linx/example.txt)")
+	flag.BoolVar(&Config.forceRandomFilename, "force-random-filename", false,
+		"Force all uploads to use a random filename")
 
 	iniflags.Parse()
 

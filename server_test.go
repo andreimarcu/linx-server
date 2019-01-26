@@ -763,6 +763,32 @@ func TestPutRandomizedUpload(t *testing.T) {
 	}
 }
 
+func TestPutForceRandomUpload(t *testing.T) {
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	oldFRF := Config.forceRandomFilename
+	Config.forceRandomFilename = true
+	filename := "randomizeme.file"
+
+	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// while this should also work without this header, let's try to force
+	// the randomized filename off to be sure
+	req.Header.Set("Linx-Randomize", "no")
+
+	mux.ServeHTTP(w, req)
+
+	if w.Body.String() == Config.siteURL+filename {
+		t.Fatal("Filename was not random")
+	}
+
+	Config.forceRandomFilename = oldFRF
+}
+
 func TestPutNoExtensionUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
@@ -1011,6 +1037,55 @@ func TestPutAndOverwrite(t *testing.T) {
 	if w.Body.String() != "New file content" {
 		t.Fatal("File did not contain 'New file content")
 	}
+}
+
+func TestPutAndOverwriteForceRandom(t *testing.T) {
+	var myjson RespOkJSON
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	oldFRF := Config.forceRandomFilename
+	Config.forceRandomFilename = true
+
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	mux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Overwrite it
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("PUT", "/upload/"+myjson.Filename, strings.NewReader("New file content"))
+	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
+	}
+
+	// Make sure it's the new file
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/"+Config.selifPath+myjson.Filename, nil)
+	mux.ServeHTTP(w, req)
+
+	if w.Code == 404 {
+		t.Fatal("Status code was 404")
+	}
+
+	if w.Body.String() != "New file content" {
+		t.Fatal("File did not contain 'New file content")
+	}
+
+	Config.forceRandomFilename = oldFRF
 }
 
 func TestPutAndSpecificDelete(t *testing.T) {
