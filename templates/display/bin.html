@@ -22,7 +22,7 @@
                 </select>
             </div>
 
-            <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename">.<input id="extension" class="codebox" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt">
+            {% if not forcerandom %}<input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename">{% endif %}.<input id="extension" class="codebox" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt">
             <textarea name='content' id="newcontent" class="editor"></textarea>
         </form>
     </div>

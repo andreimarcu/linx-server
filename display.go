@@ -131,14 +131,15 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = renderTemplate(tpl, pongo2.Context{
-		"mime":       metadata.Mimetype,
-		"filename":   fileName,
-		"size":       sizeHuman,
-		"expiry":     expiryHuman,
-		"expirylist": listExpirationTimes(),
-		"extra":      extra,
-		"lines":      lines,
-		"files":      metadata.ArchiveFiles,
+		"mime":        metadata.Mimetype,
+		"filename":    fileName,
+		"size":        sizeHuman,
+		"expiry":      expiryHuman,
+		"expirylist":  listExpirationTimes(),
+		"extra":       extra,
+		"forcerandom": Config.forceRandomFilename,
+		"lines":       lines,
+		"files":       metadata.ArchiveFiles,
 	}, r, w)
 
 	if err != nil {
