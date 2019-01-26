@@ -53,6 +53,7 @@ allowhotlink = true
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-nologs``` -- (optionally) disable request logs in stdout
+- ```-force-random-filename``` -- (optionally) force the use of random filenames
 
 #### Storage backends
 The following storage backends are available:

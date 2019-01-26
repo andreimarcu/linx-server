@@ -222,11 +222,14 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		return upload, FileTooLargeError
 	}
 
-	// Determine the appropriate filename, then write to disk
+	// Determine the appropriate filename
 	barename, extension := barePlusExt(upReq.filename)
+	randomize := false
 
+	// Randomize the "barename" (filename without extension) if needed
 	if upReq.randomBarename || len(barename) == 0 {
 		barename = generateBarename()
+		randomize = true
 	}
 
 	var header []byte
@@ -259,16 +262,32 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		if merr == nil {
 			if upReq.deleteKey == metad.DeleteKey {
 				fileexists = false
+			} else if Config.forceRandomFilename == true {
+				// the file exists
+				// the delete key doesn't match
+				// force random filenames is enabled
+				randomize = true
 			}
 		}
+	} else if Config.forceRandomFilename == true {
+		// the file doesn't exist
+		// force random filenames is enabled
+		randomize = true
+
+		// set fileexists to true to generate a new barename
+		fileexists = true
 	}
 
 	for fileexists {
-		counter, err := strconv.Atoi(string(barename[len(barename)-1]))
-		if err != nil {
-			barename = barename + "1"
+		if randomize {
+			barename = generateBarename()
 		} else {
-			barename = barename[:len(barename)-1] + strconv.Itoa(counter+1)
+			counter, err := strconv.Atoi(string(barename[len(barename)-1]))
+			if err != nil {
+				barename = barename + "1"
+			} else {
+				barename = barename[:len(barename)-1] + strconv.Itoa(counter+1)
+			}
 		}
 		upload.Filename = strings.Join([]string{barename, extension}, ".")
 

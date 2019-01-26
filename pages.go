@@ -21,8 +21,9 @@ const (
 
 func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err := renderTemplate(Templates["index.html"], pongo2.Context{
-		"maxsize":    Config.maxSize,
-		"expirylist": listExpirationTimes(),
+		"maxsize":     Config.maxSize,
+		"expirylist":  listExpirationTimes(),
+		"forcerandom": Config.forceRandomFilename,
 	}, r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -31,7 +32,8 @@ func indexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err := renderTemplate(Templates["paste.html"], pongo2.Context{
-		"expirylist": listExpirationTimes(),
+		"expirylist":  listExpirationTimes(),
+		"forcerandom": Config.forceRandomFilename,
 	}, r, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")
@@ -40,7 +42,8 @@ func pasteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func apiDocHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	err := renderTemplate(Templates["API.html"], pongo2.Context{
-		"siteurl": getSiteURL(r),
+		"siteurl":     getSiteURL(r),
+		"forcerandom": Config.forceRandomFilename,
 	}, r, w)
 	if err != nil {
 		oopsHandler(c, w, r, RespHTML, "")

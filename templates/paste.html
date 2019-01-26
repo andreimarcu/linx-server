@@ -5,7 +5,7 @@
         <div id="main" class="paste">
             <div id="info">
                 <div>
-                    <span class="hint--top hint--bounce" data-hint="Leave empty for random filename"><input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename" /></span>.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
+                    {% if not forcerandom %}<span class="hint--top hint--bounce" data-hint="Leave empty for random filename"><input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename" /></span>{% endif %}.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
                 </div>
                 <div>
                     <input type="submit" value="Paste">
