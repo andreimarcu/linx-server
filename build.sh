@@ -54,14 +54,14 @@ function build_binary {
 }
 
 version="$1"
-mkdir -p "binairies/""$version"
+mkdir -p "binaries/""$version"
 
-build_binary_rice "binairies/""$version""/linx-server-v""$version""_"
+build_binary_rice "binaries/""$version""/linx-server-v""$version""_"
 
 cd linx-genkey
-build_binary "../binairies/""$version""/linx-genkey-v""$version""_"
+build_binary "../binaries/""$version""/linx-genkey-v""$version""_"
 cd ..
 
 cd linx-cleanup
-build_binary "../binairies/""$version""/linx-cleanup-v""$version""_"
+build_binary "../binaries/""$version""/linx-cleanup-v""$version""_"
 cd ..
