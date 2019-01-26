@@ -43,7 +43,7 @@ Dropzone.options.dropzone = {
     },
     sending: function(file, xhr, formData) {
         var randomize = document.getElementById("randomize");
-        if(typeof randomize != "undefined") {
+        if(randomize != null) {
             formData.append("randomize", randomize.checked);
         }
         formData.append("expires", document.getElementById("expires").value);
