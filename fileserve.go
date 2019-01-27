@@ -38,8 +38,12 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Referrer-Policy", Config.fileReferrerPolicy)
 
 	_, reader, err := storageBackend.Get(fileName)
-	if err != nil {
-		oopsHandler(c, w, r, RespAUTO, err.Error())
+	if err == backends.NotFoundErr {
+		notFoundHandler(c, w, r)
+		return
+	} else if err != nil {
+		oopsHandler(c, w, r, RespAUTO, "Unable to open file.")
+		return
 	}
 
 	w.Header().Set("Content-Type", metadata.Mimetype)
