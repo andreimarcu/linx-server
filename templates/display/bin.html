@@ -11,24 +11,27 @@
 
 {% block infoleft %}
     <div id="editform">
-        <form id="reply" action='{{ sitepath }}upload' method='post' >
-            <div class="right pad-left">
-                <button id="save">save</button>
-                <select id="expiry" name="expires">
-                    <option disabled=disabled>Expires:</option>
+        <form id="reply" action='{{ sitepath }}upload' method='post'>
+            <div class="info-flex">
+                <div>
+                {% if not forcerandom %}<input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename">{% endif %}.<input id="extension" class="codebox" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt">
+                </div>
+                <div class="info-actions">
+                    <select id="expiry" name="expires">
+                        <option disabled>Expires:</option>
                         {% for expiry in expirylist %}
                         <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
                         {% endfor %}
-                </select>
+                    </select>
+                    <button type="submit" id="save">Save</button>
+                </div>
             </div>
-
-            {% if not forcerandom %}<input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename">{% endif %}.<input id="extension" class="codebox" name='extension' type='text' value="{{ extra.extension }}" placeholder="txt">
             <textarea name='content' id="newcontent" class="editor"></textarea>
         </form>
     </div>
 {% endblock %}
 
-{%block infomore %}
+{% block infomore %}
 <label>wrap <input id="wordwrap" type="checkbox" checked></label> | 
 {% endblock %}
 
@@ -45,5 +48,5 @@
 {% endif %}
 
 <script src="{{ sitepath }}static/js/util.js"></script>
-<script src="{{ sitepath }}static/js/bin.js"></script>
+<script src="{{ sitepath }}static/js/bin.js?v=1"></script>
 {% endblock %}

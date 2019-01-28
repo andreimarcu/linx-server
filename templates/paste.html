@@ -3,18 +3,18 @@
 {% block content %}
     <form id="reply" action='{{ sitepath }}upload' method='post'>
         <div id="main" class="paste">
-            <div id="info">
+            <div id="info" class="info-flex">
                 <div>
                     {% if not forcerandom %}<span class="hint--top hint--bounce" data-hint="Leave empty for random filename"><input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename" /></span>{% endif %}.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
                 </div>
                 <div>
-                    <input type="submit" value="Paste">
                     <select id="expiry" name="expires">
-                        <option disabled="disabled">Expires:</option>
+                        <option disabled>Expires:</option>
                         {% for expiry in expirylist %}
                         <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
                         {% endfor %}
                     </select>
+                    <button type="submit">Paste</button>
                 </div>
             </div>
 
