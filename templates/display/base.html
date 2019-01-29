@@ -6,12 +6,12 @@
 
 {% block content %}
 
-    <div id="info" class="dinfo">
+    <div id="info" class="dinfo info-flex">
         <div id="filename">
             {{ filename }}
         </div>
 
-        <div class='text-right pad-left'>
+        <div class="info-actions">
             {% if expiry %}
             <span>file expires in {{ expiry }}</span> | 
             {% endif %}
