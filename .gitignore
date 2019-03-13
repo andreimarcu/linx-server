@@ -29,3 +29,5 @@ _testmain.go
 linx-server
 files/
 meta/
+binaries/
+linx-cleanup

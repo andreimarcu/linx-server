@@ -8,7 +8,8 @@
   font-size: 12px;
   line-height: 1.6;
   word-wrap: break-word;
-  width: 680px;
+  width: 80vw;
+  max-width: 680px;
   padding: 10px;
 }
 

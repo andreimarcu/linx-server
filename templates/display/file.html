@@ -2,8 +2,8 @@
 
 {% block main %}
 <div class="normal display-file">
-    <p class="center">You are requesting <a href="{{ sitepath }}selif/{{ filename }}">{{ filename }}</a>, click below to download.</p>
-    <a href="{{ sitepath }}selif/{{ filename }}" class="download-btn">Download</a>
+    <p class="center">You are requesting <a href="{{ sitepath }}{{ selifpath }}{{ filename }}">{{ filename }}</a>, click below to download.</p>
+    <a href="{{ sitepath }}{{ selifpath }}{{ filename }}" class="download-btn">Download</a>
 
 {% if files|length > 0 %}
 <p>Contents of the archive:</p>

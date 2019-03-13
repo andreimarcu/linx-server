@@ -5,12 +5,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/andreimarcu/linx-server/torrent"
 	"github.com/zeebo/bencode"
 )
 
 func TestCreateTorrent(t *testing.T) {
 	fileName := "server.go"
-	var decoded Torrent
+	var decoded torrent.Torrent
 
 	f, err := os.Open("server.go")
 	if err != nil {
@@ -45,14 +46,14 @@ func TestCreateTorrent(t *testing.T) {
 		t.Fatal("Length was less than or equal to 0, expected more")
 	}
 
-	tracker := fmt.Sprintf("%sselif/%s", Config.siteURL, fileName)
+	tracker := fmt.Sprintf("%s%s%s", Config.siteURL, Config.selifPath, fileName)
 	if decoded.UrlList[0] != tracker {
 		t.Fatalf("First entry in URL list was %s, expected %s", decoded.UrlList[0], tracker)
 	}
 }
 
 func TestCreateTorrentWithImage(t *testing.T) {
-	var decoded Torrent
+	var decoded torrent.Torrent
 
 	f, err := os.Open("static/images/404.jpg")
 	if err != nil {

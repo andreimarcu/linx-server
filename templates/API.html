@@ -25,8 +25,10 @@
 
 			<p><strong>Optional headers with the request</strong></p>
 
+{% if not forcerandom %}
 			<p>Randomize the filename<br/>
 			<code>Linx-Randomize: yes</code></p>
+{% endif %}
 
 			<p>Specify a custom deletion key<br/>
 			<code>Linx-Delete-Key: mysecret</code></p>
@@ -41,6 +43,7 @@
 
 			<blockquote>
 			<p>“url”: the publicly available upload url<br/>
+			 “direct_url”: the url to access the file directly<br/>
 			 “filename”:   the (optionally generated) filename<br/>
 			 “delete_key”: the (optionally generated) deletion key,<br/>
 			 “expiry”: the unix timestamp at which the file will expire (0 if never)<br/>
@@ -55,30 +58,30 @@
 
 			{% if using_auth %}
 			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -T myphoto.jpg {{ siteurl }}upload/  
-{{ siteurl }}myphoto.jpg</code></pre>
+{{ siteurl }}{% if not forcerandom %}myphoto.jpg{% else %}7z4h4ut.jpg{% endif %}</code></pre>
 			{% else %}
 			<pre><code>$ curl -T myphoto.jpg {{ siteurl }}upload/  
-{{ siteurl }}myphoto.jpg</code></pre>
+{{ siteurl }}{% if not forcerandom %}myphoto.jpg{% else %}wtq7pan.jpg{% endif %}</code></pre>
 			{% endif %}
 
 			<p>Uploading myphoto.jpg with an expiry of 20 minutes</p>
 
 			{% if using_auth %}
 			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Linx-Expiry: 1200&#34; -T myphoto.jpg {{ siteurl }}upload/
-{{ siteurl }}myphoto.jpg</code></pre>
+{{ siteurl }}{% if not forcerandom %}myphoto.jpg{% else %}jm295snf.jpg{% endif %}</code></pre>
 			{% else %}
 			<pre><code>$ curl -H &#34;Linx-Expiry: 1200&#34; -T myphoto.jpg {{ siteurl }}upload/
-{{ siteurl }}myphoto.jpg</code></pre>
+{{ siteurl }}{% if not forcerandom %}myphoto.jpg{% else %}1doym9u2.jpg{% endif %}</code></pre>
 			{% endif %}
 
 			<p>Uploading myphoto.jpg with a random filename and getting a json response:</p>
 
 			{% if using_auth %}
-			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}upload/  
+			<pre><code>$ curl -H &#34;Linx-Api-Key: mysecretkey&#34; -H &#34;Accept: application/json&#34;{% if not forcerandom %} -H &#34;Linx-Randomize: yes&#34;{% endif %} -T myphoto.jpg {{ siteurl }}upload/  
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
 &#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ siteurl }}f34h4iu.jpg&#34;}</code></pre>
 			{% else %}
-			<pre><code>$ curl -H &#34;Accept: application/json&#34; -H &#34;Linx-Randomize: yes&#34; -T myphoto.jpg {{ siteurl }}upload/  
+			<pre><code>$ curl -H &#34;Accept: application/json&#34;{% if not forcerandom %} -H &#34;Linx-Randomize: yes&#34;{% endif %} -T myphoto.jpg {{ siteurl }}upload/  
 {&#34;delete_key&#34;:&#34;...&#34;,&#34;expiry&#34;:&#34;0&#34;,&#34;filename&#34;:&#34;f34h4iu.jpg&#34;,&#34;mimetype&#34;:&#34;image/jpeg&#34;,
 &#34;sha256sum&#34;:&#34;...&#34;,&#34;size&#34;:&#34;...&#34;,&#34;url&#34;:&#34;{{ siteurl }}f34h4iu.jpg&#34;}</code></pre>
 			{% endif %}
@@ -121,6 +124,7 @@ DELETED</code></pre>
 
 			<blockquote>
 			<p>“url”: the publicly available upload url<br/>
+			 “direct_url”: the url to access the file directly<br/>
 			 “filename”:   the (optionally generated) filename<br/>
 			 “expiry”: the unix timestamp at which the file will expire (0 if never)<br/>
 			 “size”: the size in bytes of the file<br/>

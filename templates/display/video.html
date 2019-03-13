@@ -2,7 +2,7 @@
 
 {% block main %}
 <video class="display-video" controls autoplay>
-    <source src="{{ sitepath }}selif/{{ filename }}"/>
-    <a href='{{ sitepath }}selif/{{ filename }}'>Download it instead</a>
+    <source src="{{ sitepath }}{{ selifpath }}{{ filename }}"/>
+    <a href='{{ sitepath }}{{ selifpath }}{{ filename }}'>Download it instead</a>
 </video>
 {% endblock %}

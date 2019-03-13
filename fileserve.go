@@ -1,21 +1,28 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/andreimarcu/linx-server/backends"
+	"github.com/andreimarcu/linx-server/expiry"
+	"github.com/andreimarcu/linx-server/httputil"
 	"github.com/zenazn/goji/web"
 )
 
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
-	err := checkFile(fileName)
-	if err == NotFoundErr {
+	metadata, err := checkFile(fileName)
+	if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
-	} else if err == BadMetadata {
+	} else if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
@@ -31,8 +38,30 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Security-Policy", Config.fileContentSecurityPolicy)
+	w.Header().Set("Referrer-Policy", Config.fileReferrerPolicy)
 
-	fileBackend.ServeFile(fileName, w, r)
+	w.Header().Set("Content-Type", metadata.Mimetype)
+	w.Header().Set("Content-Length", strconv.FormatInt(metadata.Size, 10))
+	w.Header().Set("Etag", fmt.Sprintf("\"%s\"", metadata.Sha256sum))
+	w.Header().Set("Cache-Control", "public, no-cache")
+
+	modtime := time.Unix(0, 0)
+	if done := httputil.CheckPreconditions(w, r, modtime); done == true {
+		return
+	}
+
+	if r.Method != "HEAD" {
+		_, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespAUTO, "Unable to open file.")
+			return
+		}
+		defer reader.Close()
+
+		if _, err = io.CopyN(w, reader, metadata.Size); err != nil {
+			oopsHandler(c, w, r, RespAUTO, err.Error())
+		}
+	}
 }
 
 func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -52,29 +81,24 @@ func staticHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Header().Set("Etag", timeStartedStr)
-		w.Header().Set("Cache-Control", "max-age=86400")
+		w.Header().Set("Etag", fmt.Sprintf("\"%s\"", timeStartedStr))
+		w.Header().Set("Cache-Control", "public, max-age=86400")
 		http.ServeContent(w, r, filePath, timeStarted, file)
 		return
 	}
 }
 
-func checkFile(filename string) error {
-	_, err := fileBackend.Exists(filename)
+func checkFile(filename string) (metadata backends.Metadata, err error) {
+	metadata, err = storageBackend.Head(filename)
 	if err != nil {
-		return NotFoundErr
+		return
 	}
 
-	expired, err := isFileExpired(filename)
-	if err != nil {
-		return err
+	if expiry.IsTsExpired(metadata.Expiry) {
+		storageBackend.Delete(filename)
+		err = backends.NotFoundErr
+		return
 	}
 
-	if expired {
-		fileBackend.Delete(filename)
-		metaBackend.Delete(filename)
-		return NotFoundErr
-	}
-
-	return nil
+	return
 }

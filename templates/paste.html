@@ -2,24 +2,24 @@
 
 {% block content %}
     <form id="reply" action='{{ sitepath }}upload' method='post'>
-        <div id="main">
-            <div id="info" class="ninfo">
-                <input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename (empty for random filename)" />.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
-
-                <div class="right">
+        <div id="main" class="paste">
+            <div id="info" class="info-flex">
+                <div>
+                    {% if not forcerandom %}<span class="hint--top hint--bounce" data-hint="Leave empty for random filename"><input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename" /></span>{% endif %}.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
+                </div>
+                <div>
                     <select id="expiry" name="expires">
-                        <option disabled="disabled">Expires:</option>
+                        <option disabled>Expires:</option>
                         {% for expiry in expirylist %}
                         <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
                         {% endfor %}
                     </select>
-
-                    <input type="submit" value="Paste">
+                    <button type="submit">Paste</button>
                 </div>
             </div>
 
-            <div id="inner_content">
-                <textarea name='content' id="content" class="editor"></textarea>
+            <div id="inner_content" class="padme">
+                    <textarea name='content' id="content" class="editor"></textarea>
             </div>
         </div>
     </form>        

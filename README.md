@@ -16,8 +16,7 @@ Self-hosted file/media sharing website.
 
 
 ### Screenshots
-<img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530123/4211e946-7372-11e5-9cb5-9956c5c49d95.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530124/4217db8a-7372-11e5-957d-b3abb873dc80.png" />  
-<img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530844/48d6d4e2-7379-11e5-8886-d4c32c416cbc.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530845/48dc9ae4-7379-11e5-9e59-959f7c40a573.png" /> <img width="230" src="https://cloud.githubusercontent.com/assets/4650950/10530846/48df08ec-7379-11e5-89f6-5c3f6372384d.png" />   
+<img width="200" src="https://user-images.githubusercontent.com/4650950/51735725-0033cf00-203d-11e9-8a97-f543330a92ec.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735724-0033cf00-203d-11e9-8fe0-77442eaa8705.png" />  <img width="200" src="https://user-images.githubusercontent.com/4650950/51735726-0033cf00-203d-11e9-9fca-095a97e46ce8.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735728-0033cf00-203d-11e9-90e9-4f2d36332fc4.png" /> 
 
 
 Get release and run
@@ -41,18 +40,28 @@ allowhotlink = true
 #### Options
 - ```-bind 127.0.0.1:8080``` -- what to bind to  (default is 127.0.0.1:8080)
 - ```-sitename myLinx``` -- the site name displayed on top (default is inferred from Host header)
-- ```-siteurl "http://mylinx.example.org/"``` -- the site url (default is inferred from execution context)
-- ```-filespath files/``` -- Path to store uploads (default is files/)
-- ```-metapath meta/``` -- Path to store information about uploads (default is meta/)
+- ```-siteurl "https://mylinx.example.org/"``` -- the site url (default is inferred from execution context)
+- ```-selifpath "selif"``` -- path relative to site base url (the "selif" in mylinx.example.org/selif/image.jpg) where files are accessed directly (default: selif)
 - ```-maxsize 4294967296``` -- maximum upload file size in bytes (default 4GB)
 - ```-maxexpiry 86400``` -- maximum expiration time in seconds (default is 0, which is no expiry)
 - ```-allowhotlink``` -- Allow file hotlinking
-- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
-- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;")
+- ```-contentsecuritypolicy "..."``` -- Content-Security-Policy header for pages (default is "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';")
+- ```-filecontentsecuritypolicy "..."``` -- Content-Security-Policy header for files (default is "default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';")
+- ```-refererpolicy "..."``` -- Referrer-Policy header for pages (default is "same-origin")
+- ```-filereferrerpolicy "..."``` -- Referrer-Policy header for files (default is "same-origin")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
 - ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
 - ```-nologs``` -- (optionally) disable request logs in stdout
-- ```-googleapikey``` -- (optionally) API Key for Google's URL Shortener. ([How to create one](https://developers.google.com/url-shortener/v1/getting_started#APIKey))
+- ```-force-random-filename``` -- (optionally) force the use of random filenames
+
+#### Storage backends
+The following storage backends are available:
+
+|Name|Notes|Options
+|----|-----|-------
+|LocalFS|Enabled by default, this backend uses the filesystem|```-filespath files/``` -- Path to store uploads (default is files/)<br />```-metapath meta/``` -- Path to store information about uploads (default is meta/)|
+|S3|Use with any S3-compatible provider.<br> This implementation will stream files through the linx instance (every download will request and stream the file from the S3 bucket).<br><br>For high-traffic environments, one might consider using an external caching layer such as described [in this article](https://blog.sentry.io/2017/03/01/dodging-s3-downtime-with-nginx-and-haproxy.html).|```-s3-endpoint https://...``` -- S3 endpoint<br>```-s3-region us-east-1``` -- S3 region<br>```-s3-bucket mybucket``` -- S3 bucket to use for files and metadata<br>```-s3-force-path-style``` (optional) -- force path-style addresing (e.g. https://<span></span>s3.amazonaws.com/linx/example.txt)<br><br>Environment variables to provide:<br>```AWS_ACCESS_KEY_ID``` -- the S3 access key<br>```AWS_SECRET_ACCESS_KEY ``` -- the S3 secret key<br>```AWS_SESSION_TOKEN``` (optional) -- the S3 session token|
+
 
 #### SSL with built-in server 
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
@@ -69,6 +78,23 @@ allowhotlink = true
 - ```-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
 
 A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
+
+
+Cleaning up expired files
+-------------------------
+When files expire, access is disabled immediately, but the files and metadata
+will persist on disk until someone attempts to access them. If you'd like to
+automatically clean up files that have expired, you can use the included
+`linx-cleanup` utility. To run it automatically, use a cronjob or similar type
+of scheduled task.
+
+You should be careful to ensure that only one instance of `linx-client` runs at
+a time to avoid unexpected behavior. It does not implement any type of locking.
+
+#### Options
+- ```-filespath files/``` -- Path to stored uploads (default is files/)
+- ```-metapath meta/``` -- Path to stored information about uploads (default is meta/)
+- ```-nologs``` -- (optionally) disable deletion logs in stdout
 
 
 Deployment

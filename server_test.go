@@ -173,7 +173,7 @@ func TestFileNotFound(t *testing.T) {
 
 	filename := generateBarename()
 
-	req, err := http.NewRequest("GET", "/selif/"+filename, nil)
+	req, err := http.NewRequest("GET", "/"+Config.selifPath+filename, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,7 +486,6 @@ func TestPostJSONUploadMaxExpiry(t *testing.T) {
 		var myjson RespOkJSON
 		err = json.Unmarshal([]byte(w.Body.String()), &myjson)
 		if err != nil {
-			fmt.Println(w.Body.String())
 			t.Fatal(err)
 		}
 
@@ -643,14 +642,45 @@ func TestPostEmptyUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
+	if w.Code != 400 {
 		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
+		t.Fatalf("Status code is not 400, but %d", w.Code)
+	}
+}
+
+func TestPostTooLargeUpload(t *testing.T) {
+	mux := setup()
+	oldMaxSize := Config.maxSize
+	Config.maxSize = 2
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".txt"
+
+	var b bytes.Buffer
+	mw := multipart.NewWriter(&b)
+	fw, err := mw.CreateFormFile("file", filename)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if !strings.Contains(w.Body.String(), "Empty file") {
-		t.Fatal("Response did not contain 'Empty file'")
+	fw.Write([]byte("test content"))
+	mw.Close()
+
+	req, err := http.NewRequest("POST", "/upload/", &b)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Referer", Config.siteURL)
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 400 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 400, but %d", w.Code)
+	}
+
+	Config.maxSize = oldMaxSize
 }
 
 func TestPostEmptyJSONUpload(t *testing.T) {
@@ -679,9 +709,9 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if w.Code != 500 {
+	if w.Code != 400 {
 		t.Log(w.Body.String())
-		t.Fatalf("Status code is not 500, but %d", w.Code)
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
 
 	var myjson RespErrJSON
@@ -690,7 +720,7 @@ func TestPostEmptyJSONUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if myjson.Error != "Could not upload file: Empty file" {
+	if myjson.Error != "Empty file" {
 		t.Fatal("Json 'error' was not 'Empty file' but " + myjson.Error)
 	}
 }
@@ -733,6 +763,32 @@ func TestPutRandomizedUpload(t *testing.T) {
 	}
 }
 
+func TestPutForceRandomUpload(t *testing.T) {
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	oldFRF := Config.forceRandomFilename
+	Config.forceRandomFilename = true
+	filename := "randomizeme.file"
+
+	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// while this should also work without this header, let's try to force
+	// the randomized filename off to be sure
+	req.Header.Set("Linx-Randomize", "no")
+
+	mux.ServeHTTP(w, req)
+
+	if w.Body.String() == Config.siteURL+filename {
+		t.Fatal("Filename was not random")
+	}
+
+	Config.forceRandomFilename = oldFRF
+}
+
 func TestPutNoExtensionUpload(t *testing.T) {
 	mux := setup()
 	w := httptest.NewRecorder()
@@ -768,9 +824,39 @@ func TestPutEmptyUpload(t *testing.T) {
 
 	mux.ServeHTTP(w, req)
 
-	if !strings.Contains(w.Body.String(), "Empty file") {
-		t.Fatal("Response doesn't contain'Empty file'")
+	if w.Code != 400 {
+		t.Fatalf("Status code is not 400, but %d", w.Code)
 	}
+}
+
+func TestPutTooLargeUpload(t *testing.T) {
+	mux := setup()
+	oldMaxSize := Config.maxSize
+	Config.maxSize = 2
+
+	w := httptest.NewRecorder()
+
+	filename := generateBarename() + ".file"
+
+	req, err := http.NewRequest("PUT", "/upload/"+filename, strings.NewReader("File too big"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Linx-Randomize", "yes")
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 500 {
+		t.Log(w.Body.String())
+		t.Fatalf("Status code is not 500, but %d", w.Code)
+	}
+
+	if !strings.Contains(w.Body.String(), "request body too large") {
+		t.Fatal("Response did not contain 'request body too large'")
+	}
+
+	Config.maxSize = oldMaxSize
 }
 
 func TestPutJSONUpload(t *testing.T) {
@@ -941,7 +1027,7 @@ func TestPutAndOverwrite(t *testing.T) {
 
 	// Make sure it's the new file
 	w = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", "/selif/"+myjson.Filename, nil)
+	req, err = http.NewRequest("GET", "/"+Config.selifPath+myjson.Filename, nil)
 	mux.ServeHTTP(w, req)
 
 	if w.Code == 404 {
@@ -951,6 +1037,55 @@ func TestPutAndOverwrite(t *testing.T) {
 	if w.Body.String() != "New file content" {
 		t.Fatal("File did not contain 'New file content")
 	}
+}
+
+func TestPutAndOverwriteForceRandom(t *testing.T) {
+	var myjson RespOkJSON
+
+	mux := setup()
+	w := httptest.NewRecorder()
+
+	oldFRF := Config.forceRandomFilename
+	Config.forceRandomFilename = true
+
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	mux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Overwrite it
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("PUT", "/upload/"+myjson.Filename, strings.NewReader("New file content"))
+	req.Header.Set("Linx-Delete-Key", myjson.Delete_Key)
+	mux.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatal("Status code was not 200, but " + strconv.Itoa(w.Code))
+	}
+
+	// Make sure it's the new file
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", "/"+Config.selifPath+myjson.Filename, nil)
+	mux.ServeHTTP(w, req)
+
+	if w.Code == 404 {
+		t.Fatal("Status code was 404")
+	}
+
+	if w.Body.String() != "New file content" {
+		t.Fatal("File did not contain 'New file content")
+	}
+
+	Config.forceRandomFilename = oldFRF
 }
 
 func TestPutAndSpecificDelete(t *testing.T) {
@@ -1120,4 +1255,51 @@ func TestInferSiteURLHTTPSFastCGI(t *testing.T) {
 func TestShutdown(t *testing.T) {
 	os.RemoveAll(Config.filesDir)
 	os.RemoveAll(Config.metaDir)
+}
+
+func TestPutAndGetCLI(t *testing.T) {
+	var myjson RespOkJSON
+	mux := setup()
+
+	// upload file
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("PUT", "/upload", strings.NewReader("File content"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Accept", "application/json")
+	mux.ServeHTTP(w, req)
+
+	err = json.Unmarshal([]byte(w.Body.String()), &myjson)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// request file without wget user agent
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", myjson.Url, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	mux.ServeHTTP(w, req)
+
+	contentType := w.Header().Get("Content-Type")
+	if strings.HasPrefix(contentType, "text/plain") {
+		t.Fatalf("Didn't receive file display page but %s", contentType)
+	}
+
+	// request file with wget user agent
+	w = httptest.NewRecorder()
+	req, err = http.NewRequest("GET", myjson.Url, nil)
+	req.Header.Set("User-Agent", "wget")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mux.ServeHTTP(w, req)
+
+	contentType = w.Header().Get("Content-Type")
+	if !strings.HasPrefix(contentType, "text/plain") {
+		t.Fatalf("Didn't receive file directly but %s", contentType)
+	}
+
 }
