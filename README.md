@@ -54,6 +54,12 @@ allowhotlink = true
 - ```-nologs``` -- (optionally) disable request logs in stdout
 - ```-force-random-filename``` -- (optionally) force the use of random filenames
 
+#### Require API Keys for uploads
+- ```-authfile path/to/authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
+- ```-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
+
+A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
+
 #### Storage backends
 The following storage backends are available:
 
@@ -72,12 +78,6 @@ The following storage backends are available:
 
 #### Use with fastcgi
 - ```-fastcgi``` -- serve through fastcgi 
-
-#### Require API Keys for uploads
-- ```-authfile path/to/authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
-- ```-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
-
-A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
 
 
 Cleaning up expired files
