@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  linx:
+    image: andreimarcu/linx-server:latest
+    container_name: linx
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - linx
+    volumes:
+      - './linx/meta:/data/meta'
+      - './linx/files:/data/files'
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.port=8080"
+    #   - "traefik.backend=linx"
+    #   - "traefik.frontend.rule=Host:linx.example.com"
+    command: ["-sitename=linx", "-allowhotlink"]
+
+networks:
+  linx:
+    external: true
