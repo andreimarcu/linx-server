@@ -122,11 +122,12 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 		return m, err
 	}
 
+	m, err = helpers.GenerateMetadata(r)
+	if err != nil {
+		return
+	}
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
-	m.Size = bytes
-	m.Mimetype, _ = helpers.DetectMime(tmpDst)
-	m.Sha256sum, _ = helpers.Sha256sum(tmpDst)
 	// XXX: we may not be able to write this to AWS easily
 	//m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, tmpDst)
 
@@ -138,6 +139,30 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 		Metadata: mapMetadata(m),
 	}
 	_, err = uploader.Upload(input)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (b S3Backend) PutMetadata(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+	m, err = helpers.GenerateMetadata(r)
+	if err != nil {
+		return
+	}
+	m.Expiry = expiry
+	m.DeleteKey = deleteKey
+	// XXX: we may not be able to write this to AWS easily
+	//m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, tmpDst)
+
+	_, err = b.svc.CopyObject(&s3.CopyObjectInput{
+		Bucket: aws.String(b.bucket),
+		Key: aws.String(key),
+		CopySource: aws.String("/" + b.bucket + "/" + key),
+		Metadata: mapMetadata(m),
+
+	})
 	if err != nil {
 		return
 	}
