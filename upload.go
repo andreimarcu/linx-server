@@ -223,7 +223,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	}
 
 	// Determine the appropriate filename
-	_, extension := barePlusExt(upReq.filename)
+	barename, extension := barePlusExt(upReq.filename)
 	slug := generateBarename()
 
 	var header []byte
@@ -282,7 +282,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		upReq.deleteKey = uniuri.NewLen(30)
 	}
 
-	if Config.forceRandomFilename || upReq.randomize || len(slug) == 0 {
+	if Config.forceRandomFilename || upReq.randomize || len(barename) == 0 {
 		upReq.filename = upload.Filename
 	}
 
