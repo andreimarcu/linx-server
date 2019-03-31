@@ -51,12 +51,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
-			"filename":   fileName,
-			"direct_url": getSiteURL(r) + Config.selifPath + fileName,
-			"expiry":     strconv.FormatInt(metadata.Expiry.Unix(), 10),
-			"size":       strconv.FormatInt(metadata.Size, 10),
-			"mimetype":   metadata.Mimetype,
-			"sha256sum":  metadata.Sha256sum,
+			"original_name": metadata.OriginalName,
+			"filename":      fileName,
+			"direct_url":    getSiteURL(r) + Config.selifPath + fileName,
+			"expiry":        strconv.FormatInt(metadata.Expiry.Unix(), 10),
+			"size":          strconv.FormatInt(metadata.Size, 10),
+			"mimetype":      metadata.Mimetype,
+			"sha256sum":     metadata.Sha256sum,
 		})
 		w.Write(js)
 		return
@@ -130,16 +131,21 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/file.html"]
 	}
 
+	if metadata.OriginalName == "" {
+		metadata.OriginalName = fileName
+	}
+
 	err = renderTemplate(tpl, pongo2.Context{
-		"mime":        metadata.Mimetype,
-		"filename":    fileName,
-		"size":        sizeHuman,
-		"expiry":      expiryHuman,
-		"expirylist":  listExpirationTimes(),
-		"extra":       extra,
-		"forcerandom": Config.forceRandomFilename,
-		"lines":       lines,
-		"files":       metadata.ArchiveFiles,
+		"mime":          metadata.Mimetype,
+		"original_name": metadata.OriginalName,
+		"filename":      fileName,
+		"size":          sizeHuman,
+		"expiry":        expiryHuman,
+		"expirylist":    listExpirationTimes(),
+		"extra":         extra,
+		"forcerandom":   Config.forceRandomFilename,
+		"lines":         lines,
+		"files":         metadata.ArchiveFiles,
 	}, r, w)
 
 	if err != nil {

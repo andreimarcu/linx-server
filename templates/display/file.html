@@ -2,7 +2,7 @@
 
 {% block main %}
 <div class="normal display-file">
-    <p class="center">You are requesting <a href="{{ sitepath }}{{ selifpath }}{{ filename }}">{{ filename }}</a>, click below to download.</p>
+    <p class="center">You are requesting <a href="{{ sitepath }}{{ selifpath }}{{ filename }}">{{ original_name }}</a>, click below to download.</p>
     <a href="{{ sitepath }}{{ selifpath }}{{ filename }}" class="download-btn">Download</a>
 
 {% if files|length > 0 %}

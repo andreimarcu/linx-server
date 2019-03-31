@@ -11,7 +11,7 @@ type StorageBackend interface {
 	Exists(key string) (bool, error)
 	Head(key string) (Metadata, error)
 	Get(key string) (Metadata, io.ReadCloser, error)
-	Put(key string, r io.Reader, expiry time.Time, deleteKey string) (Metadata, error)
+	Put(key string, originalName string, r io.Reader, expiry time.Time, deleteKey string) (Metadata, error)
 	Size(key string) (int64, error)
 }
 

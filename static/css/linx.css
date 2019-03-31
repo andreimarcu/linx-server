@@ -74,6 +74,13 @@ body {
   padding: 5px;
 }
 
+#filename {
+    max-width: 500px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .info-flex {
   display: flex;
   flex-wrap: wrap;
@@ -326,6 +333,8 @@ body {
 .display-audio,
 .display-file {
     width: 100%;
+    max-width: 1000px;
+    word-break: break-word;
 }
 
 .display-image {

@@ -18,13 +18,13 @@ import (
 
 type S3Backend struct {
 	bucket string
-	svc *s3.S3
+	svc    *s3.S3
 }
 
 func (b S3Backend) Delete(key string) error {
 	_, err := b.svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (b S3Backend) Delete(key string) error {
 func (b S3Backend) Exists(key string) (bool, error) {
 	_, err := b.svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 	return err == nil, err
 }
@@ -44,7 +44,7 @@ func (b S3Backend) Head(key string) (metadata backends.Metadata, err error) {
 	var result *s3.HeadObjectOutput
 	result, err = b.svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -63,7 +63,7 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 	var result *s3.GetObjectOutput
 	result, err = b.svc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -81,11 +81,12 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 
 func mapMetadata(m backends.Metadata) map[string]*string {
 	return map[string]*string{
-		"Expiry": aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
-		"Delete_key": aws.String(m.DeleteKey),
-		"Size": aws.String(strconv.FormatInt(m.Size, 10)),
-		"Mimetype": aws.String(m.Mimetype),
-		"Sha256sum": aws.String(m.Sha256sum),
+		"Original_name": aws.String(m.OriginalName),
+		"Expiry":        aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
+		"Delete_key":    aws.String(m.DeleteKey),
+		"Size":          aws.String(strconv.FormatInt(m.Size, 10)),
+		"Mimetype":      aws.String(m.Mimetype),
+		"Sha256sum":     aws.String(m.Sha256sum),
 	}
 }
 
@@ -101,13 +102,14 @@ func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 		return
 	}
 
+	m.OriginalName = aws.StringValue(input["Original_name"])
 	m.DeleteKey = aws.StringValue(input["Delete_key"])
 	m.Mimetype = aws.StringValue(input["Mimetype"])
 	m.Sha256sum = aws.StringValue(input["Sha256sum"])
 	return
 }
 
-func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+func (b S3Backend) Put(key string, originalName string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
 	tmpDst, err := ioutil.TempFile("", "linx-server-upload")
 	if err != nil {
 		return m, err
@@ -122,6 +124,7 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 		return m, err
 	}
 
+	m.OriginalName = originalName
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
 	m.Size = bytes
@@ -132,9 +135,9 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 
 	uploader := s3manager.NewUploaderWithClient(b.svc)
 	input := &s3manager.UploadInput{
-		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
-		Body: tmpDst,
+		Bucket:   aws.String(b.bucket),
+		Key:      aws.String(key),
+		Body:     tmpDst,
 		Metadata: mapMetadata(m),
 	}
 	_, err = uploader.Upload(input)
@@ -148,7 +151,7 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 func (b S3Backend) Size(key string) (int64, error) {
 	input := &s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
-		Key: aws.String(key),
+		Key:    aws.String(key),
 	}
 	result, err := b.svc.HeadObject(input)
 	if err != nil {
@@ -168,7 +171,6 @@ func (b S3Backend) List() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
 
 	for _, object := range results.Contents {
 		output = append(output, *object.Key)

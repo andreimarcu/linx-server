@@ -30,7 +30,7 @@ func deleteHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, "DELETED")
+		_, _ = fmt.Fprintf(w, "DELETED")
 		return
 
 	} else {

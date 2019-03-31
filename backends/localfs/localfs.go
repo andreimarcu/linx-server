@@ -18,6 +18,7 @@ type LocalfsBackend struct {
 }
 
 type MetadataJSON struct {
+	OriginalName string   `json:"original_name"`
 	DeleteKey    string   `json:"delete_key"`
 	Sha256sum    string   `json:"sha256sum"`
 	Mimetype     string   `json:"mimetype"`
@@ -56,6 +57,7 @@ func (b LocalfsBackend) Head(key string) (metadata backends.Metadata, err error)
 		return metadata, backends.BadMetadata
 	}
 
+	metadata.OriginalName = mjson.OriginalName
 	metadata.DeleteKey = mjson.DeleteKey
 	metadata.Mimetype = mjson.Mimetype
 	metadata.ArchiveFiles = mjson.ArchiveFiles
@@ -84,12 +86,13 @@ func (b LocalfsBackend) writeMetadata(key string, metadata backends.Metadata) er
 	metaPath := path.Join(b.metaPath, key)
 
 	mjson := MetadataJSON{
-		DeleteKey: metadata.DeleteKey,
-		Mimetype: metadata.Mimetype,
+		OriginalName: metadata.OriginalName,
+		DeleteKey:    metadata.DeleteKey,
+		Mimetype:     metadata.Mimetype,
 		ArchiveFiles: metadata.ArchiveFiles,
-		Sha256sum: metadata.Sha256sum,
-		Expiry: metadata.Expiry.Unix(),
-		Size: metadata.Size,
+		Sha256sum:    metadata.Sha256sum,
+		Expiry:       metadata.Expiry.Unix(),
+		Size:         metadata.Size,
 	}
 
 	dst, err := os.Create(metaPath)
@@ -108,7 +111,7 @@ func (b LocalfsBackend) writeMetadata(key string, metadata backends.Metadata) er
 	return nil
 }
 
-func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+func (b LocalfsBackend) Put(key string, originalName string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
 	filePath := path.Join(b.filesPath, key)
 
 	dst, err := os.Create(filePath)
@@ -126,6 +129,7 @@ func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey
 		return m, err
 	}
 
+	m.OriginalName = originalName
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
 	m.Size = bytes

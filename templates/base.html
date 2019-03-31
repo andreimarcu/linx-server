@@ -4,7 +4,7 @@
 	<title>{% block title %}{{ sitename }}{% endblock %}</title>
 	<meta charset='utf-8' content='text/html' http-equiv='content-type'>
 	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-	<link href='{{ sitepath }}static/css/linx.css?v=1' media='screen, projection' rel='stylesheet' type='text/css'>
+	<link href='{{ sitepath }}static/css/linx.css?v=2' media='screen, projection' rel='stylesheet' type='text/css'>
 	<link href='{{ sitepath }}static/css/hint.css' rel='stylesheet' type='text/css'>
 	<link href='{{ sitepath }}static/images/favicon.gif' rel='icon' type='image/gif'>
 	{% block head %}{% endblock %}
@@ -16,8 +16,8 @@
 			<div id="header">
 				<div id="navigation" class="right">
 					{% if !using_auth %}
-					<a href="{{ sitepath }}">Upload</a> | 
-					<a href="{{ sitepath }}paste/">Paste</a> | 
+					<a href="{{ sitepath }}">Upload</a> |
+					<a href="{{ sitepath }}paste/">Paste</a> |
 					{% endif %}
 					<a href="{{ sitepath }}API/">API</a>
 				</div>
@@ -27,7 +27,7 @@
 			{% block content %}{% endblock %}
 
 			<div id="footer">
-				<a href="https://github.com/andreimarcu/linx-server">linx</a>
+				<a href="https://github.com/xtrafrancyz/linx-server">linx</a>
 			</div>
 
 		</div>

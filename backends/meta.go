@@ -6,6 +6,7 @@ import (
 )
 
 type Metadata struct {
+	OriginalName string
 	DeleteKey    string
 	Sha256sum    string
 	Mimetype     string
