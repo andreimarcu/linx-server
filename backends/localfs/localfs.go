@@ -126,16 +126,30 @@ func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey
 		return m, err
 	}
 
+	dst.Seek(0 ,0)
+	m, err = helpers.GenerateMetadata(dst)
+	if err != nil {
+		os.Remove(filePath)
+		return
+	}
+	dst.Seek(0 ,0)
+
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
-	m.Size = bytes
-	m.Mimetype, _ = helpers.DetectMime(dst)
-	m.Sha256sum, _ = helpers.Sha256sum(dst)
 	m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, dst)
 
 	err = b.writeMetadata(key, m)
 	if err != nil {
 		os.Remove(filePath)
+		return
+	}
+
+	return
+}
+
+func (b LocalfsBackend) PutMetadata(key string, m backends.Metadata) (err error) {
+	err = b.writeMetadata(key, m)
+	if err != nil {
 		return
 	}
 
