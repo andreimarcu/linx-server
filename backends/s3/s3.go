@@ -148,10 +148,11 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 
 func (b S3Backend) PutMetadata(key string, m backends.Metadata) (err error) {
 	_, err = b.svc.CopyObject(&s3.CopyObjectInput{
-		Bucket:     aws.String(b.bucket),
-		Key:        aws.String(key),
-		CopySource: aws.String("/" + b.bucket + "/" + key),
-		Metadata:   mapMetadata(m),
+		Bucket:            aws.String(b.bucket),
+		Key:               aws.String(key),
+		CopySource:        aws.String("/" + b.bucket + "/" + key),
+		Metadata:          mapMetadata(m),
+		MetadataDirective: aws.String("REPLACE"),
 	})
 	if err != nil {
 		return
