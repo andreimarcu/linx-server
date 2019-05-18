@@ -16,7 +16,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
-	"github.com/andreimarcu/linx-server/backends/metajson"
+	"github.com/andreimarcu/linx-server/backends/s3"
 	"github.com/flosch/pongo2"
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji/graceful"
@@ -42,10 +42,13 @@ var Config struct {
 	siteName                  string
 	siteURL                   string
 	sitePath                  string
+	selifPath                 string
 	certFile                  string
 	keyFile                   string
 	contentSecurityPolicy     string
 	fileContentSecurityPolicy string
+	referrerPolicy            string
+	fileReferrerPolicy        string
 	xFrameOptions             string
 	maxSize                   int64
 	maxExpiry                 uint64
@@ -57,7 +60,12 @@ var Config struct {
 	authFile                  string
 	remoteAuthFile            string
 	addHeaders                headerList
-	googleShorterAPIKey       string
+	noDirectAgents            bool
+	s3Endpoint                string
+	s3Region                  string
+	s3Bucket                  string
+	s3ForcePathStyle          bool
+	forceRandomFilename       bool
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -67,8 +75,7 @@ var timeStarted time.Time
 var timeStartedStr string
 var remoteAuthKeys []string
 var metaStorageBackend backends.MetaStorageBackend
-var metaBackend backends.MetaBackend
-var fileBackend backends.StorageBackend
+var storageBackend backends.StorageBackend
 
 func setup() *web.Mux {
 	mux := web.New()
@@ -87,8 +94,9 @@ func setup() *web.Mux {
 	mux.Use(middleware.Recoverer)
 	mux.Use(middleware.AutomaticOptions)
 	mux.Use(ContentSecurityPolicy(CSPOptions{
-		policy: Config.contentSecurityPolicy,
-		frame:  Config.xFrameOptions,
+		policy:         Config.contentSecurityPolicy,
+		referrerPolicy: Config.referrerPolicy,
+		frame:          Config.xFrameOptions,
 	}))
 	mux.Use(AddHeaders(Config.addHeaders))
 
@@ -126,9 +134,16 @@ func setup() *web.Mux {
 		Config.sitePath = "/"
 	}
 
-	metaStorageBackend = localfs.NewLocalfsBackend(Config.metaDir)
-	metaBackend = metajson.NewMetaJSONBackend(metaStorageBackend)
-	fileBackend = localfs.NewLocalfsBackend(Config.filesDir)
+	Config.selifPath = strings.TrimLeft(Config.selifPath, "/")
+	if lastChar := Config.selifPath[len(Config.selifPath)-1:]; lastChar != "/" {
+		Config.selifPath = Config.selifPath + "/"
+	}
+
+	if Config.s3Bucket != "" {
+		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint, Config.s3ForcePathStyle)
+	} else {
+		storageBackend = localfs.NewLocalfsBackend(Config.metaDir, Config.filesDir)
+	}
 
 	// Template setup
 	p2l, err := NewPongo2TemplatesLoader()
@@ -147,10 +162,9 @@ func setup() *web.Mux {
 
 	// Routing setup
 	nameRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)$`)
-	selifRe := regexp.MustCompile("^" + Config.sitePath + `selif/(?P<name>[a-z0-9-\.]+)$`)
-	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + `selif/$`)
+	selifRe := regexp.MustCompile("^" + Config.sitePath + Config.selifPath + `(?P<name>[a-z0-9-\.]+)$`)
+	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + Config.selifPath + `$`)
 	torrentRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/torrent$`)
-	shortRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/short$`)
 
 	if Config.authFile == "" {
 		mux.Get(Config.sitePath, indexHandler)
@@ -189,10 +203,6 @@ func setup() *web.Mux {
 	mux.Get(selifIndexRe, unauthorizedHandler)
 	mux.Get(torrentRe, fileTorrentHandler)
 
-	if Config.googleShorterAPIKey != "" {
-		mux.Get(shortRe, shortURLHandler)
-	}
-
 	mux.NotFound(notFoundHandler)
 
 	return mux
@@ -213,6 +223,8 @@ func main() {
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "",
 		"site base url (including trailing slash)")
+	flag.StringVar(&Config.selifPath, "selifpath", "selif",
+		"path relative to site base url where files are accessed directly")
 	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
 		"maximum upload file size in bytes (default 4GB)")
 	flag.Uint64Var(&Config.maxExpiry, "maxexpiry", 0,
@@ -232,17 +244,33 @@ func main() {
 	flag.StringVar(&Config.remoteAuthFile, "remoteauthfile", "",
 		"path to a file containing newline-separated scrypted auth keys for remote uploads")
 	flag.StringVar(&Config.contentSecurityPolicy, "contentsecuritypolicy",
-		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;",
+		"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';",
 		"value of default Content-Security-Policy header")
 	flag.StringVar(&Config.fileContentSecurityPolicy, "filecontentsecuritypolicy",
-		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self'; referrer origin;",
+		"default-src 'none'; img-src 'self'; object-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';",
 		"value of Content-Security-Policy header for file access")
+	flag.StringVar(&Config.referrerPolicy, "referrerpolicy",
+		"same-origin",
+		"value of default Referrer-Policy header")
+	flag.StringVar(&Config.fileReferrerPolicy, "filereferrerpolicy",
+		"same-origin",
+		"value of Referrer-Policy header for file access")
 	flag.StringVar(&Config.xFrameOptions, "xframeoptions", "SAMEORIGIN",
 		"value of X-Frame-Options header")
 	flag.Var(&Config.addHeaders, "addheader",
 		"Add an arbitrary header to the response. This option can be used multiple times.")
-	flag.StringVar(&Config.googleShorterAPIKey, "googleapikey", "",
-		"API Key for Google's URL Shortener.")
+	flag.BoolVar(&Config.noDirectAgents, "nodirectagents", false,
+		"disable serving files directly for wget/curl user agents")
+	flag.StringVar(&Config.s3Endpoint, "s3-endpoint", "",
+		"S3 endpoint")
+	flag.StringVar(&Config.s3Region, "s3-region", "",
+		"S3 region")
+	flag.StringVar(&Config.s3Bucket, "s3-bucket", "",
+		"S3 bucket to use for files and metadata")
+	flag.BoolVar(&Config.s3ForcePathStyle, "s3-force-path-style", false,
+		"Force path-style addressing for S3 (e.g. https://s3.amazonaws.com/linx/example.txt)")
+	flag.BoolVar(&Config.forceRandomFilename, "force-random-filename", false,
+		"Force all uploads to use a random filename")
 
 	iniflags.Parse()
 

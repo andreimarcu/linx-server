@@ -6,32 +6,22 @@
 
 {% block content %}
 
-    <div id="info" class="dinfo">
-        <div class="float-left" id="filename">
+    <div id="info" class="dinfo info-flex">
+        <div id="filename">
             {{ filename }}
         </div>
 
-        <div class="right">
+        <div class="info-actions">
             {% if expiry %}
             <span>file expires in {{ expiry }}</span> | 
             {% endif %}
             {% block infomore %}{% endblock %}
             <span>{{ size }}</span> | 
-            {% if shorturlEnabled %}
-            {% if shorturl %}
-            <a class="hint--top" aria-label="Click to copy into clipboard" id="shorturl"
-                style="cursor: pointer;" href="{{shorturl}}">{{shorturl}}</a> |
-            {% else %}
-            <a class="hint--top" aria-label="Click to retrieve shortened url" id="shorturl" 
-                data-url="{{ sitepath }}{{filename}}/short" style="cursor: pointer;">short url</a> |
-            {% endif %}
-            {% endif %}
             <a href="{{ filename }}/torrent" download>torrent</a> |
-            <a href="{{ sitepath }}selif/{{ filename }}" download>get</a>
+            <a href="{{ sitepath }}{{ selifpath }}{{ filename }}" download>get</a>
         </div>
 
         {% block infoleft %}{% endblock %}
-        <div class="clear"></div>
     </div>
 
     <div id="main" {% block mainmore %}{% endblock %}>
@@ -43,8 +33,4 @@
     </div>
 
     <script src="{{ sitepath }}static/js/clipboard.js"></script>
-
-    {% if shorturlEnabled %}
-    <script src="{{ sitepath }}static/js/shorturl.js"></script>
-    {% endif %}
 {% endblock %}

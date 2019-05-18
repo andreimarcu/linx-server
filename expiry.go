@@ -24,7 +24,7 @@ type ExpirationTime struct {
 
 // Determine if the given filename is expired
 func isFileExpired(filename string) (bool, error) {
-	metadata, err := metadataRead(filename)
+	metadata, err := storageBackend.Head(filename)
 	if err != nil {
 		return false, err
 	}

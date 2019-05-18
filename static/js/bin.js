@@ -1,6 +1,6 @@
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
 
-var navlist = document.getElementById("info").getElementsByClassName("right")[0];
+var navlist = document.getElementById("info").getElementsByClassName("info-actions")[0];
 
 init();
 
@@ -32,13 +32,13 @@ function edit(ev) {
     var normalcontent = document.getElementById("normal-content");
     normalcontent.removeChild(document.getElementById("normal-code"));
 
-    var editordiv = document.getElementById("editor");
+    var editordiv = document.getElementById("inplace-editor");
     editordiv.style.display = "block";
     editordiv.addEventListener('keydown', handleTab);
 }
 
 function paste(ev) {
-    var editordiv = document.getElementById("editor");
+    var editordiv = document.getElementById("inplace-editor");
     document.getElementById("newcontent").value = editordiv.value;
     document.forms["reply"].submit();
 }

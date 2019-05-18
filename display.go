@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dustin/go-humanize"
 	"github.com/flosch/pongo2"
@@ -18,17 +21,21 @@ import (
 
 const maxDisplayFileSizeBytes = 1024 * 512
 
-func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	fileName := c.URLParams["name"]
+var cliUserAgentRe = regexp.MustCompile("(?i)(lib)?curl|wget")
 
-	err := checkFile(fileName)
-	if err == NotFoundErr {
-		notFoundHandler(c, w, r)
+func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) && !strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		fileServeHandler(c, w, r)
 		return
 	}
 
-	metadata, err := metadataRead(fileName)
-	if err != nil {
+	fileName := c.URLParams["name"]
+
+	metadata, err := checkFile(fileName)
+	if err == backends.NotFoundErr {
+		notFoundHandler(c, w, r)
+		return
+	} else if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
 		return
 	}
@@ -44,11 +51,12 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
 		js, _ := json.Marshal(map[string]string{
-			"filename":  fileName,
-			"expiry":    strconv.FormatInt(metadata.Expiry.Unix(), 10),
-			"size":      strconv.FormatInt(metadata.Size, 10),
-			"mimetype":  metadata.Mimetype,
-			"sha256sum": metadata.Sha256sum,
+			"filename":   fileName,
+			"direct_url": getSiteURL(r) + Config.selifPath + fileName,
+			"expiry":     strconv.FormatInt(metadata.Expiry.Unix(), 10),
+			"size":       strconv.FormatInt(metadata.Size, 10),
+			"mimetype":   metadata.Mimetype,
+			"sha256sum":  metadata.Sha256sum,
 		})
 		w.Write(js)
 		return
@@ -69,8 +77,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/pdf.html"]
 
 	} else if extension == "story" {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				extra["contents"] = string(bytes)
 				lines = strings.Split(extra["contents"], "\n")
@@ -79,8 +92,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if extension == "md" {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				unsafe := blackfriday.MarkdownCommon(bytes)
 				html := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
@@ -91,8 +109,13 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else if strings.HasPrefix(metadata.Mimetype, "text/") || supportedBinExtension(extension) {
+		metadata, reader, err := storageBackend.Get(fileName)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, err.Error())
+		}
+
 		if metadata.Size < maxDisplayFileSizeBytes {
-			bytes, err := fileBackend.Get(fileName)
+			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				extra["extension"] = extension
 				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
@@ -108,15 +131,15 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = renderTemplate(tpl, pongo2.Context{
-		"mime":            metadata.Mimetype,
-		"filename":        fileName,
-		"size":            sizeHuman,
-		"expiry":          expiryHuman,
-		"extra":           extra,
-		"lines":           lines,
-		"files":           metadata.ArchiveFiles,
-		"shorturlEnabled": Config.googleShorterAPIKey != "",
-		"shorturl":        metadata.ShortURL,
+		"mime":        metadata.Mimetype,
+		"filename":    fileName,
+		"size":        sizeHuman,
+		"expiry":      expiryHuman,
+		"expirylist":  listExpirationTimes(),
+		"extra":       extra,
+		"forcerandom": Config.forceRandomFilename,
+		"lines":       lines,
+		"files":       metadata.ArchiveFiles,
 	}, r, w)
 
 	if err != nil {

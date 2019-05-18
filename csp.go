@@ -6,6 +6,7 @@ import (
 
 const (
 	cspHeader          = "Content-Security-Policy"
+	rpHeader           = "Referrer-Policy"
 	frameOptionsHeader = "X-Frame-Options"
 )
 
@@ -15,14 +16,20 @@ type csp struct {
 }
 
 type CSPOptions struct {
-	policy string
-	frame  string
+	policy         string
+	referrerPolicy string
+	frame          string
 }
 
 func (c csp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// only add a CSP if one is not already set
 	if existing := w.Header().Get(cspHeader); existing == "" {
 		w.Header().Add(cspHeader, c.opts.policy)
+	}
+
+	// only add a Referrer Policy if one is not already set
+	if existing := w.Header().Get(rpHeader); existing == "" {
+		w.Header().Add(rpHeader, c.opts.referrerPolicy)
 	}
 
 	w.Header().Set(frameOptionsHeader, c.opts.frame)

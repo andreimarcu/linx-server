@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/andreimarcu/linx-server/backends/localfs"
-	"github.com/andreimarcu/linx-server/backends/metajson"
 	"github.com/andreimarcu/linx-server/expiry"
 )
 
@@ -22,17 +21,15 @@ func main() {
 		"don't log deleted files")
 	flag.Parse()
 
-	metaStorageBackend := localfs.NewLocalfsBackend(metaDir)
-	metaBackend := metajson.NewMetaJSONBackend(metaStorageBackend)
-	fileBackend := localfs.NewLocalfsBackend(filesDir)
+	fileBackend := localfs.NewLocalfsBackend(metaDir, filesDir)
 
-	files, err := metaStorageBackend.List()
+	files, err := fileBackend.List()
 	if err != nil {
 		panic(err)
 	}
 
 	for _, filename := range files {
-		metadata, err := metaBackend.Get(filename)
+		metadata, err := fileBackend.Head(filename)
 		if err != nil {
 			if !noLogs {
 				log.Printf("Failed to find metadata for %s", filename)
@@ -44,7 +41,6 @@ func main() {
 				log.Printf("Delete %s", filename)
 			}
 			fileBackend.Delete(filename)
-			metaStorageBackend.Delete(filename)
 		}
 	}
 }

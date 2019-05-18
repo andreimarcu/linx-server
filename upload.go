@@ -22,6 +22,7 @@ import (
 	"gopkg.in/h2non/filetype.v1"
 )
 
+var FileTooLargeError = errors.New("File too large.")
 var fileBlacklist = map[string]bool{
 	"favicon.ico":     true,
 	"index.htm":       true,
@@ -34,10 +35,11 @@ var fileBlacklist = map[string]bool{
 // Describes metadata directly from the user request
 type UploadRequest struct {
 	src            io.Reader
+	size           int64
 	filename       string
 	expiry         time.Duration // Seconds until expiry, 0 = never
+	deleteKey      string        // Empty string if not defined
 	randomBarename bool
-	deletionKey    string // Empty string if not defined
 }
 
 // Metadata associated with a file as it would actually be stored
@@ -48,7 +50,7 @@ type Upload struct {
 
 func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	if !strictReferrerCheck(r, getSiteURL(r), []string{"Linx-Delete-Key", "Linx-Expiry", "Linx-Randomize", "X-Requested-With"}) {
-		badRequestHandler(c, w, r)
+		badRequestHandler(c, w, r, RespAUTO, "")
 		return
 	}
 
@@ -65,32 +67,39 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		r.ParseForm()
-		if r.Form.Get("randomize") == "true" {
-			upReq.randomBarename = true
-		}
-		upReq.expiry = parseExpiry(r.Form.Get("expires"))
 		upReq.src = file
+		upReq.size = headers.Size
 		upReq.filename = headers.Filename
 	} else {
-		if r.FormValue("content") == "" {
-			oopsHandler(c, w, r, RespHTML, "Empty file")
+		if r.PostFormValue("content") == "" {
+			badRequestHandler(c, w, r, RespAUTO, "Empty file")
 			return
 		}
-		extension := r.FormValue("extension")
+		extension := r.PostFormValue("extension")
 		if extension == "" {
 			extension = "txt"
 		}
 
-		upReq.src = strings.NewReader(r.FormValue("content"))
-		upReq.expiry = parseExpiry(r.FormValue("expires"))
-		upReq.filename = r.FormValue("filename") + "." + extension
+		content := r.PostFormValue("content")
+
+		upReq.src = strings.NewReader(content)
+		upReq.size = int64(len(content))
+		upReq.filename = r.PostFormValue("filename") + "." + extension
+	}
+
+	upReq.expiry = parseExpiry(r.PostFormValue("expires"))
+
+	if r.PostFormValue("randomize") == "true" {
+		upReq.randomBarename = true
 	}
 
 	upload, err := processUpload(upReq)
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		if err != nil {
+		if err == FileTooLargeError || err == backends.FileEmptyError {
+			badRequestHandler(c, w, r, RespJSON, err.Error())
+			return
+		} else if err != nil {
 			oopsHandler(c, w, r, RespJSON, "Could not upload file: "+err.Error())
 			return
 		}
@@ -99,14 +108,16 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
-		if err != nil {
+		if err == FileTooLargeError || err == backends.FileEmptyError {
+			badRequestHandler(c, w, r, RespHTML, err.Error())
+			return
+		} else if err != nil {
 			oopsHandler(c, w, r, RespHTML, "Could not upload file: "+err.Error())
 			return
 		}
 
 		http.Redirect(w, r, Config.sitePath+upload.Filename, 303)
 	}
-
 }
 
 func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -115,12 +126,15 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	upReq.filename = c.URLParams["name"]
-	upReq.src = r.Body
+	upReq.src = http.MaxBytesReader(w, r.Body, Config.maxSize)
 
 	upload, err := processUpload(upReq)
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		if err != nil {
+		if err == FileTooLargeError || err == backends.FileEmptyError {
+			badRequestHandler(c, w, r, RespJSON, err.Error())
+			return
+		} else if err != nil {
 			oopsHandler(c, w, r, RespJSON, "Could not upload file: "+err.Error())
 			return
 		}
@@ -129,7 +143,10 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
-		if err != nil {
+		if err == FileTooLargeError || err == backends.FileEmptyError {
+			badRequestHandler(c, w, r, RespPLAIN, err.Error())
+			return
+		} else if err != nil {
 			oopsHandler(c, w, r, RespPLAIN, "Could not upload file: "+err.Error())
 			return
 		}
@@ -162,8 +179,8 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq.filename = filepath.Base(grabUrl.Path)
-	upReq.src = resp.Body
-	upReq.deletionKey = r.FormValue("deletekey")
+	upReq.src = http.MaxBytesReader(w, resp.Body, Config.maxSize)
+	upReq.deleteKey = r.FormValue("deletekey")
 	upReq.randomBarename = r.FormValue("randomize") == "yes"
 	upReq.expiry = parseExpiry(r.FormValue("expiry"))
 
@@ -193,20 +210,26 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 		upReq.randomBarename = true
 	}
 
-	upReq.deletionKey = r.Header.Get("Linx-Delete-Key")
+	upReq.deleteKey = r.Header.Get("Linx-Delete-Key")
 
 	// Get seconds until expiry. Non-integer responses never expire.
 	expStr := r.Header.Get("Linx-Expiry")
 	upReq.expiry = parseExpiry(expStr)
-
 }
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
-	// Determine the appropriate filename, then write to disk
-	barename, extension := barePlusExt(upReq.filename)
+	if upReq.size > Config.maxSize {
+		return upload, FileTooLargeError
+	}
 
+	// Determine the appropriate filename
+	barename, extension := barePlusExt(upReq.filename)
+	randomize := false
+
+	// Randomize the "barename" (filename without extension) if needed
 	if upReq.randomBarename || len(barename) == 0 {
 		barename = generateBarename()
+		randomize = true
 	}
 
 	var header []byte
@@ -215,7 +238,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		header = make([]byte, 512)
 		n, _ := upReq.src.Read(header)
 		if n == 0 {
-			return upload, errors.New("Empty file")
+			return upload, backends.FileEmptyError
 		}
 		header = header[:n]
 
@@ -231,28 +254,44 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
 	upload.Filename = strings.Replace(upload.Filename, " ", "", -1)
 
-	fileexists, _ := fileBackend.Exists(upload.Filename)
+	fileexists, _ := storageBackend.Exists(upload.Filename)
 
 	// Check if the delete key matches, in which case overwrite
 	if fileexists {
-		metad, merr := metadataRead(upload.Filename)
+		metad, merr := storageBackend.Head(upload.Filename)
 		if merr == nil {
-			if upReq.deletionKey == metad.DeleteKey {
+			if upReq.deleteKey == metad.DeleteKey {
 				fileexists = false
+			} else if Config.forceRandomFilename == true {
+				// the file exists
+				// the delete key doesn't match
+				// force random filenames is enabled
+				randomize = true
 			}
 		}
+	} else if Config.forceRandomFilename == true {
+		// the file doesn't exist
+		// force random filenames is enabled
+		randomize = true
+
+		// set fileexists to true to generate a new barename
+		fileexists = true
 	}
 
 	for fileexists {
-		counter, err := strconv.Atoi(string(barename[len(barename)-1]))
-		if err != nil {
-			barename = barename + "1"
+		if randomize {
+			barename = generateBarename()
 		} else {
-			barename = barename[:len(barename)-1] + strconv.Itoa(counter+1)
+			counter, err := strconv.Atoi(string(barename[len(barename)-1]))
+			if err != nil {
+				barename = barename + "1"
+			} else {
+				barename = barename[:len(barename)-1] + strconv.Itoa(counter+1)
+			}
 		}
 		upload.Filename = strings.Join([]string{barename, extension}, ".")
 
-		fileexists, err = fileBackend.Exists(upload.Filename)
+		fileexists, err = storageBackend.Exists(upload.Filename)
 	}
 
 	if fileBlacklist[strings.ToLower(upload.Filename)] {
@@ -267,24 +306,15 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		fileExpiry = time.Now().Add(upReq.expiry)
 	}
 
-	bytes, err := fileBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src))
-	if err != nil {
-		return upload, err
-	} else if bytes > Config.maxSize {
-		fileBackend.Delete(upload.Filename)
-		return upload, errors.New("File too large")
+	if upReq.deleteKey == "" {
+		upReq.deleteKey = uniuri.NewLen(30)
 	}
 
-	upload.Metadata, err = generateMetadata(upload.Filename, fileExpiry, upReq.deletionKey)
+	upload.Metadata, err = storageBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src), fileExpiry, upReq.deleteKey)
 	if err != nil {
-		fileBackend.Delete(upload.Filename)
-		return
+		return upload, err
 	}
-	err = metadataWrite(upload.Filename, &upload.Metadata)
-	if err != nil {
-		fileBackend.Delete(upload.Filename)
-		return
-	}
+
 	return
 }
 
@@ -295,6 +325,7 @@ func generateBarename() string {
 func generateJSONresponse(upload Upload, r *http.Request) []byte {
 	js, _ := json.Marshal(map[string]string{
 		"url":        getSiteURL(r) + upload.Filename,
+		"direct_url": getSiteURL(r) + Config.selifPath + upload.Filename,
 		"filename":   upload.Filename,
 		"delete_key": upload.Metadata.DeleteKey,
 		"expiry":     strconv.FormatInt(upload.Metadata.Expiry.Unix(), 10),
