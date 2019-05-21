@@ -74,7 +74,7 @@ The following storage backends are available:
 - ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
 
 #### Use with http proxy
-- ```-realIP``` -- let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
+- ```-RealIP``` -- let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
 
 #### Use with fastcgi
 - ```-fastcgi``` -- serve through fastcgi

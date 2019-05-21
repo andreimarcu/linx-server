@@ -15,7 +15,7 @@ import (
 )
 
 func createTorrent(fileName string, f io.Reader, r *http.Request) ([]byte, error) {
-	url := getSiteURL(r) + Config.selifPath + fileName
+	URL := getSiteURL(r) + Config.selifPath + fileName
 	chunk := make([]byte, torrent.TORRENT_PIECE_LENGTH)
 
 	t := torrent.Torrent{
@@ -24,7 +24,7 @@ func createTorrent(fileName string, f io.Reader, r *http.Request) ([]byte, error
 			PieceLength: torrent.TORRENT_PIECE_LENGTH,
 			Name:        fileName,
 		},
-		UrlList: []string{url},
+		URLList: []string{URL},
 	}
 
 	for {

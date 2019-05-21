@@ -303,7 +303,7 @@
         }
         return this._updateMaxFilesReachedClass();
       },
-      thumbnail: function(file, dataUrl) {
+      thumbnail: function(file, dataURL) {
         var thumbnailElement, _i, _len, _ref;
         if (file.previewElement) {
           file.previewElement.classList.remove("dz-file-preview");
@@ -311,7 +311,7 @@
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             thumbnailElement = _ref[_i];
             thumbnailElement.alt = file.name;
-            thumbnailElement.src = dataUrl;
+            thumbnailElement.src = dataURL;
           }
           return setTimeout(((function(_this) {
             return function() {
@@ -1061,13 +1061,13 @@
             }
             return;
           }
-          return _this.createThumbnailFromUrl(file, fileReader.result, callback);
+          return _this.createThumbnailFromURL(file, fileReader.result, callback);
         };
       })(this);
       return fileReader.readAsDataURL(file);
     };
 
-    Dropzone.prototype.createThumbnailFromUrl = function(file, imageUrl, callback) {
+    Dropzone.prototype.createThumbnailFromURL = function(file, imageURL, callback) {
       var img;
       img = document.createElement("img");
       img.onload = (function(_this) {
@@ -1097,7 +1097,7 @@
       if (callback != null) {
         img.onerror = callback;
       }
-      return img.src = imageUrl;
+      return img.src = imageURL;
     };
 
     Dropzone.prototype.processQueue = function() {

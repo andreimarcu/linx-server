@@ -19,7 +19,7 @@ import (
 
 type RespOkJSON struct {
 	Filename   string
-	Url        string
+	URL        string
 	Delete_Key string
 	Expiry     string
 	Size       string
@@ -1277,7 +1277,7 @@ func TestPutAndGetCLI(t *testing.T) {
 
 	// request file without wget user agent
 	w = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", myjson.Url, nil)
+	req, err = http.NewRequest("GET", myjson.URL, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1290,7 +1290,7 @@ func TestPutAndGetCLI(t *testing.T) {
 
 	// request file with wget user agent
 	w = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", myjson.Url, nil)
+	req, err = http.NewRequest("GET", myjson.URL, nil)
 	req.Header.Set("User-Agent", "wget")
 	if err != nil {
 		t.Fatal(err)

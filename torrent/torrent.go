@@ -18,7 +18,7 @@ type TorrentInfo struct {
 type Torrent struct {
 	Encoding string      `bencode:"encoding"`
 	Info     TorrentInfo `bencode:"info"`
-	UrlList  []string    `bencode:"url-list"`
+	URLList  []string    `bencode:"url-list"`
 }
 
 func HashPiece(piece []byte) []byte {

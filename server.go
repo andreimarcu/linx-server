@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GeertJohan/go.rice"
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/andreimarcu/linx-server/backends/s3"
@@ -52,7 +52,7 @@ var Config struct {
 	xFrameOptions             string
 	maxSize                   int64
 	maxExpiry                 uint64
-	realIp                    bool
+	RealIP                    bool
 	noLogs                    bool
 	allowHotlink              bool
 	fastcgi                   bool
@@ -83,7 +83,7 @@ func setup() *web.Mux {
 	// middleware
 	mux.Use(middleware.RequestID)
 
-	if Config.realIp {
+	if Config.RealIP {
 		mux.Use(middleware.RealIP)
 	}
 
@@ -124,12 +124,12 @@ func setup() *web.Mux {
 			Config.siteURL = Config.siteURL + "/"
 		}
 
-		parsedUrl, err := url.Parse(Config.siteURL)
+		parsedURL, err := url.Parse(Config.siteURL)
 		if err != nil {
 			log.Fatal("Could not parse siteurl:", err)
 		}
 
-		Config.sitePath = parsedUrl.Path
+		Config.sitePath = parsedURL.Path
 	} else {
 		Config.sitePath = "/"
 	}
@@ -222,7 +222,7 @@ func main() {
 	flag.StringVar(&Config.siteName, "sitename", "",
 		"name of the site")
 	flag.StringVar(&Config.siteURL, "siteurl", "",
-		"site base url (including trailing slash)")
+		"site base URL (including trailing slash)")
 	flag.StringVar(&Config.selifPath, "selifpath", "selif",
 		"path relative to site base url where files are accessed directly")
 	flag.Int64Var(&Config.maxSize, "maxsize", 4*1024*1024*1024,
@@ -233,7 +233,7 @@ func main() {
 		"path to ssl certificate (for https)")
 	flag.StringVar(&Config.keyFile, "keyfile", "",
 		"path to ssl key (for https)")
-	flag.BoolVar(&Config.realIp, "realip", false,
+	flag.BoolVar(&Config.RealIP, "RealIP", false,
 		"use X-Real-IP/X-Forwarded-For headers as original host")
 	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
 		"serve through fastcgi")

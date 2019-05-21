@@ -170,15 +170,15 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq := UploadRequest{}
-	grabUrl, _ := url.Parse(r.FormValue("url"))
+	grabURL, _ := url.Parse(r.FormValue("url"))
 
-	resp, err := http.Get(grabUrl.String())
+	resp, err := http.Get(grabURL.String())
 	if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Could not retrieve URL")
 		return
 	}
 
-	upReq.filename = filepath.Base(grabUrl.Path)
+	upReq.filename = filepath.Base(grabURL.Path)
 	upReq.src = http.MaxBytesReader(w, resp.Body, Config.maxSize)
 	upReq.deleteKey = r.FormValue("deletekey")
 	upReq.randomBarename = r.FormValue("randomize") == "yes"
