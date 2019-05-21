@@ -22,7 +22,7 @@ import (
 	"gopkg.in/h2non/filetype.v1"
 )
 
-var FileTooLargeError = errors.New("File too large.")
+var fileTooLargeError = errors.New("File too large.")
 var fileBlacklist = map[string]bool{
 	"favicon.ico":     true,
 	"index.htm":       true,
@@ -96,7 +96,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upload, err := processUpload(upReq)
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		if err == FileTooLargeError || err == backends.FileEmptyError {
+		if err == fileTooLargeError || err == backends.FileEmptyError {
 			badRequestHandler(c, w, r, RespJSON, err.Error())
 			return
 		} else if err != nil {
@@ -108,7 +108,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
-		if err == FileTooLargeError || err == backends.FileEmptyError {
+		if err == fileTooLargeError || err == backends.FileEmptyError {
 			badRequestHandler(c, w, r, RespHTML, err.Error())
 			return
 		} else if err != nil {
@@ -131,7 +131,7 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	upload, err := processUpload(upReq)
 
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		if err == FileTooLargeError || err == backends.FileEmptyError {
+		if err == fileTooLargeError || err == backends.FileEmptyError {
 			badRequestHandler(c, w, r, RespJSON, err.Error())
 			return
 		} else if err != nil {
@@ -143,7 +143,7 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Write(js)
 	} else {
-		if err == FileTooLargeError || err == backends.FileEmptyError {
+		if err == fileTooLargeError || err == backends.FileEmptyError {
 			badRequestHandler(c, w, r, RespPLAIN, err.Error())
 			return
 		} else if err != nil {
@@ -219,7 +219,7 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	if upReq.size > Config.maxSize {
-		return upload, FileTooLargeError
+		return upload, fileTooLargeError
 	}
 
 	// Determine the appropriate filename
