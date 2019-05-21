@@ -5,23 +5,23 @@ import (
 )
 
 const (
-	TORRENT_PIECE_LENGTH = 262144
+	torrentPieceLength = 262144
 )
 
-type TorrentInfo struct {
+type torrentInfo struct {
 	PieceLength int    `bencode:"piece length"`
 	Pieces      string `bencode:"pieces"`
 	Name        string `bencode:"name"`
 	Length      int    `bencode:"length"`
 }
 
-type Torrent struct {
+type torrent struct {
 	Encoding string      `bencode:"encoding"`
-	Info     TorrentInfo `bencode:"info"`
-	UrlList  []string    `bencode:"url-list"`
+	Info     torrentInfo `bencode:"info"`
+	URLList  []string    `bencode:"url-list"`
 }
 
-func HashPiece(piece []byte) []byte {
+func hashPiece(piece []byte) []byte {
 	h := sha1.New()
 	h.Write(piece)
 	return h.Sum(nil)

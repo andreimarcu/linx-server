@@ -52,7 +52,7 @@ var Config struct {
 	xFrameOptions             string
 	maxSize                   int64
 	maxExpiry                 uint64
-	realIp                    bool
+	realIP                    bool
 	noLogs                    bool
 	allowHotlink              bool
 	fastcgi                   bool
@@ -83,8 +83,8 @@ func setup() *web.Mux {
 	// middleware
 	mux.Use(middleware.RequestID)
 
-	if Config.realIp {
-		mux.Use(middleware.RealIP)
+	if Config.realIP {
+		mux.Use(middleware.realIP)
 	}
 
 	if !Config.noLogs {
@@ -124,12 +124,12 @@ func setup() *web.Mux {
 			Config.siteURL = Config.siteURL + "/"
 		}
 
-		parsedUrl, err := url.Parse(Config.siteURL)
+		parsedURL, err := url.Parse(Config.siteURL)
 		if err != nil {
 			log.Fatal("Could not parse siteurl:", err)
 		}
 
-		Config.sitePath = parsedUrl.Path
+		Config.sitePath = parsedURL.Path
 	} else {
 		Config.sitePath = "/"
 	}
@@ -233,7 +233,7 @@ func main() {
 		"path to ssl certificate (for https)")
 	flag.StringVar(&Config.keyFile, "keyfile", "",
 		"path to ssl key (for https)")
-	flag.BoolVar(&Config.realIp, "realip", false,
+	flag.BoolVar(&Config.realIP, "realIP", false,
 		"use X-Real-IP/X-Forwarded-For headers as original host")
 	flag.BoolVar(&Config.fastcgi, "fastcgi", false,
 		"serve through fastcgi")

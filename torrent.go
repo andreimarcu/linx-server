@@ -15,16 +15,16 @@ import (
 )
 
 func createTorrent(fileName string, f io.Reader, r *http.Request) ([]byte, error) {
-	url := getSiteURL(r) + Config.selifPath + fileName
-	chunk := make([]byte, torrent.TORRENT_PIECE_LENGTH)
+	URL := getSiteURL(r) + Config.selifPath + fileName
+	chunk := make([]byte, torrent.torrentPieceLength)
 
 	t := torrent.Torrent{
 		Encoding: "UTF-8",
 		Info: torrent.TorrentInfo{
-			PieceLength: torrent.TORRENT_PIECE_LENGTH,
+			PieceLength: torrent.torrentPieceLength,
 			Name:        fileName,
 		},
-		UrlList: []string{url},
+		URLList: []string{URL},
 	}
 
 	for {

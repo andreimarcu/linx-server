@@ -16,7 +16,7 @@ Self-hosted file/media sharing website.
 
 
 ### Screenshots
-<img width="200" src="https://user-images.githubusercontent.com/4650950/51735725-0033cf00-203d-11e9-8a97-f543330a92ec.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735724-0033cf00-203d-11e9-8fe0-77442eaa8705.png" />  <img width="200" src="https://user-images.githubusercontent.com/4650950/51735726-0033cf00-203d-11e9-9fca-095a97e46ce8.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735728-0033cf00-203d-11e9-90e9-4f2d36332fc4.png" /> 
+<img width="200" src="https://user-images.githubusercontent.com/4650950/51735725-0033cf00-203d-11e9-8a97-f543330a92ec.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735724-0033cf00-203d-11e9-8fe0-77442eaa8705.png" />  <img width="200" src="https://user-images.githubusercontent.com/4650950/51735726-0033cf00-203d-11e9-9fca-095a97e46ce8.png" /> <img width="200" src="https://user-images.githubusercontent.com/4650950/51735728-0033cf00-203d-11e9-90e9-4f2d36332fc4.png" />
 
 
 Get release and run
@@ -24,7 +24,7 @@ Get release and run
 1. Grab the latest binary from the [releases](https://github.com/andreimarcu/linx-server/releases)
 2. Run ```./linx-server```
 
-  
+
 Usage
 -----
 
@@ -50,7 +50,7 @@ allowhotlink = true
 - ```-refererpolicy "..."``` -- Referrer-Policy header for pages (default is "same-origin")
 - ```-filereferrerpolicy "..."``` -- Referrer-Policy header for files (default is "same-origin")
 - ```-xframeoptions "..." ``` -- X-Frame-Options header (default is "SAMEORIGIN")
-- ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...) 
+- ```-remoteuploads``` -- (optionally) enable remote uploads (/upload?url=https://...)
 - ```-nologs``` -- (optionally) disable request logs in stdout
 - ```-force-random-filename``` -- (optionally) force the use of random filenames
 
@@ -69,15 +69,15 @@ The following storage backends are available:
 |S3|Use with any S3-compatible provider.<br> This implementation will stream files through the linx instance (every download will request and stream the file from the S3 bucket).<br><br>For high-traffic environments, one might consider using an external caching layer such as described [in this article](https://blog.sentry.io/2017/03/01/dodging-s3-downtime-with-nginx-and-haproxy.html).|```-s3-endpoint https://...``` -- S3 endpoint<br>```-s3-region us-east-1``` -- S3 region<br>```-s3-bucket mybucket``` -- S3 bucket to use for files and metadata<br>```-s3-force-path-style``` (optional) -- force path-style addresing (e.g. https://<span></span>s3.amazonaws.com/linx/example.txt)<br><br>Environment variables to provide:<br>```AWS_ACCESS_KEY_ID``` -- the S3 access key<br>```AWS_SECRET_ACCESS_KEY ``` -- the S3 secret key<br>```AWS_SESSION_TOKEN``` (optional) -- the S3 session token|
 
 
-#### SSL with built-in server 
+#### SSL with built-in server
 - ```-certfile path/to/your.crt``` -- Path to the ssl certificate (required if you want to use the https server)
 - ```-keyfile path/to/your.key``` -- Path to the ssl key (required if you want to use the https server)
 
-#### Use with http proxy 
-- ```-realip``` -- let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
+#### Use with http proxy
+- ```-realIP``` -- let linx-server know you (nginx, etc) are providing the X-Real-IP and/or X-Forwarded-For headers.
 
 #### Use with fastcgi
-- ```-fastcgi``` -- serve through fastcgi 
+- ```-fastcgi``` -- serve through fastcgi
 
 
 Cleaning up expired files
@@ -112,7 +112,7 @@ server {
     ...
     server_name yourlinx.example.org;
     ...
-    
+
     client_max_body_size 4096M;
     location / {
         fastcgi_pass 127.0.0.1:8080;
