@@ -32,7 +32,7 @@ var fileBlacklist = map[string]bool{
 	"crossdomain.xml": true,
 }
 
-// Describes metadata directly from the user request
+// UploadRequest .. Describes metadata directly from the user request
 type UploadRequest struct {
 	src            io.Reader
 	size           int64
@@ -42,7 +42,7 @@ type UploadRequest struct {
 	randomBarename bool
 }
 
-// Metadata associated with a file as it would actually be stored
+// Upload .. Metadata associated with a file as it would actually be stored
 type Upload struct {
 	Filename string // Final filename on disk
 	Metadata backends.Metadata
