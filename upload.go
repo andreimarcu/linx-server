@@ -22,7 +22,7 @@ import (
 	"gopkg.in/h2non/filetype.v1"
 )
 
-var fileTooLargeError = errors.New("File too large.")
+var fileTooLargeError = errors.New("File too large")
 var fileBlacklist = map[string]bool{
 	"favicon.ico":     true,
 	"index.htm":       true,
