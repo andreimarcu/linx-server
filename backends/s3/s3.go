@@ -122,7 +122,12 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 		return m, err
 	}
 
-	m, err = helpers.GenerateMetadata(r)
+	_, err = tmpDst.Seek(0, 0)
+	if err != nil {
+		return m, err
+	}
+
+	m, err = helpers.GenerateMetadata(tmpDst)
 	if err != nil {
 		return
 	}
@@ -130,6 +135,11 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 	m.DeleteKey = deleteKey
 	// XXX: we may not be able to write this to AWS easily
 	//m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, tmpDst)
+
+	_, err = tmpDst.Seek(0, 0)
+	if err != nil {
+		return m, err
+	}
 
 	uploader := s3manager.NewUploaderWithClient(b.svc)
 	input := &s3manager.UploadInput{
