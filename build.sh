@@ -13,6 +13,11 @@ function build_binary_rice {
         rice append --exec "$name"freebsd-$arch
     done
 
+    for arch in arm amd64 386; do
+        GOOS=netbsd GOARCH=$arch go build -o "$name"netbsd-$arch
+        rice append --exec "$name"netbsd-$arch
+    done
+
     for arch in amd64 386; do
         GOOS=openbsd GOARCH=$arch go build -o "$name"openbsd-$arch
         rice append --exec "$name"openbsd-$arch
@@ -38,6 +43,10 @@ function build_binary {
 
     for arch in amd64 386; do
         GOOS=freebsd GOARCH=$arch go build -o "$name"freebsd-$arch
+    done
+
+    for arch in arm amd64 386; do
+        GOOS=netbsd GOARCH=$arch go build -o "$name"netbsd-$arch
     done
 
     for arch in amd64 386; do
