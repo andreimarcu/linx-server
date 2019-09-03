@@ -7,15 +7,6 @@
 {% block content %} 
 <div id="fileupload">
     <form action="{{ sitepath }}upload" class="dropzone" id="dropzone" method="POST" enctype="multipart/form-data" data-maxsize="{{ maxsize }}">
-        <div class="fallback">
-            <input id="fileinput" name="file" type="file" /><br />
-            <input id="submitbtn" type="submit" value="Upload">
-        </div>
-
-        <div id="dzone" class="dz-default dz-message">
-            <span>Click or Drop file(s) or Paste image</span>
-        </div>
-
         <div id="choices">
             <label>{% if not forcerandom %}<input name="randomize" id="randomize" type="checkbox" checked /> Randomize filename{% endif %}</label>
             <div id="expiry">
@@ -28,6 +19,16 @@
                 </label>
             </div>
         </div>
+
+        <div class="fallback">
+            <input id="fileinput" name="file" type="file" /><br />
+            <input id="submitbtn" type="submit" value="Upload">
+        </div>
+
+        <div id="dzone" class="dz-default dz-message">
+            <span>Click or Drop file(s) or Paste image</span>
+        </div>
+
         <div class="clear"></div>
     </form>
     <div id="uploads"></div>
