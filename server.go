@@ -283,7 +283,7 @@ func main() {
 		var err error
 		if Config.bind[0] == '/' {
 			// UNIX path
-			listener, err = net.ListenUnix("unix", &net.UnixAddr{Config.bind, "unix"})
+            listener, err = net.ListenUnix("unix", &net.UnixAddr{ Name:Config.bind, Net:"unix" })
 			cleanup := func() {
 				log.Print("Removing FastCGI socket")
 				os.Remove(Config.bind)
