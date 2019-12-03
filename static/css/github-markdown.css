@@ -44,6 +44,10 @@
   overflow: auto;
 }
 
+.markdown-body li {
+  list-style: unset;
+}
+
 .markdown-body code,
 .markdown-body kbd,
 .markdown-body pre {
