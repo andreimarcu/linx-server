@@ -8,9 +8,11 @@ import (
 	"net/http/fcgi"
 	"net/url"
 	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/GeertJohan/go.rice"
@@ -277,7 +279,27 @@ func main() {
 	mux := setup()
 
 	if Config.fastcgi {
-		listener, err := net.Listen("tcp", Config.bind)
+		var listener net.Listener
+		var err error
+		if Config.bind[0] == '/' {
+			// UNIX path
+			listener, err = net.ListenUnix("unix", &net.UnixAddr{Name: Config.bind, Net: "unix"})
+			cleanup := func() {
+				log.Print("Removing FastCGI socket")
+				os.Remove(Config.bind)
+			}
+			defer cleanup()
+			sigs := make(chan os.Signal, 1)
+			signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+			go func() {
+				sig := <-sigs
+				log.Print("Signal: ", sig)
+				cleanup()
+				os.Exit(0)
+			}()
+		} else {
+			listener, err = net.Listen("tcp", Config.bind)
+		}
 		if err != nil {
 			log.Fatal("Could not bind: ", err)
 		}
