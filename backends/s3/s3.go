@@ -81,11 +81,11 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 
 func mapMetadata(m backends.Metadata) map[string]*string {
 	return map[string]*string{
-		"Expiry":     aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
-		"Delete_key": aws.String(m.DeleteKey),
-		"Size":       aws.String(strconv.FormatInt(m.Size, 10)),
-		"Mimetype":   aws.String(m.Mimetype),
-		"Sha256sum":  aws.String(m.Sha256sum),
+		"Expiry":    aws.String(strconv.FormatInt(m.Expiry.Unix(), 10)),
+		"Deletekey": aws.String(m.DeleteKey),
+		"Size":      aws.String(strconv.FormatInt(m.Size, 10)),
+		"Mimetype":  aws.String(m.Mimetype),
+		"Sha256sum": aws.String(m.Sha256sum),
 	}
 }
 
@@ -101,7 +101,7 @@ func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 		return
 	}
 
-	m.DeleteKey = aws.StringValue(input["Delete_key"])
+	m.DeleteKey = aws.StringValue(input["Deletekey"])
 	m.Mimetype = aws.StringValue(input["Mimetype"])
 	m.Sha256sum = aws.StringValue(input["Sha256sum"])
 	return
