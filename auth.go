@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -78,6 +79,12 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key := r.Header.Get("Linx-Api-Key")
+	if key == "" && Config.basicAuth {
+		_, password, ok := r.BasicAuth()
+		if ok {
+			key = password
+		}
+	}
 
 	result, err := checkAuth(a.authKeys, key)
 	if err != nil || !result {
@@ -101,7 +108,13 @@ func UploadAuth(o AuthOptions) func(http.Handler) http.Handler {
 }
 
 func badAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusUnauthorized)
+	if Config.basicAuth {
+		rs := ""
+		if Config.siteName != "" {
+			rs = fmt.Sprintf(` realm="%s"`, Config.siteName)
+		}
+		w.Header().Set("WWW-Authenticate", `Basic` + rs)
+	}
 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 }
 
