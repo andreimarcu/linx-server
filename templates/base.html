@@ -15,7 +15,7 @@
 		<div id="container">
 			<div id="header">
 				<div id="navigation" class="right">
-					{% if !using_auth %}
+					{% if !using_auth || basic_auth %}
 					<a href="{{ sitepath }}">Upload</a> | 
 					<a href="{{ sitepath }}paste/">Paste</a> | 
 					{% endif %}
