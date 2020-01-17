@@ -5,6 +5,9 @@ linx-server
 
 Self-hosted file/media sharing website.  
 
+### Demo
+You can see what it looks like using the demo: [https://demo.linx-server.net/](https://demo.linx-server.net/)
+
 
 ### Features
 
