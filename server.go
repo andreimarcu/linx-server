@@ -190,6 +190,27 @@ func setup() *web.Mux {
 		}
 	}
 
+	if Config.basicAuth {
+		options := AuthOptions{
+			AuthFile:      Config.authFile,
+			UnauthMethods: []string{},
+		}
+		okFunc := func (w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Location", Config.sitePath)
+			w.WriteHeader(http.StatusFound)
+		}
+		authHandler := auth {
+			successHandler: http.HandlerFunc(okFunc),
+			failureHandler: http.HandlerFunc(badAuthorizationHandler),
+			authKeys:       readAuthKeys(Config.authFile),
+			o:              options,
+		}
+		mux.Head(Config.sitePath+"auth", authHandler)
+		mux.Head(Config.sitePath+"auth/", authHandler)
+		mux.Get(Config.sitePath+"auth", authHandler)
+		mux.Get(Config.sitePath+"auth/", authHandler)
+	}
+
 	mux.Post(Config.sitePath+"upload", uploadPostHandler)
 	mux.Post(Config.sitePath+"upload/", uploadPostHandler)
 	mux.Put(Config.sitePath+"upload", uploadPutHandler)

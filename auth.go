@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"golang.org/x/crypto/scrypt"
+
+	"github.com/zenazn/goji/web"
 )
 
 const (
@@ -95,8 +97,8 @@ func (a auth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.successHandler.ServeHTTP(w, r)
 }
 
-func UploadAuth(o AuthOptions) func(http.Handler) http.Handler {
-	fn := func(h http.Handler) http.Handler {
+func UploadAuth(o AuthOptions) func(*web.C, http.Handler) http.Handler {
+	fn := func(c *web.C, h http.Handler) http.Handler {
 		return auth{
 			successHandler: h,
 			failureHandler: http.HandlerFunc(badAuthorizationHandler),
