@@ -84,8 +84,15 @@ func renderTemplate(tpl *pongo2.Template, context pongo2.Context, r *http.Reques
 
 	context["sitepath"] = Config.sitePath
 	context["selifpath"] = Config.selifPath
-	context["using_auth"] = Config.authFile != ""
-	context["basic_auth"] = Config.basicAuth
+	var a string
+	if Config.authFile == "" {
+		a = "none"
+	} else if Config.basicAuth {
+		a = "basic"
+	} else {
+		a = "header"
+	}
+	context["auth"] = a
 
 	return tpl.ExecuteWriter(context, writer)
 }
