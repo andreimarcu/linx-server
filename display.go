@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -21,24 +20,7 @@ import (
 
 const maxDisplayFileSizeBytes = 1024 * 512
 
-var cliUserAgentRe = regexp.MustCompile("(?i)(lib)?curl|wget")
-
-func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	if !Config.noDirectAgents && cliUserAgentRe.MatchString(r.Header.Get("User-Agent")) && !strings.EqualFold("application/json", r.Header.Get("Accept")) {
-		fileServeHandler(c, w, r)
-		return
-	}
-
-	fileName := c.URLParams["name"]
-
-	metadata, err := checkFile(fileName)
-	if err == backends.NotFoundErr {
-		notFoundHandler(c, w, r)
-		return
-	} else if err != nil {
-		oopsHandler(c, w, r, RespAUTO, "Corrupt metadata.")
-		return
-	}
+func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request, fileName string, metadata backends.Metadata) {
 	var expiryHuman string
 	if metadata.Expiry != expiry.NeverExpire {
 		expiryHuman = humanize.RelTime(time.Now(), metadata.Expiry, "", "")
@@ -130,7 +112,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		tpl = Templates["display/file.html"]
 	}
 
-	err = renderTemplate(tpl, pongo2.Context{
+	err := renderTemplate(tpl, pongo2.Context{
 		"mime":        metadata.Mimetype,
 		"filename":    fileName,
 		"size":        sizeHuman,

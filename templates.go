@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GeertJohan/go.rice"
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/flosch/pongo2"
 )
 
@@ -51,6 +51,7 @@ func populateTemplatesMap(tSet *pongo2.TemplateSet, tMap map[string]*pongo2.Temp
 		"401.html",
 		"404.html",
 		"oops.html",
+		"access.html",
 
 		"display/audio.html",
 		"display/image.html",

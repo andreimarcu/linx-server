@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="access">
+    <form action="{{ unlockpath }}" method="POST" enctype="multipart/form-data">
+        {{ filename }} is protected with password <br />
+        <input id="access_key" name="access_key" type="password" />
+        <input id="submitbtn" type="submit" value="Unlock">
+    </form>
+</div>
+{% endblock %}
