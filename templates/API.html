@@ -33,6 +33,9 @@
 			<p>Specify a custom deletion key<br/>
 			<code>Linx-Delete-Key: mysecret</code></p>
 
+			<p>Protect file with password<br/>
+			<code>Linx-Access-Key: mysecret</code></p>
+
 			<p>Specify an expiration time (in seconds)<br/>
 			<code>Linx-Expiry: 60</code></p>
 
@@ -46,6 +49,7 @@
 			 “direct_url”: the url to access the file directly<br/>
 			 “filename”:   the (optionally generated) filename<br/>
 			 “delete_key”: the (optionally generated) deletion key,<br/>
+			 “access_key”: the (optionally generated) access key,<br/>
 			 “expiry”: the unix timestamp at which the file will expire (0 if never)<br/>
 			 “size”: the size in bytes of the file<br/>
 			 “mimetype”:   the guessed mimetype of the file<br/>
