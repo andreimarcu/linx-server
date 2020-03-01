@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
+	"net/url"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -70,19 +73,25 @@ func checkAccessKey(r *http.Request, metadata *backends.Metadata) (accessKeySour
 	return accessKeySourceNone, errInvalidAccessKey
 }
 
-func setAccessKeyCookies(w http.ResponseWriter, domain, fileName, value string, expires time.Time) {
+func setAccessKeyCookies(w http.ResponseWriter, siteURL, fileName, value string, expires time.Time) {
+	u, err := url.Parse(siteURL)
+	if err != nil {
+		log.Printf("cant parse siteURL (%v): %v", siteURL, err)
+		return
+	}
+
 	cookie := http.Cookie{
 		Name:     accessKeyHeaderName,
 		Value:    value,
 		HttpOnly: true,
-		Domain:   domain,
+		Domain:   u.Hostname(),
 		Expires:  expires,
 	}
 
-	cookie.Path = Config.sitePath + fileName
+	cookie.Path = path.Join(u.Path, fileName)
 	http.SetCookie(w, &cookie)
 
-	cookie.Path = Config.sitePath + Config.selifPath + fileName
+	cookie.Path = path.Join(u.Path, Config.selifPath, fileName)
 	http.SetCookie(w, &cookie)
 }
 
