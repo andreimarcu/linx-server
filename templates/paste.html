@@ -8,6 +8,10 @@
                     {% if not forcerandom %}<span class="hint--top hint--bounce" data-hint="Leave empty for random filename"><input class="codebox" name='filename' id="filename" type='text' value="" placeholder="filename" /></span>{% endif %}.<span class="hint--top hint--bounce" data-hint="Enable syntax highlighting by adding the extension"><input id="extension" class="codebox" name='extension' type='text' value="" placeholder="txt" /></span>
                 </div>
                 <div>
+                    <span class="hint--top hint--bounce" data-hint="Require password to access (leave empty to disable)">
+                        <input class="codebox" name="access_key" type="text" placeholder="password"/>
+                    </span>
+
                     <select id="expiry" name="expires">
                         <option disabled>Expires:</option>
                         {% for expiry in expirylist %}
