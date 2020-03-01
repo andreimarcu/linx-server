@@ -264,6 +264,24 @@ body {
   margin: 0;
 }
 
+#access_key_checkbox {
+  margin: 0;
+}
+
+#access_key_checkbox:checked ~ #access_key {
+  display: inline-block;
+}
+#access_key_checkbox:checked ~ #access_key_label {
+  display: none;
+}
+
+#access_key {
+  line-height: 1em;
+  padding: 1px;
+  border: 3px;
+  display: none;
+}
+
 .oopscontent {
     width: 400px;
 }
