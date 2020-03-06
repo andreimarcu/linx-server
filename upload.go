@@ -40,6 +40,7 @@ type UploadRequest struct {
 	expiry         time.Duration // Seconds until expiry, 0 = never
 	deleteKey      string        // Empty string if not defined
 	randomBarename bool
+	accessKey      string // Empty string if not defined
 }
 
 // Metadata associated with a file as it would actually be stored
@@ -88,6 +89,7 @@ func uploadPostHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq.expiry = parseExpiry(r.PostFormValue("expires"))
+	upReq.accessKey = r.PostFormValue(accessKeyParamName)
 
 	if r.PostFormValue("randomize") == "true" {
 		upReq.randomBarename = true
@@ -192,6 +194,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	upReq.filename = filepath.Base(grabUrl.Path)
 	upReq.src = http.MaxBytesReader(w, resp.Body, Config.maxSize)
 	upReq.deleteKey = r.FormValue("deletekey")
+	upReq.accessKey = r.FormValue(accessKeyParamName)
 	upReq.randomBarename = r.FormValue("randomize") == "yes"
 	upReq.expiry = parseExpiry(r.FormValue("expiry"))
 
@@ -222,6 +225,7 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 	}
 
 	upReq.deleteKey = r.Header.Get("Linx-Delete-Key")
+	upReq.accessKey = r.Header.Get(accessKeyHeaderName)
 
 	// Get seconds until expiry. Non-integer responses never expire.
 	expStr := r.Header.Get("Linx-Expiry")
@@ -321,7 +325,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		upReq.deleteKey = uniuri.NewLen(30)
 	}
 
-	upload.Metadata, err = storageBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src), fileExpiry, upReq.deleteKey)
+	upload.Metadata, err = storageBackend.Put(upload.Filename, io.MultiReader(bytes.NewReader(header), upReq.src), fileExpiry, upReq.deleteKey, upReq.accessKey)
 	if err != nil {
 		return upload, err
 	}
@@ -339,6 +343,7 @@ func generateJSONresponse(upload Upload, r *http.Request) []byte {
 		"direct_url": getSiteURL(r) + Config.selifPath + upload.Filename,
 		"filename":   upload.Filename,
 		"delete_key": upload.Metadata.DeleteKey,
+		"access_key": upload.Metadata.AccessKey,
 		"expiry":     strconv.FormatInt(upload.Metadata.Expiry.Unix(), 10),
 		"size":       strconv.FormatInt(upload.Metadata.Size, 10),
 		"mimetype":   upload.Metadata.Mimetype,

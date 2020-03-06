@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/GeertJohan/go.rice"
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/andreimarcu/linx-server/backends/s3"
@@ -69,6 +69,7 @@ var Config struct {
 	s3Bucket                  string
 	s3ForcePathStyle          bool
 	forceRandomFilename       bool
+	accessKeyCookieExpiry     uint64
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -222,7 +223,8 @@ func setup() *web.Mux {
 	mux.Get(Config.sitePath+"static/*", staticHandler)
 	mux.Get(Config.sitePath+"favicon.ico", staticHandler)
 	mux.Get(Config.sitePath+"robots.txt", staticHandler)
-	mux.Get(nameRe, fileDisplayHandler)
+	mux.Get(nameRe, fileAccessHandler)
+	mux.Post(nameRe, fileAccessHandler)
 	mux.Get(selifRe, fileServeHandler)
 	mux.Get(selifIndexRe, unauthorizedHandler)
 	mux.Get(torrentRe, fileTorrentHandler)
@@ -297,6 +299,7 @@ func main() {
 		"Force path-style addressing for S3 (e.g. https://s3.amazonaws.com/linx/example.txt)")
 	flag.BoolVar(&Config.forceRandomFilename, "force-random-filename", false,
 		"Force all uploads to use a random filename")
+	flag.Uint64Var(&Config.accessKeyCookieExpiry, "access-cookie-expiry", 0, "Expiration time for access key cookies in seconds (set 0 to use session cookies)")
 
 	iniflags.Parse()
 

@@ -86,6 +86,7 @@ func mapMetadata(m backends.Metadata) map[string]*string {
 		"Size":      aws.String(strconv.FormatInt(m.Size, 10)),
 		"Mimetype":  aws.String(m.Mimetype),
 		"Sha256sum": aws.String(m.Sha256sum),
+		"AccessKey": aws.String(m.AccessKey),
 	}
 }
 
@@ -108,10 +109,15 @@ func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 
 	m.Mimetype = aws.StringValue(input["Mimetype"])
 	m.Sha256sum = aws.StringValue(input["Sha256sum"])
+
+	if key, ok := input["AccessKey"]; ok {
+		m.AccessKey = aws.StringValue(key)
+	}
+
 	return
 }
 
-func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey, accessKey string) (m backends.Metadata, err error) {
 	tmpDst, err := ioutil.TempFile("", "linx-server-upload")
 	if err != nil {
 		return m, err
@@ -137,6 +143,7 @@ func (b S3Backend) Put(key string, r io.Reader, expiry time.Time, deleteKey stri
 	}
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
+	m.AccessKey = accessKey
 	// XXX: we may not be able to write this to AWS easily
 	//m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, tmpDst)
 
