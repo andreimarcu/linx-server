@@ -102,6 +102,10 @@ func unmapMetadata(input map[string]*string) (m backends.Metadata, err error) {
 	}
 
 	m.DeleteKey = aws.StringValue(input["Deletekey"])
+	if m.DeleteKey == "" {
+		m.DeleteKey = aws.StringValue(input["Delete_key"])
+	}
+
 	m.Mimetype = aws.StringValue(input["Mimetype"])
 	m.Sha256sum = aws.StringValue(input["Sha256sum"])
 	return
