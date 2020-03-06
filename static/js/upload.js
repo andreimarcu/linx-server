@@ -6,6 +6,23 @@ Dropzone.options.dropzone = {
         dzone.style.display = "block";
     },
     addedfile: function(file) {
+        if (!this.options.autoProcessQueue) {
+            var dropzone = this;
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                if (xhr.readyState !== XMLHttpRequest.DONE) {
+                    return;
+                }
+                if (xhr.status < 400) {
+                    dropzone.processQueue()
+                    dropzone.options.autoProcessQueue = true;
+                } else {
+                    dropzone.cancelUpload(file)
+                }
+            };
+            xhr.open("HEAD", "auth/", true);
+            xhr.send()
+        }
         var upload = document.createElement("div");
         upload.className = "upload";
 
@@ -80,6 +97,9 @@ Dropzone.options.dropzone = {
         file.cancelActionElement = deleteAction;
         file.fileActions.appendChild(deleteAction);
     },
+    canceled: function(file) {
+        this.options.error(file);
+    },
     error: function(file, resp, xhrO) {
         file.fileActions.removeChild(file.cancelActionElement);
         file.fileActions.removeChild(file.progressElement);
@@ -101,6 +121,7 @@ Dropzone.options.dropzone = {
         file.fileLabel.className = "error";
     },
 
+    autoProcessQueue: document.getElementById("dropzone").getAttribute("data-auth") !== "basic",
     maxFilesize: Math.round(parseInt(document.getElementById("dropzone").getAttribute("data-maxsize"), 10) / 1024 / 1024),
     previewsContainer: "#uploads",
     parallelUploads: 5,

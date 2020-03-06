@@ -59,6 +59,7 @@ var Config struct {
 	allowHotlink              bool
 	fastcgi                   bool
 	remoteUploads             bool
+	basicAuth                 bool
 	authFile                  string
 	remoteAuthFile            string
 	addHeaders                headerList
@@ -168,7 +169,7 @@ func setup() *web.Mux {
 	selifIndexRe := regexp.MustCompile("^" + Config.sitePath + Config.selifPath + `$`)
 	torrentRe := regexp.MustCompile("^" + Config.sitePath + `(?P<name>[a-z0-9-\.]+)/torrent$`)
 
-	if Config.authFile == "" {
+	if Config.authFile == "" || Config.basicAuth {
 		mux.Get(Config.sitePath, indexHandler)
 		mux.Get(Config.sitePath+"paste/", pasteHandler)
 	} else {
@@ -187,6 +188,27 @@ func setup() *web.Mux {
 		if Config.remoteAuthFile != "" {
 			remoteAuthKeys = readAuthKeys(Config.remoteAuthFile)
 		}
+	}
+
+	if Config.basicAuth {
+		options := AuthOptions{
+			AuthFile:      Config.authFile,
+			UnauthMethods: []string{},
+		}
+		okFunc := func (w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Location", Config.sitePath)
+			w.WriteHeader(http.StatusFound)
+		}
+		authHandler := auth {
+			successHandler: http.HandlerFunc(okFunc),
+			failureHandler: http.HandlerFunc(badAuthorizationHandler),
+			authKeys:       readAuthKeys(Config.authFile),
+			o:              options,
+		}
+		mux.Head(Config.sitePath+"auth", authHandler)
+		mux.Head(Config.sitePath+"auth/", authHandler)
+		mux.Get(Config.sitePath+"auth", authHandler)
+		mux.Get(Config.sitePath+"auth/", authHandler)
 	}
 
 	mux.Post(Config.sitePath+"upload", uploadPostHandler)
@@ -217,6 +239,8 @@ func main() {
 		"path to files directory")
 	flag.StringVar(&Config.metaDir, "metapath", "meta/",
 		"path to metadata directory")
+	flag.BoolVar(&Config.basicAuth, "basicauth", false,
+		"allow logging by basic auth password")
 	flag.BoolVar(&Config.noLogs, "nologs", false,
 		"remove stdout output for each request")
 	flag.BoolVar(&Config.allowHotlink, "allowhotlink", false,

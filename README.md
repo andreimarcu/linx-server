@@ -60,6 +60,7 @@ allowhotlink = true
 #### Require API Keys for uploads
 - ```-authfile path/to/authfile``` -- (optionally) require authorization for upload/delete by providing a newline-separated file of scrypted auth keys
 - ```-remoteauthfile path/to/remoteauthfile``` -- (optionally) require authorization for remote uploads by providing a newline-separated file of scrypted auth keys
+- ```-basicauth``` -- (optionally) allow basic authorization to upload or paste files from browser when `-authfile` is enabled
 
 A helper utility ```linx-genkey``` is provided which hashes keys to the format required in the auth files.
 

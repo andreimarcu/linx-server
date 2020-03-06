@@ -157,9 +157,20 @@ func uploadPutHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	if Config.remoteAuthFile != "" {
-		result, err := checkAuth(remoteAuthKeys, r.FormValue("key"))
+		key := r.FormValue("key")
+		if key == "" && Config.basicAuth {
+			_, password, ok := r.BasicAuth()
+			if ok {
+				key = password
+			}
+		}
+		result, err := checkAuth(remoteAuthKeys, key)
 		if err != nil || !result {
-			unauthorizedHandler(c, w, r)
+			if Config.basicAuth {
+				badAuthorizationHandler(w, r)
+			} else {
+				unauthorizedHandler(c, w, r)
+			}
 			return
 		}
 	}
