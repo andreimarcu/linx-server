@@ -19,6 +19,7 @@ type LocalfsBackend struct {
 
 type MetadataJSON struct {
 	DeleteKey    string   `json:"delete_key"`
+	AccessKey    string   `json:"access_key,omitempty"`
 	Sha256sum    string   `json:"sha256sum"`
 	Mimetype     string   `json:"mimetype"`
 	Size         int64    `json:"size"`
@@ -57,6 +58,7 @@ func (b LocalfsBackend) Head(key string) (metadata backends.Metadata, err error)
 	}
 
 	metadata.DeleteKey = mjson.DeleteKey
+	metadata.AccessKey = mjson.AccessKey
 	metadata.Mimetype = mjson.Mimetype
 	metadata.ArchiveFiles = mjson.ArchiveFiles
 	metadata.Sha256sum = mjson.Sha256sum
@@ -84,12 +86,13 @@ func (b LocalfsBackend) writeMetadata(key string, metadata backends.Metadata) er
 	metaPath := path.Join(b.metaPath, key)
 
 	mjson := MetadataJSON{
-		DeleteKey: metadata.DeleteKey,
-		Mimetype: metadata.Mimetype,
+		DeleteKey:    metadata.DeleteKey,
+		AccessKey:    metadata.AccessKey,
+		Mimetype:     metadata.Mimetype,
 		ArchiveFiles: metadata.ArchiveFiles,
-		Sha256sum: metadata.Sha256sum,
-		Expiry: metadata.Expiry.Unix(),
-		Size: metadata.Size,
+		Sha256sum:    metadata.Sha256sum,
+		Expiry:       metadata.Expiry.Unix(),
+		Size:         metadata.Size,
 	}
 
 	dst, err := os.Create(metaPath)
@@ -108,7 +111,7 @@ func (b LocalfsBackend) writeMetadata(key string, metadata backends.Metadata) er
 	return nil
 }
 
-func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey string) (m backends.Metadata, err error) {
+func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey, accessKey string) (m backends.Metadata, err error) {
 	filePath := path.Join(b.filesPath, key)
 
 	dst, err := os.Create(filePath)
@@ -126,16 +129,17 @@ func (b LocalfsBackend) Put(key string, r io.Reader, expiry time.Time, deleteKey
 		return m, err
 	}
 
-	dst.Seek(0 ,0)
+	dst.Seek(0, 0)
 	m, err = helpers.GenerateMetadata(dst)
 	if err != nil {
 		os.Remove(filePath)
 		return
 	}
-	dst.Seek(0 ,0)
+	dst.Seek(0, 0)
 
 	m.Expiry = expiry
 	m.DeleteKey = deleteKey
+	m.AccessKey = accessKey
 	m.ArchiveFiles, _ = helpers.ListArchiveFiles(m.Mimetype, m.Size, dst)
 
 	err = b.writeMetadata(key, m)

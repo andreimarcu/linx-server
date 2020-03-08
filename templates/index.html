@@ -17,15 +17,27 @@
         </div>
 
         <div id="choices">
-            <label>{% if not forcerandom %}<input name="randomize" id="randomize" type="checkbox" checked /> Randomize filename{% endif %}</label>
+            <span class="hint--top hint--bounce" data-hint="Replace the filename with random characters. The file extension is retained">
+                <label><input {% if forcerandom %} disabled {% endif %} name="randomize" id="randomize" type="checkbox" checked /> Randomize filename</label>
+            </span>
+
             <div id="expiry">
                 <label>File expiry:
-                <select name="expires" id="expires">
-                    {% for expiry in expirylist %}
-                    <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
-                    {% endfor %}
-                </select>
+                    <select name="expires" id="expires">
+                        {% for expiry in expirylist %}
+                        <option value="{{ expiry.Seconds }}"{% if forloop.Last %} selected{% endif %}>{{ expiry.Human }}</option>
+                        {% endfor %}
+                    </select>
                 </label>
+            </div>
+            <div id="access_key">
+                <span class="hint--top hint--bounce" data-hint="Require password to access (this does not encrypt the file but only limits access)">
+                    <label>
+                        <input type="checkbox" id="access_key_checkbox"/>
+                        <input id="access_key_input" name="access_key" type="text" placeholder="Access password"/>
+                        <span id="access_key_text">Require access password</span>
+                    </label>
+                </span>
             </div>
         </div>
         <div class="clear"></div>

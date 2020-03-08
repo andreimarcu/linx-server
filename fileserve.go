@@ -27,6 +27,16 @@ func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if src, err := checkAccessKey(r, &metadata); err != nil {
+		// remove invalid cookie
+		if src == accessKeySourceCookie {
+			setAccessKeyCookies(w, getSiteURL(r), fileName, "", time.Unix(0, 0))
+		}
+		unauthorizedHandler(c, w, r)
+
+		return
+	}
+
 	if !Config.allowHotlink {
 		referer := r.Header.Get("Referer")
 		u, _ := url.Parse(referer)
