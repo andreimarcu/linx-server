@@ -264,21 +264,28 @@ body {
   margin: 0;
 }
 
+#access_key {
+  min-width: 100%;
+  line-height: 1.3em;
+}
+
+#access_key input, span {
+  vertical-align: middle;
+}
+
 #access_key_checkbox {
   margin: 0;
 }
 
-#access_key_checkbox:checked ~ #access_key {
+#access_key_checkbox:checked ~ #access_key_input {
   display: inline-block;
 }
-#access_key_checkbox:checked ~ #access_key_label {
+#access_key_checkbox:checked ~ #access_key_text {
   display: none;
 }
 
-#access_key {
-  line-height: 1em;
-  padding: 1px;
-  border: 3px;
+#access_key_input {
+  padding: 0;
   display: none;
 }
 

@@ -1,15 +1,15 @@
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
 
 Dropzone.options.dropzone = {
-    init: function() {
+    init: function () {
         var dzone = document.getElementById("dzone");
         dzone.style.display = "block";
     },
-    addedfile: function(file) {
+    addedfile: function (file) {
         if (!this.options.autoProcessQueue) {
             var dropzone = this;
             var xhr = new XMLHttpRequest();
-            xhr.onload = function() {
+            xhr.onload = function () {
                 if (xhr.readyState !== XMLHttpRequest.DONE) {
                     return;
                 }
@@ -39,7 +39,7 @@ Dropzone.options.dropzone = {
         var cancelAction = document.createElement("span");
         cancelAction.className = "cancel";
         cancelAction.innerHTML = "Cancel";
-        cancelAction.addEventListener('click', function(ev) {
+        cancelAction.addEventListener('click', function (ev) {
             this.removeFile(file);
         }.bind(this));
         file.cancelActionElement = cancelAction;
@@ -53,19 +53,19 @@ Dropzone.options.dropzone = {
 
         document.getElementById("uploads").appendChild(upload);
     },
-    uploadprogress: function(file, p, bytesSent) {
+    uploadprogress: function (file, p, bytesSent) {
         p = parseInt(p);
         file.progressElement.innerHTML = p + "%";
         file.uploadElement.setAttribute("style", 'background-image: -webkit-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -moz-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -ms-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: -o-linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%); background-image: linear-gradient(left, #F2F4F7 ' + p + '%, #E2E2E2 ' + p + '%)');
     },
-    sending: function(file, xhr, formData) {
+    sending: function (file, xhr, formData) {
         var randomize = document.getElementById("randomize");
-        if(randomize != null) {
+        if (randomize != null) {
             formData.append("randomize", randomize.checked);
         }
         formData.append("expires", document.getElementById("expires").value);
     },
-    success: function(file, resp) {
+    success: function (file, resp) {
         file.fileActions.removeChild(file.progressElement);
 
         var fileLabelLink = document.createElement("a");
@@ -79,11 +79,11 @@ Dropzone.options.dropzone = {
         var deleteAction = document.createElement("span");
         deleteAction.innerHTML = "Delete";
         deleteAction.className = "cancel";
-        deleteAction.addEventListener('click', function(ev) {
+        deleteAction.addEventListener('click', function (ev) {
             xhr = new XMLHttpRequest();
             xhr.open("DELETE", resp.url, true);
             xhr.setRequestHeader("Linx-Delete-Key", resp.delete_key);
-            xhr.onreadystatechange = function(file) {
+            xhr.onreadystatechange = function (file) {
                 if (xhr.readyState == 4 && xhr.status === 200) {
                     var text = document.createTextNode("Deleted ");
                     file.fileLabel.insertBefore(text, file.fileLabelLink);
@@ -97,15 +97,15 @@ Dropzone.options.dropzone = {
         file.cancelActionElement = deleteAction;
         file.fileActions.appendChild(deleteAction);
     },
-    canceled: function(file) {
+    canceled: function (file) {
         this.options.error(file);
     },
-    error: function(file, resp, xhrO) {
+    error: function (file, resp, xhrO) {
         file.fileActions.removeChild(file.cancelActionElement);
         file.fileActions.removeChild(file.progressElement);
 
         if (file.status === "canceled") {
-            file.fileLabel.innerHTML = file.name + ": Canceled ";            
+            file.fileLabel.innerHTML = file.name + ": Canceled ";
         }
         else {
             if (resp.error) {
@@ -125,18 +125,24 @@ Dropzone.options.dropzone = {
     maxFilesize: Math.round(parseInt(document.getElementById("dropzone").getAttribute("data-maxsize"), 10) / 1024 / 1024),
     previewsContainer: "#uploads",
     parallelUploads: 5,
-    headers: {"Accept": "application/json"},
+    headers: { "Accept": "application/json" },
     dictDefaultMessage: "Click or Drop file(s) or Paste image",
     dictFallbackMessage: ""
 };
 
-document.onpaste = function(event) {
+document.onpaste = function (event) {
     var items = (event.clipboardData || event.originalEvent.clipboardData).items;
     for (index in items) {
         var item = items[index];
         if (item.kind === "file") {
             Dropzone.forElement("#dropzone").addFile(item.getAsFile());
         }
+    }
+};
+
+document.getElementById("access_key_checkbox").onchange = function (event) {
+    if (event.target.checked == false) {
+        document.getElementById("access_key_input").value = "";
     }
 };
 
