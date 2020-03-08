@@ -277,13 +277,6 @@ body {
   margin: 0;
 }
 
-#access_key_checkbox:checked ~ #access_key_input {
-  display: inline-block;
-}
-#access_key_checkbox:checked ~ #access_key_text {
-  display: none;
-}
-
 #access_key_input {
   padding: 0;
   display: none;

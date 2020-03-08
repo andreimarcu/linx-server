@@ -141,8 +141,13 @@ document.onpaste = function (event) {
 };
 
 document.getElementById("access_key_checkbox").onchange = function (event) {
-    if (event.target.checked == false) {
+    if (event.target.checked) {
+        document.getElementById("access_key_input").style.display = "inline-block";
+        document.getElementById("access_key_text").style.display = "none";
+    } else {
         document.getElementById("access_key_input").value = "";
+        document.getElementById("access_key_input").style.display = "none";
+        document.getElementById("access_key_text").style.display = "inline-block";
     }
 };
 
