@@ -1,6 +1,6 @@
 module github.com/andreimarcu/linx-server
 
-go 1.13
+go 1.14
 
 require (
 	github.com/GeertJohan/go.rice v1.0.0
