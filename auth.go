@@ -115,7 +115,7 @@ func badAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
 		if Config.siteName != "" {
 			rs = fmt.Sprintf(` realm="%s"`, Config.siteName)
 		}
-		w.Header().Set("WWW-Authenticate", `Basic` + rs)
+		w.Header().Set("WWW-Authenticate", `Basic`+rs)
 	}
 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 }

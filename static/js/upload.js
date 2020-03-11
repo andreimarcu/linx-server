@@ -20,7 +20,7 @@ Dropzone.options.dropzone = {
                     dropzone.cancelUpload(file)
                 }
             };
-            xhr.open("HEAD", "auth/", true);
+            xhr.open("HEAD", "/auth", true);
             xhr.send()
         }
         var upload = document.createElement("div");
