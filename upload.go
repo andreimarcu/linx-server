@@ -184,6 +184,7 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	upReq := UploadRequest{}
 	grabUrl, _ := url.Parse(r.FormValue("url"))
+	directURL := r.FormValue("direct_url") == "yes"
 
 	resp, err := http.Get(grabUrl.String())
 	if err != nil {
@@ -215,7 +216,11 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, Config.sitePath+upload.Filename, 303)
+		if directURL {
+			http.Redirect(w, r, Config.sitePath+Config.selifPath+upload.Filename, 303)
+		} else {
+			http.Redirect(w, r, Config.sitePath+upload.Filename, 303)
+		}
 	}
 }
 
