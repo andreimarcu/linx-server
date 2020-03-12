@@ -68,7 +68,7 @@ func TestCreateTorrentWithImage(t *testing.T) {
 
 	bencode.DecodeBytes(encoded, &decoded)
 
-	if decoded.Info.Pieces != "r\x01\x80j\x99\x84\n\xd3dZ;1NX\xec;\x9d$+f" {
+	if decoded.Info.Pieces != "\xd6\xff\xbf'^)\x85?\xb4.\xb0\xc1|\xa3\x83\xeeX\xf9\xfd\xd7" {
 		t.Fatal("Torrent pieces did not match expected pieces for image")
 	}
 }
