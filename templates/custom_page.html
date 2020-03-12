@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{sitename}} - {{ pagename }}{% endblock %}
+
+{% block head %}
+<link href="{{ sitepath }}static/css/github-markdown.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+<div id="main">
+	<div id='inner_content'>
+		<div class="normal markdown-body">
+			<h2>{{ pagename }}</h2>
+
+			{{ contents|safe }}
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>{% block title %}{{ sitename }}{% endblock %}</title>
 	<meta charset='utf-8' content='text/html' http-equiv='content-type'>
@@ -16,12 +17,15 @@
 			<div id="header">
 				<div id="navigation" class="right">
 					{% if auth != "header" %}
-					<a href="{{ sitepath }}">Upload</a> | 
-					<a href="{{ sitepath }}paste/">Paste</a> | 
+					<a href="{{ sitepath }}">Upload</a> |
+					<a href="{{ sitepath }}paste/">Paste</a> |
 					{% endif %}
 					<a href="{{ sitepath }}API/">API</a>
+					{% for custom_file_name, custom_page_name in custom_pages_names sorted %}
+					| <a href="{{ sitepath }}{{ custom_file_name }}/">{{ custom_page_name }}</a>
+					{% endfor %}
 				</div>
-				<h2><a href="{{ sitepath }}"  title="{{ sitename }}">{{ sitename }}</a></h2>
+				<h2><a href="{{ sitepath }}" title="{{ sitename }}">{{ sitename }}</a></h2>
 			</div>
 
 			{% block content %}{% endblock %}
@@ -33,4 +37,5 @@
 		</div>
 	</div>
 </body>
+
 </html>

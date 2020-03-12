@@ -70,6 +70,7 @@ var Config struct {
 	s3ForcePathStyle          bool
 	forceRandomFilename       bool
 	accessKeyCookieExpiry     uint64
+	customPagesDir            string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -80,6 +81,8 @@ var timeStartedStr string
 var remoteAuthKeys []string
 var metaStorageBackend backends.MetaStorageBackend
 var storageBackend backends.StorageBackend
+var customPages = make(map[string]string)
+var customPagesNames = make(map[string]string)
 
 func setup() *web.Mux {
 	mux := web.New()
@@ -227,6 +230,14 @@ func setup() *web.Mux {
 	mux.Get(selifIndexRe, unauthorizedHandler)
 	mux.Get(torrentRe, fileTorrentHandler)
 
+	if Config.customPagesDir != "" {
+		initializeCustomPages(Config.customPagesDir)
+		for fileName := range customPagesNames {
+			mux.Get(Config.sitePath+fileName, makeCustomPageHandler(fileName))
+			mux.Get(Config.sitePath+fileName+"/", makeCustomPageHandler(fileName))
+		}
+	}
+
 	mux.NotFound(notFoundHandler)
 
 	return mux
@@ -298,6 +309,8 @@ func main() {
 	flag.BoolVar(&Config.forceRandomFilename, "force-random-filename", false,
 		"Force all uploads to use a random filename")
 	flag.Uint64Var(&Config.accessKeyCookieExpiry, "access-cookie-expiry", 0, "Expiration time for access key cookies in seconds (set 0 to use session cookies)")
+	flag.StringVar(&Config.customPagesDir, "custompagespath", "",
+		"path to directory containing .md files to render as custom pages")
 
 	iniflags.Parse()
 

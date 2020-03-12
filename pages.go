@@ -50,6 +50,21 @@ func apiDocHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func makeCustomPageHandler(fileName string) func(c web.C, w http.ResponseWriter, r *http.Request) {
+	return func(c web.C, w http.ResponseWriter, r *http.Request) {
+		err := renderTemplate(Templates["custom_page.html"], pongo2.Context{
+			"siteurl":     getSiteURL(r),
+			"forcerandom": Config.forceRandomFilename,
+			"contents":    customPages[fileName],
+			"filename":    fileName,
+			"pagename":    customPagesNames[fileName],
+		}, r, w)
+		if err != nil {
+			oopsHandler(c, w, r, RespHTML, "")
+		}
+	}
+}
+
 func notFoundHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(404)
 	err := renderTemplate(Templates["404.html"], pongo2.Context{}, r, w)

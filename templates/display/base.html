@@ -1,36 +1,36 @@
 {% extends "../base.html" %}
 
-{% block title %}{{ filename }}{% endblock %}
+{% block title %}{{sitename}} - {{ filename }}{% endblock %}
 
 {% block bodymore %}{% endblock %}
 
 {% block content %}
 
-    <div id="info" class="dinfo info-flex">
-        <div id="filename">
-            {{ filename }}
-        </div>
-
-        <div class="info-actions">
-            {% if expiry %}
-            <span>file expires in {{ expiry }}</span> | 
-            {% endif %}
-            {% block infomore %}{% endblock %}
-            <span>{{ size }}</span> | 
-            <a href="{{ filename }}/torrent" download>torrent</a> |
-            <a href="{{ sitepath }}{{ selifpath }}{{ filename }}" download>get</a>
-        </div>
-
-        {% block infoleft %}{% endblock %}
+<div id="info" class="dinfo info-flex">
+    <div id="filename">
+        {{ filename }}
     </div>
 
-    <div id="main" {% block mainmore %}{% endblock %}>
-
-      <div id='inner_content' {% block innercontentmore %}{% endblock %} >
-      {% block main %}{% endblock %}
-      </div>
-
+    <div class="info-actions">
+        {% if expiry %}
+        <span>file expires in {{ expiry }}</span> |
+        {% endif %}
+        {% block infomore %}{% endblock %}
+        <span>{{ size }}</span> |
+        <a href="{{ filename }}/torrent" download>torrent</a> |
+        <a href="{{ sitepath }}{{ selifpath }}{{ filename }}" download>get</a>
     </div>
 
-    <script src="{{ sitepath }}static/js/clipboard.js"></script>
+    {% block infoleft %}{% endblock %}
+</div>
+
+<div id="main" {% block mainmore %}{% endblock %}>
+
+    <div id='inner_content' {% block innercontentmore %}{% endblock %}>
+        {% block main %}{% endblock %}
+    </div>
+
+</div>
+
+<script src="{{ sitepath }}static/js/clipboard.js"></script>
 {% endblock %}
