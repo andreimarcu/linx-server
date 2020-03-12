@@ -100,7 +100,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request, fileNam
 			bytes, err := ioutil.ReadAll(reader)
 			if err == nil {
 				extra["extension"] = extension
-				extra["lang_hl"], extra["lang_ace"] = extensionToHlAndAceLangs(extension)
+				extra["lang_hl"] = extensionToHlLang(extension)
 				extra["contents"] = string(bytes)
 				tpl = Templates["display/bin.html"]
 			}
