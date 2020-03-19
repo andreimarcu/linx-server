@@ -3,6 +3,7 @@ package s3
 import (
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -76,6 +77,43 @@ func (b S3Backend) Get(key string) (metadata backends.Metadata, r io.ReadCloser,
 
 	metadata, err = unmapMetadata(result.Metadata)
 	r = result.Body
+	return
+}
+
+func (b S3Backend) ServeFile(key string, w http.ResponseWriter, r *http.Request) (err error) {
+	var result *s3.GetObjectOutput
+
+	if r.Header.Get("Range") != "" {
+		result, err = b.svc.GetObject(&s3.GetObjectInput{
+			Bucket: aws.String(b.bucket),
+			Key:    aws.String(key),
+			Range:  aws.String(r.Header.Get("Range")),
+		})
+
+		w.WriteHeader(206)
+		w.Header().Set("Content-Range", *result.ContentRange)
+		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))
+		w.Header().Set("Accept-Ranges", "bytes")
+
+	} else {
+		result, err = b.svc.GetObject(&s3.GetObjectInput{
+			Bucket: aws.String(b.bucket),
+			Key:    aws.String(key),
+		})
+
+	}
+
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			if aerr.Code() == s3.ErrCodeNoSuchKey || aerr.Code() == "NotFound" {
+				err = backends.NotFoundErr
+			}
+		}
+		return
+	}
+
+	_, err = io.Copy(w, result.Body)
+
 	return
 }
 

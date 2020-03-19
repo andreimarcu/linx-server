@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 	"time"
@@ -78,6 +79,18 @@ func (b LocalfsBackend) Get(key string) (metadata backends.Metadata, f io.ReadCl
 	if err != nil {
 		return
 	}
+
+	return
+}
+
+func (b LocalfsBackend) ServeFile(key string, w http.ResponseWriter, r *http.Request) (err error) {
+	_, err = b.Head(key)
+	if err != nil {
+		return
+	}
+
+	filePath := path.Join(b.filesPath, key)
+	http.ServeFile(w, r, filePath)
 
 	return
 }
