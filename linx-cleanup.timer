@@ -1,0 +1,8 @@
+[Unit]
+Description=Run linx-cleanup every hour
+
+[Timer]
+OnUnitActiveSec=1h 
+
+[Install]
+WantedBy=timers.target
