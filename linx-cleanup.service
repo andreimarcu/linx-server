@@ -1,0 +1,12 @@
+[Unit]
+Description=Self-hosted file/code/media sharing (expired files cleanup)
+After=network.target
+
+[Service]
+User=linx
+Group=linx
+ExecStart=/usr/bin/linx-cleanup
+WorkingDirectory=/srv/linx/
+
+[Install]
+WantedBy=multi-user.target
