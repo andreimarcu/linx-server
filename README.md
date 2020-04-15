@@ -136,7 +136,7 @@ automatically clean up files that have expired, you can use the included
 `linx-cleanup` utility. To run it automatically, use a cronjob or similar type
 of scheduled task.
 
-You should be careful to ensure that only one instance of `linx-client` runs at
+You should be careful to ensure that only one instance of `linx-cleanup` runs at
 a time to avoid unexpected behavior. It does not implement any type of locking.
 
 
