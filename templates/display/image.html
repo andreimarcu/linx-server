@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+<meta property="og:image" content="{{ siteurl }}{{ sitepath }}{{ selifpath }}{{ filename }}" />
+{% endblock %}
+
 {% block main %}
 <a href="{{ sitepath }}{{ selifpath }}{{ filename }}">
     <img class="display-image" src="{{ sitepath }}{{ selifpath }}{{ filename }}" />

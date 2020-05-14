@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
+{% block head %}
+<meta property="og:video" content="{{ siteurl }}{{ sitepath }}{{ selifpath }}{{ filename }}" />
+{% endblock %}
+
 {% block main %}
 <video class="display-video" controls autoplay>
-    <source src="{{ sitepath }}{{ selifpath }}{{ filename }}"/>
+    <source src="{{ sitepath }}{{ selifpath }}{{ filename }}" />
     <a href='{{ sitepath }}{{ selifpath }}{{ filename }}'>Download it instead</a>
 </video>
 {% endblock %}

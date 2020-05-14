@@ -122,6 +122,7 @@ func fileDisplayHandler(c web.C, w http.ResponseWriter, r *http.Request, fileNam
 		"forcerandom": Config.forceRandomFilename,
 		"lines":       lines,
 		"files":       metadata.ArchiveFiles,
+		"siteurl":     strings.TrimSuffix(getSiteURL(r), "/"),
 	}, r, w)
 
 	if err != nil {
