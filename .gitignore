@@ -29,8 +29,8 @@ _testmain.go
 *.prof
 
 linx-server
-linx-cleanup
-linx-genkey
+linx-cleanup/linx-cleanup
+linx-genkey/linx-genkey
 files/
 meta/
 binaries/

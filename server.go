@@ -19,6 +19,7 @@ import (
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/andreimarcu/linx-server/backends/s3"
+	"github.com/andreimarcu/linx-server/cleanup"
 	"github.com/flosch/pongo2"
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji/graceful"
@@ -71,6 +72,7 @@ var Config struct {
 	forceRandomFilename       bool
 	accessKeyCookieExpiry     uint64
 	customPagesDir            string
+	cleanupEveryMinutes       uint64
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -150,6 +152,10 @@ func setup() *web.Mux {
 		storageBackend = s3.NewS3Backend(Config.s3Bucket, Config.s3Region, Config.s3Endpoint, Config.s3ForcePathStyle)
 	} else {
 		storageBackend = localfs.NewLocalfsBackend(Config.metaDir, Config.filesDir)
+		if Config.cleanupEveryMinutes > 0 {
+			go cleanup.PeriodicCleanup(time.Duration(Config.cleanupEveryMinutes)*time.Minute, Config.filesDir, Config.metaDir, Config.noLogs)
+		}
+
 	}
 
 	// Template setup
@@ -311,6 +317,8 @@ func main() {
 	flag.Uint64Var(&Config.accessKeyCookieExpiry, "access-cookie-expiry", 0, "Expiration time for access key cookies in seconds (set 0 to use session cookies)")
 	flag.StringVar(&Config.customPagesDir, "custompagespath", "",
 		"path to directory containing .md files to render as custom pages")
+	flag.Uint64Var(&Config.cleanupEveryMinutes, "cleanup-every-minutes", 0,
+		"How often to clean up expired files in minutes (default is 0, which means files will be cleaned up as they are accessed)")
 
 	iniflags.Parse()
 

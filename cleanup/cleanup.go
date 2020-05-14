@@ -1,26 +1,14 @@
-package main
+package cleanup
 
 import (
-	"flag"
 	"log"
+	"time"
 
 	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/andreimarcu/linx-server/expiry"
 )
 
-func main() {
-	var filesDir string
-	var metaDir string
-	var noLogs bool
-
-	flag.StringVar(&filesDir, "filespath", "files/",
-		"path to files directory")
-	flag.StringVar(&metaDir, "metapath", "meta/",
-		"path to metadata directory")
-	flag.BoolVar(&noLogs, "nologs", false,
-		"don't log deleted files")
-	flag.Parse()
-
+func Cleanup(filesDir string, metaDir string, noLogs bool) {
 	fileBackend := localfs.NewLocalfsBackend(metaDir, filesDir)
 
 	files, err := fileBackend.List()
@@ -43,4 +31,12 @@ func main() {
 			fileBackend.Delete(filename)
 		}
 	}
+}
+
+func PeriodicCleanup(minutes time.Duration, filesDir string, metaDir string, noLogs bool) {
+	c := time.Tick(minutes)
+	for range c {
+		Cleanup(filesDir, metaDir, noLogs)
+	}
+
 }

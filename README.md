@@ -92,6 +92,17 @@ allowhotlink = true
 | ```-force-random-filename``` | (optionally) force the use of random filenames
 | ```-custompagespath "custom_pages"``` | (optionally) specify path to directory containing markdown pages (must end in .md) that will be added to the site navigation (this can be useful for providing contact/support information and so on). For example, custom_pages/My_Page.md will become My Page in the site navigation 
 
+
+#### Cleaning up expired files
+When files expire, access is disabled immediately, but the files and metadata
+will persist on disk until someone attempts to access them. You can set the following option to run cleanup every few minutes. This can also be done using a separate utility found the linx-cleanup directory.
+
+
+|Option|Description
+|------|-----------
+| ```-cleanup-every-minutes 5``` | How often to clean up expired files in minutes (default is 0, which means files will be cleaned up as they are accessed)
+
+
 #### Require API Keys for uploads
 
 |Option|Description
@@ -126,26 +137,6 @@ The following storage backends are available:
 |Option|Description
 |------|-----------
 | ```-fastcgi``` | serve through fastcgi 
-
-
-Cleaning up expired files
--------------------------
-When files expire, access is disabled immediately, but the files and metadata
-will persist on disk until someone attempts to access them. If you'd like to
-automatically clean up files that have expired, you can use the included
-`linx-cleanup` utility. To run it automatically, use a cronjob or similar type
-of scheduled task.
-
-You should be careful to ensure that only one instance of `linx-cleanup` runs at
-a time to avoid unexpected behavior. It does not implement any type of locking.
-
-
-|Option|Description
-|------|-----------
-| ```-filespath files/``` | Path to stored uploads (default is files/)
-| ```-nologs``` | (optionally) disable deletion logs in stdout
-| ```-metapath meta/``` | Path to stored information about uploads (default is meta/)
-
 
 Deployment
 ----------
@@ -207,4 +198,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Author
 -------
-Andrei Marcu, http://andreim.net/
+Andrei Marcu, https://andreim.net/
