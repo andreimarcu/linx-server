@@ -75,8 +75,16 @@ func CheckAuth(authKeys []string, key string) (result bool, err error) {
 	return
 }
 
+func (a ApiKeysMiddleware) getSitePrefix() string {
+	prefix := a.o.SitePath
+	if len(prefix) <= 0 || prefix[0] != '/' {
+		prefix = "/" + prefix
+	}
+	return prefix
+}
+
 func (a ApiKeysMiddleware) goodAuthorizationHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Location", a.o.SitePath)
+	w.Header().Set("Location", a.getSitePrefix())
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -93,11 +101,7 @@ func (a ApiKeysMiddleware) badAuthorizationHandler(w http.ResponseWriter, r *htt
 
 func (a ApiKeysMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var successHandler http.Handler
-
-	prefix := a.o.SitePath
-	if len(prefix) <= 0 || prefix[0] != '/' {
-		prefix = "/" + prefix
-	}
+	prefix := a.getSitePrefix()
 
 	if r.URL.Path == prefix+"auth" {
 		successHandler = http.HandlerFunc(a.goodAuthorizationHandler)
