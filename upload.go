@@ -18,8 +18,8 @@ import (
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/zenazn/goji/web"
-	"gopkg.in/h2non/filetype.v1"
 )
 
 var FileTooLargeError = errors.New("File too large.")
@@ -263,11 +263,11 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		header = header[:n]
 
 		// Determine the type of file from header
-		kind, err := filetype.Match(header)
-		if err != nil || kind.Extension == "unknown" {
+		kind := mimetype.Detect(header)
+		if len(kind.Extension()) < 2 {
 			extension = "file"
 		} else {
-			extension = kind.Extension
+			extension = kind.Extension()[1:] // remove leading "."
 		}
 	}
 
