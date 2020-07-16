@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/andreimarcu/linx-server/backends"
+	svg "github.com/h2non/go-is-svg"
 	"github.com/minio/sha256-simd"
 	"gopkg.in/h2non/filetype.v1"
 )
@@ -21,7 +22,7 @@ func GenerateMetadata(r io.Reader) (m backends.Metadata, err error) {
 
 	// Get first 512 bytes for mimetype detection
 	header := make([]byte, 512)
-	_, err = teeReader.Read(header)
+	headerlen, err := teeReader.Read(header)
 	if err != nil {
 		return
 	}
@@ -53,6 +54,8 @@ func GenerateMetadata(r io.Reader) (m backends.Metadata, err error) {
 		return m, err
 	} else if kind.MIME.Value != "" {
 		m.Mimetype = kind.MIME.Value
+	} else if svg.Is(header[:headerlen]) {
+		m.Mimetype = "image/svg+xml"
 	} else if printable(header) {
 		m.Mimetype = "text/plain"
 	} else {

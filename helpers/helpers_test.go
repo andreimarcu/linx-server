@@ -27,3 +27,24 @@ func TestGenerateMetadata(t *testing.T) {
 		t.Fatalf("Size was %d instead of expected value of %d", m.Size, expectedSize)
 	}
 }
+
+func TestSVGMimetype(t *testing.T) {
+	testcases := []struct {
+		mimetype  string
+		inputdata string
+	}{
+		{mimetype: "image/svg+xml", inputdata: "<svg width=\"2042pt\" height=\"810pt\">\nsvg things\n</svg>\n"},
+		{mimetype: "text/plain", inputdata: "Not an SVG!\nThis is sooo not an SVG file.\n"},
+	}
+
+	for i, record := range testcases {
+		r := strings.NewReader(record.inputdata)
+		m, err := GenerateMetadata(r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if record.mimetype != m.Mimetype {
+			t.Fatalf("[svg testcase %d] Mimetype was %s instead of expected value %s", i, m.Mimetype, record.mimetype)
+		}
+	}
+}

@@ -1303,3 +1303,21 @@ func TestPutAndGetCLI(t *testing.T) {
 	}
 
 }
+
+func TestSVGExtension(t *testing.T) {
+	testcases := []struct {
+		extension string
+		inputdata string
+	}{
+		{extension: "svg", inputdata: "<svg width=\"2042pt\" height=\"810pt\">\nsvg things\n</svg>\n"},
+		{extension: "file", inputdata: "Not an SVG!\nThis is sooo not an SVG file.\n"},
+	}
+
+	for i, record := range testcases {
+		header := []byte(record.inputdata)
+		extension := determineExtension(header)
+		if record.extension != extension {
+			t.Fatalf("[svg testcase %d] extension was %s instead of expected value %s", i, extension, record.extension)
+		}
+	}
+}

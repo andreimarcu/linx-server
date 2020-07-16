@@ -18,6 +18,7 @@ import (
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
+	svg "github.com/h2non/go-is-svg"
 	"github.com/zenazn/goji/web"
 	"gopkg.in/h2non/filetype.v1"
 )
@@ -237,6 +238,20 @@ func uploadHeaderProcess(r *http.Request, upReq *UploadRequest) {
 	upReq.expiry = parseExpiry(expStr)
 }
 
+func determineExtension(header []byte) string {
+	// Determine the type of file from header
+	var extension string
+	kind, err := filetype.Match(header)
+	if err == nil && kind.Extension != "unknown" {
+		extension = kind.Extension
+	} else if svg.Is(header) {
+		extension = "svg"
+	} else {
+		extension = "file"
+	}
+	return extension
+}
+
 func processUpload(upReq UploadRequest) (upload Upload, err error) {
 	if upReq.size > Config.maxSize {
 		return upload, FileTooLargeError
@@ -262,13 +277,7 @@ func processUpload(upReq UploadRequest) (upload Upload, err error) {
 		}
 		header = header[:n]
 
-		// Determine the type of file from header
-		kind, err := filetype.Match(header)
-		if err != nil || kind.Extension == "unknown" {
-			extension = "file"
-		} else {
-			extension = kind.Extension
-		}
+		extension = determineExtension(header)
 	}
 
 	upload.Filename = strings.Join([]string{barename, extension}, ".")
