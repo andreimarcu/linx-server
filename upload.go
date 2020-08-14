@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreimarcu/linx-server/auth/apikeys"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/expiry"
 	"github.com/dchest/uniuri"
@@ -166,13 +167,16 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 				key = password
 			}
 		}
-		result, err := checkAuth(remoteAuthKeys, key)
+		result, err := apikeys.CheckAuth(remoteAuthKeys, key)
 		if err != nil || !result {
 			if Config.basicAuth {
-				badAuthorizationHandler(w, r)
-			} else {
-				unauthorizedHandler(c, w, r)
+				rs := ""
+				if Config.siteName != "" {
+					rs = fmt.Sprintf(` realm="%s"`, Config.siteName)
+				}
+				w.Header().Set("WWW-Authenticate", `Basic`+rs)
 			}
+			unauthorizedHandler(c, w, r)
 			return
 		}
 	}

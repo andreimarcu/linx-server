@@ -16,6 +16,7 @@ import (
 	"time"
 
 	rice "github.com/GeertJohan/go.rice"
+	"github.com/andreimarcu/linx-server/auth/apikeys"
 	"github.com/andreimarcu/linx-server/backends"
 	"github.com/andreimarcu/linx-server/backends/localfs"
 	"github.com/andreimarcu/linx-server/backends/s3"
@@ -110,9 +111,12 @@ func setup() *web.Mux {
 	mux.Use(AddHeaders(Config.addHeaders))
 
 	if Config.authFile != "" {
-		mux.Use(UploadAuth(AuthOptions{
+		mux.Use(apikeys.NewApiKeysMiddleware(apikeys.AuthOptions{
 			AuthFile:      Config.authFile,
 			UnauthMethods: []string{"GET", "HEAD", "OPTIONS", "TRACE"},
+			BasicAuth:     Config.basicAuth,
+			SiteName:      Config.siteName,
+			SitePath:      Config.sitePath,
 		}))
 	}
 
@@ -196,27 +200,8 @@ func setup() *web.Mux {
 		mux.Get(Config.sitePath+"upload/", uploadRemote)
 
 		if Config.remoteAuthFile != "" {
-			remoteAuthKeys = readAuthKeys(Config.remoteAuthFile)
+			remoteAuthKeys = apikeys.ReadAuthKeys(Config.remoteAuthFile)
 		}
-	}
-
-	if Config.basicAuth {
-		options := AuthOptions{
-			AuthFile:      Config.authFile,
-			UnauthMethods: []string{},
-		}
-		okFunc := func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Location", Config.sitePath)
-			w.WriteHeader(http.StatusFound)
-		}
-		authHandler := auth{
-			successHandler: http.HandlerFunc(okFunc),
-			failureHandler: http.HandlerFunc(badAuthorizationHandler),
-			authKeys:       readAuthKeys(Config.authFile),
-			o:              options,
-		}
-		mux.Head(Config.sitePath+"auth", authHandler)
-		mux.Get(Config.sitePath+"auth", authHandler)
 	}
 
 	mux.Post(Config.sitePath+"upload", uploadPostHandler)
