@@ -2,9 +2,8 @@ name: buildx
 
 on:
   push:
-    branches: master
     tags:
-      - v*
+      - 'v*'
 
 jobs:
   buildx:
@@ -17,7 +16,7 @@ jobs:
         name: Prepare
         id: prepare
         run: |
-          DOCKER_IMAGE=crazymax/diun
+          DOCKER_IMAGE=andreimarcu/linx-server
           DOCKER_PLATFORMS=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386
           VERSION=version-${GITHUB_REF#refs/tags/v}
           TAGS="--tag ${DOCKER_IMAGE}:${VERSION} --tag ${DOCKER_IMAGE}:latest"
