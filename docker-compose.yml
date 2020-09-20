@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  linx-server:
+    container_name: linx-server
+    image: andreimarcu/linx-server
+    working_dir: /data/
+    entrypoint: /usr/local/bin/linx-server
+    command: -config /data/linx-server.conf
+    volumes:
+      - ./linx-server.conf:/data/linx-server.conf
+      - ./auth.passwd:/auth.passwd
+      - ./files:/data/files
+      - ./meta:/data/meta
+    network_mode: bridge
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
