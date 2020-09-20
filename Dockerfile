@@ -22,6 +22,7 @@ RUN mkdir -p /data/files && mkdir -p /data/meta && chown -R 65534:65534 /data
 
 VOLUME ["/data/files", "/data/meta"]
 
+WORKDIR /data
 EXPOSE 8080
 USER nobody
 ENTRYPOINT ["/usr/local/bin/linx-server", "-bind=0.0.0.0:8080", "-filespath=/data/files/", "-metapath=/data/meta/"]
