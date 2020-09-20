@@ -38,7 +38,9 @@ Example running
 docker run -p 8080:8080 -v /path/to/linx-server.conf:/data/linx-server.conf -v /path/to/meta:/data/meta -v /path/to/files:/data/files andreimarcu/linx-server -config /data/linx-server.conf
 ``` 
 
-Example with docker-compose: [docker-compose.yml](./docker-compose.yml)
+#### Using Docker-Compose
+
+See [docker-compose.yml](./docker-compose.yml)
 
 Ideally, you would use a reverse proxy such as nginx or caddy to handle TLS certificates.
 
