@@ -38,24 +38,8 @@ Example running
 docker run -p 8080:8080 -v /path/to/linx-server.conf:/data/linx-server.conf -v /path/to/meta:/data/meta -v /path/to/files:/data/files andreimarcu/linx-server -config /data/linx-server.conf
 ``` 
 
-Example with docker-compose 
-```
-version: '2.2'
-services:
-  linx-server:
-    container_name: linx-server
-    image: andreimarcu/linx-server
-    entrypoint: /usr/local/bin/linx-server 
-    command: -config /data/linx-server.conf
-    volumes:
-      - /path/to/files:/data/files
-      - /path/to/meta:/data/meta
-      - /path/to/linx-server.conf:/data/linx-server.conf
-    network_mode: bridge
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-```
+Example with docker-compose: [docker-compose.yml](./docker-compose.yml)
+
 Ideally, you would use a reverse proxy such as nginx or caddy to handle TLS certificates.
 
 #### Using a binary release
