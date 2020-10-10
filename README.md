@@ -76,7 +76,7 @@ maxsize = 4294967296
 maxexpiry = 86400
 # ... etc
 ``` 
-...and then run ```linx-server -config path/to/linx-server.conf```    
+...and then run ```./linx-server -config path/to/linx-server.conf```    
 
 #### Options
 
