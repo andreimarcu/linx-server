@@ -13,7 +13,7 @@ You can see what it looks like using the demo: [https://demo.linx-server.net/](h
 
 - Display common filetypes (image, video, audio, markdown, pdf)  
 - Display syntax-highlighted code with in-place editing
-- Documented API with keys if need to restrict uploads (can use [linx-client](https://github.com/andreimarcu/linx-client) for uploading through command-line)
+- Documented API with keys if need to restrict uploads (can use [linx-client](https://github.com/andreimarcu/linx-client) for uploading through command-line, or [LinxShare](https://github.com/iksteen/LinxShare/) client for android - also available on the (Play Store)[https://play.google.com/store/apps/details?id=org.thegraveyard.linxshare] )
 - Torrent download of files using web seeding
 - File expiry, deletion key, file access key, and random filename options
 
