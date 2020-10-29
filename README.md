@@ -107,6 +107,7 @@ maxexpiry = 86400
 | ```nologs = true``` | (optionally) disable request logs in stdout
 | ```force-random-filename = true``` | (optionally) force the use of random filenames
 | ```custompagespath = custom_pages/``` | (optionally) specify path to directory containing markdown pages (must end in .md) that will be added to the site navigation (this can be useful for providing contact/support information and so on). For example, custom_pages/My_Page.md will become My Page in the site navigation 
+| ```delete-master-ip = 127.0.0.1``` | Comma-separated whitelist of master IP addresses that can delete any upload (Make sure IP addresses are being detected correctly before you enable this)
 
 
 #### Cleaning up expired files

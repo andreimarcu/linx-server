@@ -74,6 +74,7 @@ var Config struct {
 	accessKeyCookieExpiry     uint64
 	customPagesDir            string
 	cleanupEveryMinutes       uint64
+	masterDeleteIp            string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -304,6 +305,8 @@ func main() {
 		"path to directory containing .md files to render as custom pages")
 	flag.Uint64Var(&Config.cleanupEveryMinutes, "cleanup-every-minutes", 0,
 		"How often to clean up expired files in minutes (default is 0, which means files will be cleaned up as they are accessed)")
+	flag.StringVar(&Config.masterDeleteIp, "master-delete-ip", "",
+		"Comma-separated whitelist of master IP addresses that can delete any upload (Make sure IP addresses are being detected correctly before you enable this)")
 
 	iniflags.Parse()
 
