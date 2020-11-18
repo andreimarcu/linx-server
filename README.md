@@ -54,7 +54,6 @@ services:
   linx-server:
     container_name: linx-server
     image: andreimarcu/linx-server
-    entrypoint: /usr/local/bin/linx-server 
     command: -config /data/linx-server.conf
     volumes:
       - /path/to/files:/data/files
