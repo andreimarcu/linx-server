@@ -54,11 +54,11 @@ services:
   linx-server:
     container_name: linx-server
     image: andreimarcu/linx-server
-    command: -config /data/linx-server.conf
+    command: -config /data/config/linx-server.conf
     volumes:
       - /path/to/files:/data/files
       - /path/to/meta:/data/meta
-      - /path/to/linx-server.conf:/data/linx-server.conf
+      - /path/to/linx-server.conf:/data/config
     network_mode: bridge
     ports:
       - "8080:8080"
