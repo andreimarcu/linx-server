@@ -1,4 +1,10 @@
 
+## Seeking new maintainer!
+If anyone would be interested in taking on this project, I would be willing to transfer it over as development and work on issues has mostly stalled at this point.
+Please [respond to this issue](https://github.com/andreimarcu/linx-server/issues/266) if interested!
+
+---
+
 linx-server 
 ======
 [![Build Status](https://travis-ci.org/andreimarcu/linx-server.svg?branch=master)](https://travis-ci.org/andreimarcu/linx-server)  
