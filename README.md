@@ -1,9 +1,9 @@
+# Development on this repository has been frozen.   
 
-## Seeking new maintainer!
-If anyone would be interested in taking on this project, I would be willing to transfer it over as development and work on issues has mostly stalled at this point.
-Please [respond to this issue](https://github.com/andreimarcu/linx-server/issues/266) if interested!
+Feel free to send a pull request if you are maintaining an active fork of this project to add a link to your repository in this readme.
 
 ---
+
 
 linx-server 
 ======
