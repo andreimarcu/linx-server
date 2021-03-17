@@ -2,6 +2,11 @@
 
 Feel free to send a pull request if you are maintaining an active fork of this project to add a link to your repository in this readme.
 
+
+### Active Forks
+- ZizzyDizzyMC: [https://github.com/ZizzyDizzyMC/linx-server/](https://github.com/ZizzyDizzyMC/linx-server/)
+
+
 ---
 
 
@@ -13,9 +18,6 @@ Self-hosted file/media sharing website.
 
 ### Demo
 You can see what it looks like using the demo: [https://demo.linx-server.net/](https://demo.linx-server.net/)
-
-### Active Forks
-- ZizzyDizzyMC: [https://github.com/ZizzyDizzyMC/linx-server/](https://github.com/ZizzyDizzyMC/linx-server/)
 
 ### Clients
 **Official**
