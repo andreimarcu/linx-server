@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
@@ -187,7 +188,27 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq := UploadRequest{}
-	grabUrl, _ := url.Parse(r.FormValue("url"))
+	grabUrl, err := url.Parse(r.FormValue("url"))
+	if err != nil || (grabUrl.Scheme != "http" && grabUrl.Scheme != "https") {
+		badRequestHandler(c, w, r, RespAUTO, "Invalid URL scheme")
+		return
+	}
+
+	// SSRF protection: block requests to private/internal IPs
+	host := grabUrl.Hostname()
+	ips, lookupErr := net.LookupHost(host)
+	if lookupErr != nil {
+		oopsHandler(c, w, r, RespAUTO, "Could not resolve URL host")
+		return
+	}
+	for _, ipStr := range ips {
+		ip := net.ParseIP(ipStr)
+		if ip != nil && (ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast()) {
+			badRequestHandler(c, w, r, RespAUTO, "URL points to a private/internal address")
+			return
+		}
+	}
+
 	directURL := r.FormValue("direct_url") == "yes"
 
 	resp, err := http.Get(grabUrl.String())
