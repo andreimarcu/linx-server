@@ -5,5 +5,8 @@
 {% block content %}
 <div class="error-404">
   <a href="{{ sitepath }}"><img src='{{ sitepath }}static/images/404.jpg'></a>
+  {% if expired and expiredmessage %}
+  <p class="expired-message">{{ expiredmessage }}</p>
+  {% endif %}
 </div>
 {% endblock %}

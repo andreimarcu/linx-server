@@ -10,3 +10,4 @@ remoteuploads = true
 nologs = true
 force-random-filename = false
 cleanup-every-minutes = 5
+expiredmessage = "This file has expired."

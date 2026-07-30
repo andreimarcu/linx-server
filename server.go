@@ -74,6 +74,7 @@ var Config struct {
 	accessKeyCookieExpiry     uint64
 	customPagesDir            string
 	cleanupEveryMinutes       uint64
+	expiredMessage            string
 }
 
 var Templates = make(map[string]*pongo2.Template)
@@ -304,6 +305,8 @@ func main() {
 		"path to directory containing .md files to render as custom pages")
 	flag.Uint64Var(&Config.cleanupEveryMinutes, "cleanup-every-minutes", 0,
 		"How often to clean up expired files in minutes (default is 0, which means files will be cleaned up as they are accessed)")
+	flag.StringVar(&Config.expiredMessage, "expiredmessage", "",
+		"Custom message to show instead of the generic 404 page when a visited file's expiry has passed (default is unset, which keeps the plain 404 page)")
 
 	iniflags.Parse()
 

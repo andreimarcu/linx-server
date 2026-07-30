@@ -104,7 +104,10 @@ func fileAccessHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
 	metadata, err := checkFile(fileName)
-	if err == backends.NotFoundErr {
+	if err == errExpired {
+		expiredHandler(c, w, r)
+		return
+	} else if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err != nil {

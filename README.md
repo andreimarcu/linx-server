@@ -125,6 +125,17 @@ will persist on disk until someone attempts to access them. You can set the foll
 | ```cleanup-every-minutes = 5``` | How often to clean up expired files in minutes (default is 0, which means files will be cleaned up as they are accessed)
 
 
+#### Custom expired-file message
+By default, a link whose file has expired shows the same generic 404 page as
+a link that never existed. Set the following option to show a custom message
+on that page instead, e.g. to tell users why the file is gone rather than
+leaving them guessing.
+
+|Option|Description
+|------|-----------
+| ```expiredmessage = "This file has expired."``` | (optionally) custom message shown on the 404 page when a file's expiry has passed (default is unset, which keeps the plain 404 page for both expired and never-existed files)
+
+
 #### Require API Keys for uploads
 
 |Option|Description

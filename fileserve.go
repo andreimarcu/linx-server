@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -14,11 +15,20 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
+// errExpired distinguishes "this existed but its expiry passed" from a
+// plain backends.NotFoundErr, so handlers can show Config.expiredMessage
+// instead of the generic 404 page when that's the actual reason a link
+// no longer resolves.
+var errExpired = errors.New("file expired")
+
 func fileServeHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	fileName := c.URLParams["name"]
 
 	metadata, err := checkFile(fileName)
-	if err == backends.NotFoundErr {
+	if err == errExpired {
+		expiredHandler(c, w, r)
+		return
+	} else if err == backends.NotFoundErr {
 		notFoundHandler(c, w, r)
 		return
 	} else if err != nil {
@@ -101,7 +111,7 @@ func checkFile(filename string) (metadata backends.Metadata, err error) {
 
 	if expiry.IsTsExpired(metadata.Expiry) {
 		storageBackend.Delete(filename)
-		err = backends.NotFoundErr
+		err = errExpired
 		return
 	}
 

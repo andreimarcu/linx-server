@@ -73,6 +73,21 @@ func notFoundHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// expiredHandler renders the same 404 page as notFoundHandler, but for the
+// specific case of a file whose expiry has passed rather than one that
+// never existed. If Config.expiredMessage is unset this looks identical to
+// the plain 404 page, so existing deployments see no behavior change.
+func expiredHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(404)
+	err := renderTemplate(Templates["404.html"], pongo2.Context{
+		"expired":        true,
+		"expiredmessage": Config.expiredMessage,
+	}, r, w)
+	if err != nil {
+		oopsHandler(c, w, r, RespHTML, "")
+	}
+}
+
 func oopsHandler(c web.C, w http.ResponseWriter, r *http.Request, rt RespType, msg string) {
 	if msg == "" {
 		msg = "Oops! Something went wrong..."
