@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
@@ -187,14 +189,48 @@ func uploadRemote(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 
 	upReq := UploadRequest{}
-	grabUrl, _ := url.Parse(r.FormValue("url"))
-	directURL := r.FormValue("direct_url") == "yes"
-
-	resp, err := http.Get(grabUrl.String())
+	grabUrl, err := url.Parse(r.FormValue("url"))
 	if err != nil {
 		oopsHandler(c, w, r, RespAUTO, "Could not retrieve URL")
 		return
 	}
+	directURL := r.FormValue("direct_url") == "yes"
+
+	if err := checkRemoteURLAllowed(grabUrl); err != nil {
+		oopsHandler(c, w, r, RespAUTO, "Could not retrieve URL")
+		return
+	}
+
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return checkRemoteURLAllowed(req.URL)
+		},
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				host, _, serr := net.SplitHostPort(addr)
+				if serr != nil {
+					return nil, serr
+				}
+				ips, lerr := net.LookupIP(host)
+				if lerr != nil {
+					return nil, lerr
+				}
+				for _, ip := range ips {
+					if isDisallowedIP(ip) {
+						return nil, errRemoteURLNotAllowed
+					}
+				}
+				return (&net.Dialer{}).DialContext(ctx, network, addr)
+			},
+		},
+	}
+
+	resp, err := client.Get(grabUrl.String())
+	if err != nil {
+		oopsHandler(c, w, r, RespAUTO, "Could not retrieve URL")
+		return
+	}
+	defer resp.Body.Close()
 
 	upReq.filename = filepath.Base(grabUrl.Path)
 	upReq.src = http.MaxBytesReader(w, resp.Body, Config.maxSize)
@@ -410,4 +446,51 @@ func parseExpiry(expStr string) time.Duration {
 			return time.Duration(fileExpiry) * time.Second
 		}
 	}
+}
+
+var errRemoteURLNotAllowed = errors.New("remote URL not allowed")
+
+// isDisallowedIP reports whether an IP address points at the local host or a
+// private/internal network and therefore must not be fetched on behalf of a
+// remote-upload request.
+func isDisallowedIP(ip net.IP) bool {
+	return ip.IsLoopback() ||
+		ip.IsPrivate() ||
+		ip.IsUnspecified() ||
+		ip.IsLinkLocalUnicast() ||
+		ip.IsLinkLocalMulticast() ||
+		ip.IsInterfaceLocalMulticast()
+}
+
+// checkRemoteURLAllowed restricts remote-upload fetches to http(s) URLs whose
+// host does not resolve to a loopback, private, or link-local address. This
+// guards the /upload?url= feature against server-side request forgery.
+func checkRemoteURLAllowed(u *url.URL) error {
+	if u == nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return errRemoteURLNotAllowed
+	}
+
+	host := u.Hostname()
+	if host == "" {
+		return errRemoteURLNotAllowed
+	}
+
+	if ip := net.ParseIP(host); ip != nil {
+		if isDisallowedIP(ip) {
+			return errRemoteURLNotAllowed
+		}
+		return nil
+	}
+
+	ips, err := net.LookupIP(host)
+	if err != nil || len(ips) == 0 {
+		return errRemoteURLNotAllowed
+	}
+	for _, ip := range ips {
+		if isDisallowedIP(ip) {
+			return errRemoteURLNotAllowed
+		}
+	}
+
+	return nil
 }
